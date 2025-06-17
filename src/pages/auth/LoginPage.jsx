@@ -1,10 +1,9 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
-import LogoGoogle from "../../assets/LogoGoogle.png";
 import BgLogin from "../../assets/BgLogin.png";
 import LogoCPLLogin from "../../assets/LogoCPLLogin.png";
-import LogoMicrosoft from "../../assets/LogoMicrosoft.svg";
+
 
 
 const LoginPage = () => {
@@ -26,13 +25,12 @@ const LoginPage = () => {
     };
 
     return (
-        <div
-            className="flex bg-gray-500 items-center justify-center min-h-screen bg-cover bg-center"
+        <div className="flex bg-gray-500 items-center justify-center min-h-screen bg-cover bg-center"
             style={{ backgroundImage: `url(${BgLogin})` }}>
-            <div className="bg-white bg-opacity-80 p-4 rounded-lg shadow-lg w-[430px] relative flex flex-col items-center">
-                <div className="flex h-24 w-64 justify-center items-center space-x-4 mb-4">
-                    <img src={LogoCPLLogin} alt="Logo" className="w-20 h-20" />
-                    <p className="font-bold text-sm">Sistem Informasi Perhitungan Capaian Pembelajaran Lulusan (CPL)</p>
+            <div className="bg-white bg-opacity-80 p-4 rounded-lg shadow-lg w-[430px] flex flex-col items-center">
+                <div className="h-24 justify-center items-center mb-4 bg-white">
+                    <img src={LogoCPLLogin} alt="Logo" className="w-20 h-20 " />
+                    <p className="font-bold text-xl text-center ">SIP-CPL</p>
                 </div>
                 <form onSubmit={handleSubmit} className="w-full">
                     <div className="mb-4">
@@ -60,15 +58,7 @@ const LoginPage = () => {
                         />
                     </div>
                     <div>
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" class="form-checkbox text-indigo-600" />
-                            <span className="ml-2 text-xs text-slate-400">
-                                Dengan mendaftar, Anda membuat akun di sistem informasi CPL Unila dan menyetujui
-                                <a href="#" className="text-blue-600 mx-1">Syarat Pengguna</a>
-                                serta
-                                <a href="#" className="text-blue-600 mx-1">Kebijakan Privasi</a>
-                            </span>
-                        </label>
+
                         <label class="inline-flex items-center mt-3">
                             <input type="checkbox" class="form-checkbox text-indigo-600" />
                             <span className="ml-2 text-xs text-slate-400">
@@ -84,19 +74,6 @@ const LoginPage = () => {
                     </button>
                     {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
                 </form>
-                <div className="text-xs text-gray-400 mt-2">Atau</div>
-
-                <div className="flex space-x-4 p-2 ">
-                    <button className="flex items-center space-x-2 w-28 h-10 justify-center border border-gray-400 rounded hover:bg-gray-100 hover:border-gray-500 transition duration-200 cursor-pointer">
-                        <img src={LogoGoogle} alt="Google logo" className="w-4 h-4" />
-                        <span className="text-sm text-gray-400 hover:text-gray-500">Google</span>
-                    </button>
-                    <button className="flex items-center space-x-2 w-28 h-10 justify-center border border-gray-400 rounded hover:bg-gray-100 hover:border-gray-500 transition duration-200 cursor-pointer">
-                        <img src={LogoMicrosoft} alt="Microsoft logo" className="w-4 h-4" />
-                        <span className="text-sm text-gray-400 hover:text-gray-500">Microsoft</span>
-                    </button>
-
-                </div>
 
             </div>
         </div>

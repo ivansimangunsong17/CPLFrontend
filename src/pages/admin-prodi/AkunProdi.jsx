@@ -12,22 +12,62 @@ const AkunProdi = () => {
   const [formMode, setFormMode] = useState("create");
   const [editData, setEditData] = useState(null);
 
-  const [data, setData] = useState(
-    Array(10).fill(null).map((_, index) => ({
-      id: index + 1,
-      nama: `Admin Prodi ${index + 1}`,
-      email: `admin.prodi${index + 1}@example.com`,
-      hakAkses: index % 2 === 0 ? "Kaprodi" : "Dosen",
-      status: index % 3 === 0 ? "Aktif" : "Nonaktif",
-    }))
-  );
+  const [data, setData] = useState([
+    {
+      id: 1,
+      nama: "Rizka Andayani, S.T., M.T.",
+      nip: "0123058702",
+      email: "rizka.andayani@univti.ac.id",
+      password: "Rizk@TIB7",
+      role: "Dosen"
+    },
+    {
+      id: 2,
+      nama: "Ahmad Fadli, S.Kom., M.Kom.",
+      nip: "0123048501",
+      email: "ahmad.fadli@univti.ac.id",
+      password: "Fadl1Kom#85",
+      role: "Dosen"
+    },
+    {
+      id: 3,
+      nama: "Budi Santoso, S.Kom., M.Cs.",
+      nip: "0123068003",
+      email: "budi.santoso@univti.ac.id",
+      password: "Bud1Cs#80",
+      role: "Dosen"
+    },
+    {
+      id: 4,
+      nama: "Hendra Gunawan, S.Kom., M.Kom.",
+      nip: "0123079004",
+      email: "hendra.gunawan@univti.ac.id",
+      password: "H3ndra#9004",
+      role: "Dosen"
+    },
+    {
+      id: 5,
+      nama: "Dedi Firmansyah, S.T., M.T.I.",
+      nip: "0123089106",
+      email: "dedi.firmansyah@univti.ac.id",
+      password: "D3dIT1#9106",
+      role: "Dosen"
+    }
+  ]);
 
   const formFields = [
     {
       name: "nama",
-      label: "Nama",
+      label: "Nama Lengkap",
       type: "text",
-      placeholder: "Masukkan nama admin prodi",
+      placeholder: "Masukkan nama lengkap dengan gelar",
+      required: true,
+    },
+    {
+      name: "nip",
+      label: "NIP/NIDN",
+      type: "text",
+      placeholder: "Masukkan NIP/NIDN",
       required: true,
     },
     {
@@ -38,17 +78,17 @@ const AkunProdi = () => {
       required: true,
     },
     {
-      name: "hakAkses",
-      label: "Hak Akses",
-      type: "select",
-      options: ["Kaprodi", "Dosen"],
+      name: "password",
+      label: "Password",
+      type: "password",
+      placeholder: "Masukkan password",
       required: true,
     },
     {
-      name: "status",
-      label: "Status",
+      name: "role",
+      label: "Role",
       type: "select",
-      options: ["Aktif", "Nonaktif"],
+      options: ["Kaprodi", "Dosen"],
       required: true,
     },
   ];
@@ -105,13 +145,27 @@ const AkunProdi = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Teknik Informatika</h1>
+        <p className="text-gray-600">Kaprodi: Dr. Fajar, S.Kom., M.T.</p>
+      </div>
+
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-gray-700 mb-2">Nama Lengkap</h2>
+        <ul className="list-disc pl-5 mb-6">
+          <li>Dr. Fajar, S.Kom., M.T.</li>
+        </ul>
+
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">NIP / NIDN</h2>
+      </div>
+
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Manajemen Akun Program Studi</h1>
+        <h3 className="text-lg font-semibold text-gray-800">Daftar Dosen Teknik Informatika</h3>
         <div className="flex gap-3">
           <button
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${selectedRows.length > 0
-              ? "bg-red-500 text-white hover:bg-red-600"
-              : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                ? "bg-red-500 text-white hover:bg-red-600"
+                : "bg-gray-200 text-gray-500 cursor-not-allowed"
               }`}
             disabled={selectedRows.length === 0}
             onClick={() => setIsConfirmOpen(true)}
@@ -124,7 +178,7 @@ const AkunProdi = () => {
             onClick={openCreateModal}
           >
             <AiOutlinePlus size={18} />
-            <span>Tambah Akun</span>
+            <span>Tambah Dosen</span>
           </button>
         </div>
       </div>
@@ -143,10 +197,10 @@ const AkunProdi = () => {
                     className="w-4 h-4 rounded accent-blue-500 focus:ring-blue-300"
                   />
                 </th>
-                <th className="p-4 text-left">Nama</th>
+                <th className="p-4 text-left">Nama Lengkap</th>
+                <th className="p-4 text-left">NIP/NIDN</th>
                 <th className="p-4 text-left">Email</th>
-                <th className="p-4 text-left">Hak Akses</th>
-                <th className="p-4 text-left">Status</th>
+                <th className="p-4 text-left">Password</th>
                 <th className="p-4 text-left">Aksi</th>
               </tr>
             </thead>
@@ -162,27 +216,9 @@ const AkunProdi = () => {
                     />
                   </td>
                   <td className="p-4 font-medium text-gray-800">{item.nama}</td>
+                  <td className="p-4 text-gray-600">{item.nip}</td>
                   <td className="p-4 text-gray-600">{item.email}</td>
-                  <td className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${item.hakAkses === "Kaprodi"
-                        ? "bg-purple-100 text-purple-800"
-                        : item.hakAkses === "Dosen"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}>
-                      {item.hakAkses}
-                    </span>
-                  </td>
-
-
-                  <td className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${item.status === "Aktif"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                      }`}>
-                      {item.status}
-                    </span>
-                  </td>
+                  <td className="p-4 text-gray-600">{item.password}</td>
                   <td className="p-4">
                     <button
                       onClick={() => openEditModal(item)}
@@ -204,11 +240,12 @@ const AkunProdi = () => {
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
         onConfirm={handleDelete}
+        message="Apakah Anda yakin ingin menghapus data dosen yang dipilih?"
       />
 
       {isFormOpen && (
         <BaseModal
-          title={formMode === "create" ? "Tambah Akun Prodi" : "Edit Akun Prodi"}
+          title={formMode === "create" ? "Tambah Dosen" : "Edit Dosen"}
           onClose={() => {
             setIsFormOpen(false);
             setEditData(null);

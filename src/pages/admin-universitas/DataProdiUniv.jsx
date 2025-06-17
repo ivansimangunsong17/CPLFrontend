@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AiFillDelete, AiOutlinePlus, AiFillEdit } from "react-icons/ai";
+import { AiFillDelete, AiOutlinePlus, AiFillEdit, AiOutlineArrowDown } from "react-icons/ai";
 import ConfirmModal from "../../components/Modal/ConfModal";
 import BasedModal from "../../components/Modal/BasedModal";
 import FormData from "../../components/Form/FormData";
@@ -7,23 +7,24 @@ import FormData from "../../components/Form/FormData";
 const DataProdiUniv = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [allSelected, setAllSelected] = useState(false);
-  const [data, setData] = useState(
-    Array(10).fill().map((_, i) => ({
-      nama: `Program Studi ${i + 1}`,
-      email: `PRODI${i + 1}`,
-      admin: `Admin Prodi ${(i % 3) + 1}`
-    }))
-  );
+  const [data, setData] = useState([
+    { kode: "TI", nama: "Teknik Informatika", fakultas: "Fakultas Teknik" },
+    { kode: "SI", nama: "Sistem Informasi", fakultas: "Fakultas Teknologi Informasi" },
+    { kode: "TE", nama: "Teknik Elektro", fakultas: "Fakultas Teknik" },
+    { kode: "TM", nama: "Teknik Mesin", fakultas: "Fakultas Teknik" },
+    { kode: "TS", nama: "Teknik Sipil", fakultas: "Fakultas Teknik" }
+  ]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
 
-  const adminOptions = [
-    "Admin Prodi 1",
-    "Admin Prodi 2",
-    "Admin Prodi 3",
-    "Admin Universitas",
-    "Super Admin"
+  const fakultasOptions = [
+    "Fakultas Teknologi Informasi",
+    "Fakultas Teknik",
+    "Fakultas Pertanian",
+    "Fakultas Ilmu Sosial dan Politik",
+    "Fakultas Ekonomi dan Bisnis"
   ];
 
   const toggleSelectAll = () => {
@@ -51,13 +52,26 @@ const DataProdiUniv = () => {
   };
 
   const fields = [
-    { name: "nama", label: "Nama Prodi", type: "text", required: true },
-    { name: "email", label: "Kode Prodi", type: "text", required: true },
     {
-      name: "admin",
-      label: "Nama Admin",
+      name: "kode",
+      label: "Kode Prodi",
+      type: "text",
+      placeholder: "Masukkan kode prodi (contoh: TI)",
+      required: true,
+      maxLength: 5
+    },
+    {
+      name: "nama",
+      label: "Nama Prodi",
+      type: "text",
+      placeholder: "Masukkan nama program studi",
+      required: true
+    },
+    {
+      name: "fakultas",
+      label: "Fakultas",
       type: "select",
-      options: adminOptions,
+      options: fakultasOptions,
       required: true
     },
   ];
@@ -82,8 +96,8 @@ const DataProdiUniv = () => {
         <div className="flex gap-3">
           <button
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${selectedRows.length > 0
-              ? "bg-red-500 text-white hover:bg-red-600"
-              : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                ? "bg-red-500 text-white hover:bg-red-600"
+                : "bg-gray-200 text-gray-500 cursor-not-allowed"
               }`}
             disabled={selectedRows.length === 0}
             onClick={() => setIsModalOpen(true)}
@@ -118,10 +132,26 @@ const DataProdiUniv = () => {
                     className="w-4 h-4 rounded accent-blue-500 focus:ring-blue-300"
                   />
                 </th>
-                <th className="p-4 text-left">Nama Prodi</th>
-                <th className="p-4 text-left">Kode Prodi</th>
-                <th className="p-4 text-left">Admin</th>
-                <th className="p-4 text-left">Aksi</th>
+                <th className="p-4 text-left">
+                  <div className="flex items-center gap-1">
+                    Kode Prodi <AiOutlineArrowDown />
+                  </div>
+                </th>
+                <th className="p-4 text-left">
+                  <div className="flex items-center gap-1">
+                    Nama Program Studi <AiOutlineArrowDown />
+                  </div>
+                </th>
+                <th className="p-4 text-left">
+                  <div className="flex items-center gap-1">
+                    Fakultas <AiOutlineArrowDown />
+                  </div>
+                </th>
+                <th className="p-4 text-left">
+                  <div className="flex items-center gap-1">
+                    Ubah Data <AiOutlineArrowDown />
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -135,15 +165,15 @@ const DataProdiUniv = () => {
                       className="w-4 h-4 rounded accent-blue-500 focus:ring-blue-300"
                     />
                   </td>
-                  <td className="p-4 font-medium text-gray-800">{item.nama}</td>
-                  <td className="p-4 text-gray-600">
+                  <td className="p-4 font-medium text-gray-800">
                     <span className="px-2 py-1 bg-gray-100 rounded-md text-sm">
-                      {item.email}
+                      {item.kode}
                     </span>
                   </td>
+                  <td className="p-4 ">{item.nama}</td>
                   <td className="p-4">
                     <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                      {item.admin}
+                      {item.fakultas}
                     </span>
                   </td>
                   <td className="p-4">
@@ -170,9 +200,10 @@ const DataProdiUniv = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleDelete}
+        message="Apakah Anda yakin ingin menghapus program studi yang dipilih?"
       />
 
-      {/* Modal Form (Tambah / Edit) */}
+      {/* Modal Form (Tambah/Edit) */}
       {isFormModalOpen && (
         <BasedModal
           title={editingIndex !== null ? "Edit Program Studi" : "Tambah Program Studi"}

@@ -13,7 +13,6 @@ import {
   DashboardUniversitas,
   AkunUniversitas,
   HasilPerhitunganUniv,
-  DataFakultasUniv,
   DataProdiUniv,
 
   DashboardProdi,
@@ -59,7 +58,6 @@ const router = createBrowserRouter([
         children: [
           { path: "", element: <DashboardUniversitas /> }, // Default halaman utama
           { path: "data_akun", element: <AkunUniversitas /> },
-          { path: "data_fakultas", element: <DataFakultasUniv />},
           { path: "data_prodi", element: <DataProdiUniv /> },
           { path: "hasil_perhitungan", element: <HasilPerhitunganUniv /> },
 

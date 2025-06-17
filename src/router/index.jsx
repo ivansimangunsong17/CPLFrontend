@@ -10,7 +10,6 @@ import DashboardUniversitas from '../pages/admin-universitas/DashboardUniversita
 import AkunUniversitas from '../pages/admin-universitas/AkunUniversitas';
 import HasilPerhitunganUniv from '../pages/admin-universitas/HasilPerhitunganUniv';
 import DataProdiUniv from '../pages/admin-universitas/DataProdiUniv';
-import DataFakultasUniv from '../pages/admin-universitas/DataFakultasUniv';
 
 //Admin Prodi
 import DashboardProdi from '../pages/admin-prodi/DashboardProdi';
@@ -49,7 +48,6 @@ export {
     AkunUniversitas,
     HasilPerhitunganUniv,
     DataProdiUniv,
-    DataFakultasUniv ,
 
     DashboardProdi,
     AkunProdi,

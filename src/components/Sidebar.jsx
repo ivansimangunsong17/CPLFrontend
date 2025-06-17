@@ -35,7 +35,6 @@ const Sidebar = () => {
                 icon: <FaRegFileAlt />,
                 children: [
                     { label: "Data Akun", path: "/dashboard/admin_universitas/data_akun", icon: <FaUsers /> },
-                    { label: "Data Fakultas", path: "/dashboard/admin_universitas/data_fakultas", icon: <MdSchool /> },
                     { label: "Data Program Studi", path: "/dashboard/admin_universitas/data_prodi", icon: <MdOutlineSubject /> },
                 ],
             },
