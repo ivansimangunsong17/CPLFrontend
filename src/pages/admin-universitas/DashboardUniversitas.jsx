@@ -20,11 +20,43 @@ const DashboardUniversitas = () => {
     { id: 2, nama: "Kaprodi TI", email: "kaprodi.ti@univ.ac.id", role: "Admin Prodi", status: "Aktif" },
   ];
 
+  // Data hasil perhitungan CPL
+  const hasilPerhitunganCPL = [
+    { id: 1, programStudi: "Teknik Informatika", nilaiCPL: 88, nilaiCPMK: 90, status: "Selesai" },
+    { id: 2, programStudi: "Perikanan dan Kelautan", nilaiCPL: 87, nilaiCPMK: 85, status: "Selesai" },
+    { id: 3, programStudi: "Hukum", nilaiCPL: 86, nilaiCPMK: 88, status: "Proses" },
+    { id: 4, programStudi: "Pendidikan Kedokteran", nilaiCPL: null, nilaiCPMK: null, status: "Tidak ada" },
+    { id: 5, programStudi: "Teknik Elektro", nilaiCPL: 88, nilaiCPMK: 90, status: "Proses" },
+    { id: 6, programStudi: "Teknik Mesin", nilaiCPL: 87, nilaiCPMK: 89, status: "Proses" },
+    { id: 7, programStudi: "Teknik Sipil", nilaiCPL: 86, nilaiCPMK: 88, status: "Proses" },
+    { id: 8, programStudi: "Teknik Kimia", nilaiCPL: 87, nilaiCPMK: 89, status: "Proses" },
+    { id: 9, programStudi: "Teknik Lingkungan", nilaiCPL: 87, nilaiCPMK: 90, status: "Proses" },
+    { id: 10, programStudi: "Ilmu Komputer", nilaiCPL: 88, nilaiCPMK: 89, status: "Proses" },
+  ];
+
   const statistics = {
     totalFakultas: dataFakultas.length,
     totalProdi: dataProdi.length,
     totalDosen: 45,
     totalMahasiswa: 1200,
+  };
+
+  // Filter data berdasarkan search
+  const filteredHasilPerhitungan = hasilPerhitunganCPL.filter(item =>
+    item.programStudi.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "Selesai":
+        return "bg-green-100 text-green-800";
+      case "Proses":
+        return "bg-yellow-100 text-yellow-800";
+      case "Tidak ada":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
 
   return (
@@ -71,128 +103,99 @@ const DashboardUniversitas = () => {
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="mb-6">
-        <div className="relative">
-          <FaSearch className="absolute left-3 top-3 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Cari data..."
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {/* Data Boxes */}
-      <div className="space-y-6">
-
-        {/* Fakultas Box */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+      {/* Hasil Perhitungan Capaian Pembelajaran Lulusan */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+        <div className="p-6 border-b border-gray-100">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Data Fakultas</h2>
-            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              Lihat Semua →
-            </button>
+            <h2 className="text-xl font-bold text-gray-800">Hasil Perhitungan Capaian Pembelajaran Lulusan</h2>
+            <div className="max-w-md">
+              <div className="relative">
+                <FaSearch className="absolute left-3 top-3 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Cari Program Studi..."
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="text-gray-600 text-sm border-b">
-                <tr>
-                  <th className="pb-2">Nama Fakultas</th>
-                  <th className="pb-2">Kode</th>
-                  <th className="pb-2">Dekan</th>
-                  <th className="pb-2">Jumlah Prodi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {dataFakultas.map((fakultas) => (
-                  <tr key={fakultas.id} className="hover:bg-gray-50">
-                    <td className="py-3">{fakultas.nama}</td>
-                    <td className="py-3 font-medium">{fakultas.kode}</td>
-                    <td className="py-3">{fakultas.dekan}</td>
-                    <td className="py-3">{fakultas.jumlahProdi}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+
+          {/* Search Bar */}
+
         </div>
 
-        {/* Prodi Box */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Data Program Studi</h2>
-            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              Lihat Semua →
-            </button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="text-gray-600 text-sm border-b">
-                <tr>
-                  <th className="pb-2">Nama Prodi</th>
-                  <th className="pb-2">Fakultas</th>
-                  <th className="pb-2">Kaprodi</th>
-                  <th className="pb-2">Mahasiswa</th>
-                  <th className="pb-2">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {dataProdi.map((prodi) => (
-                  <tr key={prodi.id} className="hover:bg-gray-50">
-                    <td className="py-3">{prodi.nama}</td>
-                    <td className="py-3">{prodi.fakultas}</td>
-                    <td className="py-3">{prodi.kaprodi}</td>
-                    <td className="py-3">{prodi.jumlahMahasiswa}</td>
-                    <td className="py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs ${prodi.status === "Aktif" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                        {prodi.status}
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-blue-500 text-white">
+              <tr>
+                <th className="px-6 py-4 text-left font-medium">
+                  <div className="flex items-center gap-2">
+                    Program Studi
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-left font-medium">
+                  <div className="flex items-center gap-2">
+                    Nilai CPL
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-left font-medium">
+                  <div className="flex items-center gap-2">
+                    Nilai CPMK
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-left font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredHasilPerhitungan.map((item, index) => (
+                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 text-gray-900">{item.programStudi}</td>
+                  <td className="px-6 py-4 text-gray-700 font-medium">
+                    {item.nilaiCPL || '-'}
+                  </td>
+                  <td className="px-6 py-4 text-gray-700 font-medium">
+                    {item.nilaiCPMK || '-'}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${item.status === 'Selesai' ? 'bg-green-500' :
+                        item.status === 'Proses' ? 'bg-yellow-500' : 'bg-red-500'
+                        }`}></div>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(item.status)}`}>
+                        {item.status}
                       </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
-        {/* Akun Box */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Data Akun Admin</h2>
-            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              Lihat Semua →
-            </button>
+        {/* Empty State */}
+        {filteredHasilPerhitungan.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <FaSearch size={48} className="mx-auto" />
+            </div>
+            <p className="text-gray-500 text-lg">Tidak ada data yang ditemukan</p>
+            <p className="text-gray-400 text-sm mt-2">
+              Coba ubah kata kunci pencarian Anda
+            </p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="text-gray-600 text-sm border-b">
-                <tr>
-                  <th className="pb-2">Nama</th>
-                  <th className="pb-2">Email</th>
-                  <th className="pb-2">Role</th>
-                  <th className="pb-2">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {dataAkun.map((akun) => (
-                  <tr key={akun.id} className="hover:bg-gray-50">
-                    <td className="py-3">{akun.nama}</td>
-                    <td className="py-3">{akun.email}</td>
-                    <td className="py-3">{akun.role}</td>
-                    <td className="py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs ${akun.status === "Aktif" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                        {akun.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -1,75 +1,94 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
 
 const FormData = ({ fields, onSubmit, onCancel }) => {
-    const [formData, setFormData] = useState(
-        fields.reduce((acc, field) => {
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        watch,
+        reset,
+    } = useForm();
+
+    // Reset form setiap kali field (defaultValues) berubah, terutama saat edit
+    useEffect(() => {
+        const defaults = fields.reduce((acc, field) => {
             acc[field.name] = field.defaultValue || "";
             return acc;
-        }, {})
-    );
+        }, {});
+        reset(defaults);
+    }, [fields, reset]);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-    };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSubmit(formData);
-    };
+    const watchPassword = watch("password");
 
     const renderInput = (field) => {
-        const baseClasses = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200";
-        
+        const rules = {
+            required: field.required && `${field.label} wajib diisi`,
+        };
+
+        // Tambahkan validasi khusus
+        if (field.name === "password" && field.required !== false) {
+            rules.minLength = {
+                value: 8,
+                message: "Password minimal 8 karakter",
+            };
+        }
+
+        if (field.name === "password_confirmation") {
+            rules.validate = (value) =>
+                value === watchPassword || "Konfirmasi password tidak cocok";
+        }
+
+        if (field.type === "email") {
+            rules.pattern = {
+                value: /^\S+@\S+\.\S+$/,
+                message: "Email tidak valid",
+            };
+        }
+
+        const commonProps = {
+            ...register(field.name, rules),
+            id: field.name,
+            placeholder: field.placeholder,
+            autoComplete: "off",
+            className:
+                "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200",
+        };
+
         switch (field.type) {
-            case 'select':
+            case "select":
                 return (
-                    <select
-                        id={field.name}
-                        name={field.name}
-                        value={formData[field.name]}
-                        onChange={handleChange}
-                        className={`${baseClasses} cursor-pointer`}
-                        required={field.required}
-                    >
-                        <option value="" disabled>Pilih {field.label}</option>
-                        {field.options.map((option, idx) => (
-                            <option key={idx} value={option}>
-                                {option}
+                    <select {...commonProps}>
+                        <option value="" disabled>
+                            Pilih {field.label}
+                        </option>
+                        {field.options?.map((option, idx) => (
+                            <option key={idx} value={option.value}>
+                                {option.label}
                             </option>
                         ))}
                     </select>
                 );
-            case 'textarea':
+
+
+            case "textarea":
                 return (
                     <textarea
-                        id={field.name}
-                        name={field.name}
-                        value={formData[field.name]}
-                        onChange={handleChange}
-                        placeholder={field.placeholder}
-                        className={`${baseClasses} min-h-[120px]`}
-                        required={field.required}
+                        {...commonProps}
+                        className={`${commonProps.className} min-h-[120px]`}
                     />
                 );
+
             default:
-                return (
-                    <input
-                        type={field.type}
-                        id={field.name}
-                        name={field.name}
-                        value={formData[field.name]}
-                        onChange={handleChange}
-                        placeholder={field.placeholder}
-                        className={baseClasses}
-                        required={field.required}
-                    />
-                );
+                return <input type={field.type} {...commonProps} />;
         }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} autoComplete="off" className="space-y-6">
+            <input type="text" name="fake_username" autoComplete="username" className="hidden" />
+            <input type="password" name="fake_password" autoComplete="new-password" className="hidden" />
             <div className="space-y-4">
                 {fields.map((field) => (
                     <div key={field.name} className="space-y-2">
@@ -80,14 +99,22 @@ const FormData = ({ fields, onSubmit, onCancel }) => {
                             {field.label}
                             {field.required && <span className="text-red-500 ml-1">*</span>}
                         </label>
+
                         {renderInput(field)}
-                        {field.description && (
-                            <p className="text-xs text-gray-500 mt-1">{field.description}</p>
+
+                        {errors[field.name] && (
+                            <p className="text-sm text-red-600 mt-1">
+                                {errors[field.name].message}
+                            </p>
+                        )}
+
+                        {field.helpText && (
+                            <p className="text-xs text-gray-500 mt-1">{field.helpText}</p>
                         )}
                     </div>
                 ))}
             </div>
-            
+
             <div className="flex justify-end gap-4 pt-2">
                 <button
                     type="button"

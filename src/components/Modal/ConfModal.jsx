@@ -1,40 +1,96 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-const ConfirmModal = ({ isOpen, onClose, onConfirm }) => {
-    if (!isOpen) return null;
+const ConfirmModal = ({
+    isOpen,
+    onClose,
+    onConfirm,
+    message = "Apakah Anda yakin ingin menghapus?",
+}) => {
+    const [isVisible, setIsVisible] = useState(false);  // untuk animasi
+    const [shouldRender, setShouldRender] = useState(isOpen); // untuk render
+
+    useEffect(() => {
+        if (isOpen) {
+            setShouldRender(true);
+            setTimeout(() => setIsVisible(true), 10); // animasi masuk
+        } else {
+            setIsVisible(false); // animasi keluar
+            // tunggu transisi selesai sebelum unmount
+            setTimeout(() => setShouldRender(false), 300);
+        }
+    }, [isOpen]);
+
+    if (!shouldRender) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-
-            <div className="bg-white p-6 rounded-lg shadow-lg w-[400px] relative">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                transition: "opacity 300ms ease",
+                opacity: isVisible ? 1 : 0,
+            }}
+        >
+            <div
+                className="bg-white rounded-lg p-6 shadow-lg w-full max-w-sm relative"
+                style={{
+                    transform: isVisible ? "scale(1)" : "scale(0.9)",
+                    opacity: isVisible ? 1 : 0,
+                    transition: "transform 300ms ease, opacity 300ms ease",
+                    background: "white",
+                }}
+            >
                 {/* Tombol Close */}
                 <button
                     onClick={onClose}
-                    className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+                    style={{
+                        position: "absolute",
+                        top: 8,
+                        right: 12,
+                        fontSize: "1.25rem",
+                        color: "#555",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                    }}
                 >
-                    ✖
+                    ×
                 </button>
 
-                {/* Icon & Judul */}
-                <div className="flex items-center gap-3 mb-4">
-                    <span className="text-red-500 text-2xl">⚠️</span>
-                    <h2 className="text-lg font-semibold">Hapus</h2>
+                {/* Header */}
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                    <span style={{ color: "#e53e3e", fontSize: 24 }}>⚠️</span>
+                    <h2 style={{ fontSize: 18, fontWeight: 600, color: "#2d3748" }}>Konfirmasi Hapus</h2>
                 </div>
 
-                {/* Isi Modal */}
-                <p className="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus?</p>
+                {/* Isi Pesan */}
+                <p style={{ color: "#4a5568", marginBottom: 24 }}>{message}</p>
 
                 {/* Tombol Aksi */}
-                <div className="flex justify-end gap-3">
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 border rounded-md hover:bg-gray-100"
+                        style={{
+                            padding: "8px 16px",
+                            border: "1px solid #cbd5e0",
+                            borderRadius: 6,
+                            background: "#fff",
+                            color: "#2d3748",
+                            cursor: "pointer",
+                        }}
                     >
-                        Kembali
+                        Batal
                     </button>
                     <button
                         onClick={onConfirm}
-                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                        style={{
+                            padding: "8px 16px",
+                            borderRadius: 6,
+                            backgroundColor: "#e53e3e",
+                            color: "#fff",
+                            cursor: "pointer",
+                            border: "none",
+                        }}
                     >
                         Hapus
                     </button>
@@ -43,6 +99,5 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm }) => {
         </div>
     );
 };
-
 
 export default ConfirmModal;

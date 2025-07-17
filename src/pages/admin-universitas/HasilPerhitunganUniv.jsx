@@ -1,141 +1,232 @@
 import React, { useState } from "react";
-import { AiOutlineSearch, AiOutlineEye } from "react-icons/ai";
+import { AiOutlineSearch } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
+import { useProdiList } from "../../hooks/admin-universitas/useDataProdi";
+
+import TableSkeleton from "../../components/TableSkeleton";
 
 const HasilPerhitunganUniv = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const navigate = useNavigate();
+  const itemsPerPage = 10;
 
-  // Data contoh yang diperbarui
-  const prodiList = [
-    {
-      nama: "Teknik Informatika",
-      kaprodi: "Dr. Ahmad Fauzi, M.Kom",
-      capaian: "85%",
-      status: "Sangat Baik"
-    },
-    {
-      nama: "Sistem Informasi",
-      kaprodi: "Dr. Siti Aminah, M.T.I.",
-      capaian: "72%",
-      status: "Baik"
-    },
-    {
-      nama: "Teknik Elektro",
-      kaprodi: "Prof. Budi Santoso, Ph.D.",
-      capaian: "91%",
-      status: "Sangat Baik"
-    },
-    {
-      nama: "Manajemen",
-      kaprodi: "Dr. Rina Wijayanti, S.E., M.M.",
-      capaian: "65%",
-      status: "Cukup"
-    },
-    {
-      nama: "Akuntansi",
-      kaprodi: "Dewi Kusuma, S.E., Ak., M.M.",
-      capaian: "78%",
-      status: "Baik"
-    }
-  ];
+  // Fetch data prodi using useProdiList hook
+  const { data: prodiList, isLoading, isError } = useProdiList();
 
-  // Filter data
-  const filteredData = prodiList.filter(item =>
-    item.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.kaprodi.toLowerCase().includes(searchTerm.toLowerCase())
+  // Transform data to match the table structure
+  const prodiData = prodiList || [];
+
+  // Filter data berdasarkan search
+  const filteredData = prodiData.filter(item =>
+    item.nama_prodi?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.kode_prodi?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.fakultas?.nama_fakultas?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Warna berdasarkan status
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Sangat Baik": return "bg-green-100 text-green-800";
-      case "Baik": return "bg-blue-100 text-blue-800";
-      case "Cukup": return "bg-yellow-100 text-yellow-800";
-      default: return "bg-gray-100 text-gray-800";
+  // Pagination
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = filteredData.slice(startIndex, endIndex);
+
+  // Generate page numbers untuk pagination
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      // Always show first page
+      pageNumbers.push(1);
+
+      // Add ellipsis if current page is far from start
+      if (currentPage > 3) {
+        pageNumbers.push('...');
+      }
+
+      // Add pages around current page
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        if (!pageNumbers.includes(i)) {
+          pageNumbers.push(i);
+        }
+      }
+
+      // Add ellipsis if current page is far from end
+      if (currentPage < totalPages - 2) {
+        pageNumbers.push('...');
+      }
+
+      // Always show last page
+      if (!pageNumbers.includes(totalPages)) {
+        pageNumbers.push(totalPages);
+      }
+    }
+
+    return pageNumbers;
+  };
+
+  const handlePageChange = (page) => {
+    if (page !== '...' && page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
     }
   };
 
-  // Fungsi untuk melihat detail
-  const viewDetail = (prodi) => {
-    alert(`Detail untuk ${prodi.nama}\nKaprodi: ${prodi.kaprodi}\nCapaian: ${prodi.capaian}\nStatus: ${prodi.status}`);
-    // Di implementasi nyata bisa diarahkan ke halaman detail atau buka modal
+  const handleDetailClick = (prodiId) => {
+    navigate(`/dashboard/admin_universitas/detail_prodi/${prodiId}`);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-5xl mx-auto">
-        {/* Judul */}
-        <h1 className="text-xl font-bold text-gray-800 mb-4">Hasil Capaian Pembelajaran</h1>
+    <div className="p-6 bg-gray-50 min-h-screen">
+      {/* Loading Screen */}
+      
 
-        {/* Pencarian */}
-        <div className="relative mb-6">
-          <AiOutlineSearch className="absolute left-3 top-3 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Cari program studi atau kaprodi..."
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+      <div className="max-w-7xl mx-auto">
+        {/* Error Handling */}
+        {isError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <p className="font-semibold">Error</p>
+            <p>Terjadi kesalahan saat mengambil data program studi. Silakan coba lagi nanti.</p>
+          </div>
+        )}
 
-        {/* Tabel Hasil */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-3 text-left">Program Studi</th>
-                <th className="p-3 text-left">Kaprodi</th>
-                <th className="p-3 text-left">Capaian</th>
-                <th className="p-3 text-left">Status</th>
-                <th className="p-3 text-left">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.map((item, index) => (
-                <tr key={index} className="border-b border-gray-200 hover:bg-gray-50">
-                  <td className="p-3 font-medium">{item.nama}</td>
-                  <td className="p-3 text-gray-600">{item.kaprodi}</td>
-                  <td className="p-3">
-                    <div className="flex items-center">
-                      <div className="w-24 bg-gray-200 rounded-full h-2 mr-2">
-                        <div
-                          className={`h-2 rounded-full ${parseFloat(item.capaian) > 80 ? 'bg-green-500' :
-                              parseFloat(item.capaian) > 60 ? 'bg-blue-500' : 'bg-yellow-500'
-                            }`}
-                          style={{ width: item.capaian }}
-                        ></div>
-                      </div>
-                      <span>{item.capaian}</span>
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <span className={`px-2 py-1 rounded-full text-sm ${getStatusColor(item.status)}`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <button
-                      onClick={() => viewDetail(item)}
-                      className="flex items-center text-blue-600 hover:text-blue-800"
-                    >
-                      <AiOutlineEye className="mr-1" /> Detail
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-bold text-gray-800">Daftar Program Studi</h1>
+            {!isLoading && prodiData.length > 0 && (
+              <div className="text-sm text-gray-600">
+                {searchTerm ? (
+                  <>Menampilkan {filteredData.length} dari {prodiData.length} program studi</>
+                ) : (
+                  <>Total {prodiData.length} program studi</>
+                )}
+              </div>
+            )}
+          </div>
 
-        {/* Keterangan */}
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-gray-700">
-          <p className="font-medium mb-1">Keterangan Status:</p>
-          <div className="flex flex-wrap gap-2">
-            <span className="px-2 py-1 rounded-full bg-green-100 text-green-800">Sangat Baik (≥80%)</span>
-            <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-800">Baik (70-79%)</span>
-            <span className="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">Cukup (60-69%)</span>
+          {/* Search Bar */}
+          <div className="flex justify-end mb-4">
+            <div className="relative w-80">
+              <AiOutlineSearch className="absolute right-3 top-3 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Cari Program Studi..."
+                className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+              <button className="absolute right-0 top-0 h-full px-4 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition">
+                <AiOutlineSearch size={20} />
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Table */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-blue-200 ">
+              <tr>
+                <th className="px-6 py-4 text-left font-medium">
+                  <div className="flex items-center gap-2">
+                    Kode Program Studi
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-left font-medium">
+                  <div className="flex items-center gap-2">
+                    Nama Program Studi
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-left font-medium">
+                  <div className="flex items-center gap-2">
+                    Fakultas
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-left font-medium">Detail</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {isLoading ? (
+                <TableSkeleton rows={itemsPerPage} columns={4} />
+              ) : (
+                currentData.map((item, index) => (
+                  <tr key={item.prodi_id || index} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 text-gray-900 font-medium">{item.kode_prodi || "-"}</td>
+                    <td className="px-6 py-4 text-gray-900">{item.nama_prodi || "-"}</td>
+                    <td className="px-6 py-4 text-gray-700">{item.fakultas?.nama_fakultas || "-"}</td>                  <td className="px-6 py-4">
+                      <button
+                        className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                        onClick={() => handleDetailClick(item.prodi_id)}
+                      >
+                        Lihat Detail
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+
+          {/* Empty State */}
+          {!isLoading && currentData.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <AiOutlineSearch size={48} className="mx-auto" />
+              </div>
+              <p className="text-gray-500 text-lg">
+                {prodiData.length === 0 ? "Belum ada data program studi" : "Tidak ada data yang ditemukan"}
+              </p>
+              <p className="text-gray-400 text-sm mt-2">
+                {prodiData.length === 0
+                  ? "Data program studi akan muncul di sini setelah ditambahkan"
+                  : "Coba ubah kata kunci pencarian Anda"
+                }
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Pagination */}
+        {!isLoading && totalPages > 1 && (
+          <div className="flex justify-center items-center mt-6 gap-2">
+            {getPageNumbers().map((page, index) => (
+              <button
+                key={index}
+                onClick={() => handlePageChange(page)}
+                disabled={page === '...'}
+                className={`px-3 py-2 rounded-lg font-medium transition-colors ${page === currentPage
+                  ? 'bg-blue-600 text-white'
+                  : page === '...'
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

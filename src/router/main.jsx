@@ -1,29 +1,32 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import '../index.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PrivateRoutes from '../routes/PrivateRoutes';
 import { AuthProvider } from '../context/AuthContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../index.css';
 
+// import semua komponen dari index.js
 import {
   LoginPage,
   NotFoundPage,
+  UnauthorizedPage,
   DashboardLayout,
-
+  DashboardRedirect,
   DashboardUniversitas,
   AkunUniversitas,
   HasilPerhitunganUniv,
   DataProdiUniv,
-
+  DetailProdiUniv,
   DashboardProdi,
   AkunProdi,
-  PemetaanCPLProdi,
-  PemetaanCPMKProdi,
   HasilPerhitunganProdi,
-  DataProdi,
+  DataCPL,
   DataMahasiswaProdi,
   DataMataKuliahProdi,
-
+  DetailMataKuliahProdi,
   DashboardKaprodi,
   DataMahasiswaKaprodi,
   DataMataKuliahKaprodi,
@@ -31,83 +34,98 @@ import {
   HasilPerhitunganKaprodi,
   PemetaanCPLKaprodi,
   PemetaanCPMKKaprodi,
-
-
   DashboardDosen,
   HasilPerhitunganDosen,
-  InputNilaiDosen,
-
-
-
+  InputNilaiDosen
 } from './index';
 
-import DashboardLanding from '../pages/DashboardLanding';
-
-
+const queryClient = new QueryClient();
 const router = createBrowserRouter([
   { path: "/", element: <LoginPage /> },
   { path: "/login", element: <LoginPage /> },
   {
     path: "dashboard",
-    element: <PrivateRoutes />,
     children: [
-      { path: "", element: <DashboardLanding /> },
       {
-        path: "admin_universitas",
-        element: <DashboardLayout />, // Layout
-        children: [
-          { path: "", element: <DashboardUniversitas /> }, // Default halaman utama
-          { path: "data_akun", element: <AkunUniversitas /> },
-          { path: "data_prodi", element: <DataProdiUniv /> },
-          { path: "hasil_perhitungan", element: <HasilPerhitunganUniv /> },
-
-        ],
+        path: "",
+        element: <DashboardRedirect />
       },
       {
-        path: "admin_prodi",
-        element: <DashboardLayout />,
+        path: "admin_universitas",
+        element: <PrivateRoutes allowedRoles={["admin_universitas"]} />,
         children: [
-          { path: "", element: <DashboardProdi /> },
-          { path: "data_akun", element: <AkunProdi /> },
-          { path: "data_prodi", element: <DataProdi /> },
-          { path: "data_mahasiswa", element: <DataMahasiswaProdi /> },
-          { path: "data_matakuliah", element: <DataMataKuliahProdi /> },
-          { path: "pemetaan_cpl", element: <PemetaanCPLProdi /> },
-          { path: "pemetaan_cpmk", element: <PemetaanCPMKProdi /> },
-          { path: "hasil_perhitungan", element: <HasilPerhitunganProdi /> },
+          {
+            path: "", element: <DashboardLayout />, children: [
+              { path: "", element: <DashboardUniversitas /> },
+              { path: "data_akun", element: <AkunUniversitas /> },
+              { path: "data_prodi", element: <DataProdiUniv /> },
+              { path: "hasil_perhitungan", element: <HasilPerhitunganUniv /> },
+              { path: "detail_prodi/:prodiId", element: <DetailProdiUniv /> },
+            ]
+          },
+        ],
+      },
+
+      {
+        path: "admin_prodi",
+        element: <PrivateRoutes allowedRoles={["admin_prodi"]} />,
+        children: [
+          {
+            path: "", element: <DashboardLayout />, children: [
+              { path: "", element: <DashboardProdi /> },
+              { path: "data_akun", element: <AkunProdi /> },
+              { path: "data_cpl", element: <DataCPL /> },
+              { path: "data_mahasiswa", element: <DataMahasiswaProdi /> },
+              { path: "data_matakuliah", element: <DataMataKuliahProdi /> },
+              { path: "detail_matakuliah/:mataKuliahId", element: <DetailMataKuliahProdi /> },
+              { path: "hasil_perhitungan", element: <HasilPerhitunganProdi /> },
+            ]
+          },
         ],
       },
       {
         path: "kaprodi",
-        element: <DashboardLayout />,
+        element: <PrivateRoutes allowedRoles={["kaprodi"]} />,
         children: [
-          { path: "", element: <DashboardKaprodi /> },
-          { path: "data_prodi", element: <DataProdiKaprodi /> },
-          { path: "data_mahasiswa", element: <DataMahasiswaKaprodi /> },
-          { path: "data_matakuliah", element: <DataMataKuliahKaprodi /> },
-          { path: "pemetaan_cpl", element: <PemetaanCPLKaprodi /> },
-          { path: "pemetaan_cpmk", element: <PemetaanCPMKKaprodi /> },
-          { path: "hasil_perhitungan", element: <HasilPerhitunganKaprodi /> },
+          {
+            path: "", element: <DashboardLayout />, children: [
+              { path: "", element: <DashboardKaprodi /> },
+              { path: "data_prodi", element: <DataProdiKaprodi /> },
+              { path: "data_mahasiswa", element: <DataMahasiswaKaprodi /> },
+              { path: "data_matakuliah", element: <DataMataKuliahKaprodi /> },
+              { path: "pemetaan_cpl", element: <PemetaanCPLKaprodi /> },
+              { path: "pemetaan_cpmk", element: <PemetaanCPMKKaprodi /> },
+              { path: "hasil_perhitungan", element: <HasilPerhitunganKaprodi /> },
+            ]
+          },
         ],
       },
       {
         path: "dosen",
-        element: <DashboardLayout />,
+        element: <PrivateRoutes allowedRoles={["dosen"]} />,
         children: [
-          { path: "", element: <DashboardDosen /> },
-          { path: "input_nilai", element: <InputNilaiDosen /> },
-          { path: "hasil_perhitungan", element: <HasilPerhitunganDosen /> },
+          {
+            path: "", element: <DashboardLayout />, children: [
+              { path: "", element: <DashboardDosen /> },
+              { path: "input_nilai", element: <InputNilaiDosen /> },
+              { path: "hasil_perhitungan", element: <HasilPerhitunganDosen /> },
+            ]
+          },
         ],
       },
     ],
   },
+  { path: "/unauthorized", element: <UnauthorizedPage /> },
   { path: "*", element: <NotFoundPage /> },
 ]);
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RouterProvider router={router} />
+        <ToastContainer position="top-right" autoClose={3000} />
+      </AuthProvider>
+    </QueryClientProvider>
   </StrictMode>
 );

@@ -1,40 +1,55 @@
 import React from "react";
-import { 
-  FiUsers, 
-  FiUserCheck, 
+import { useParams } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import {
+  FiUsers,
+  FiUserCheck,
   FiBook,
   FiCheckCircle,
-  FiAlertTriangle 
+  FiAlertTriangle
 } from "react-icons/fi";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 const DashboardProdi = () => {
+  const { prodiId } = useParams();
+  const { user } = useAuth();
+
+  // Simulasi data prodi berdasarkan prodi_id (nanti bisa diganti dengan API call)
+  const prodiInfo = {
+    1: { name: "Teknik Informatika", fakultas: "Fakultas Teknik" },
+    2: { name: "Sistem Informasi", fakultas: "Fakultas Teknik" },
+    3: { name: "Teknik Elektro", fakultas: "Fakultas Teknik" },
+    // Tambahkan prodi lainnya sesuai kebutuhan
+  };
+
+  const currentProdi = prodiInfo[prodiId || user?.prodi_id] || { name: "Program Studi", fakultas: "Fakultas" };
+
   // Data statistik
   const cardData = [
-    { 
-      title: "Mahasiswa", 
-      value: "1.240", 
+    {
+      title: "Mahasiswa",
+      value: "1.240",
       icon: FiUsers,
       color: "bg-blue-100",
       iconColor: "text-blue-600"
     },
-    { 
-      title: "Dosen", 
-      value: "28", 
+    {
+      title: "Dosen",
+      value: "28",
       icon: FiUserCheck,
       color: "bg-green-100",
       iconColor: "text-green-600"
     },
-    { 
-      title: "Matakuliah", 
-      value: "45", 
+    {
+      title: "Matakuliah",
+      value: "45",
       icon: FiBook,
       color: "bg-purple-100",
       iconColor: "text-purple-600"
     },
-    { 
-      title: "CPL Rata-rata", 
-      value: "87%", 
+    {
+      title: "CPL Rata-rata",
+      value: "87%",
       icon: FiCheckCircle,
       color: "bg-amber-100",
       iconColor: "text-amber-600"
@@ -58,8 +73,19 @@ const DashboardProdi = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Dashboard Prodi</h1>
-        
+        {/* Header dengan informasi prodi */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Dashboard Prodi</h1>
+          <div className="mt-2 text-sm text-gray-600">
+            <span className="font-medium">{currentProdi.name}</span> • {currentProdi.fakultas}
+            {prodiId && (
+              <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                ID: {prodiId}
+              </span>
+            )}
+          </div>
+        </div>
+
         {/* Kartu Statistik */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {cardData.map((card, index) => (
@@ -74,25 +100,25 @@ const DashboardProdi = () => {
             </div>
           ))}
         </div>
-        
+
         {/* Grafik Ketercapaian CPL */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <h2 className="text-lg font-semibold mb-4">Ketercapaian per CPL</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={cplAchievement}>
-                <XAxis 
-                  dataKey="cpl" 
+                <XAxis
+                  dataKey="cpl"
                   tick={{ fill: '#4B5563' }}
                   axisLine={false}
                 />
-                <YAxis 
-                  domain={[0, 100]} 
+                <YAxis
+                  domain={[0, 100]}
                   tick={{ fill: '#4B5563' }}
                   axisLine={false}
                   tickFormatter={(value) => `${value}%`}
                 />
-                <Tooltip 
+                <Tooltip
                   formatter={(value) => [`${value}%`, "Pencapaian"]}
                   contentStyle={{
                     borderRadius: '6px',
@@ -102,9 +128,9 @@ const DashboardProdi = () => {
                 />
                 <Bar dataKey="percentage">
                   {cplAchievement.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={getColor(entry.status)} 
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={getColor(entry.status)}
                       radius={[4, 4, 0, 0]}
                     />
                   ))}
@@ -113,7 +139,7 @@ const DashboardProdi = () => {
             </ResponsiveContainer>
           </div>
         </div>
-        
+
         {/* Daftar CPL Perlu Perbaikan */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center mb-4">
@@ -122,7 +148,7 @@ const DashboardProdi = () => {
             </div>
             <h2 className="text-lg font-semibold">CPL Perlu Perbaikan</h2>
           </div>
-          
+
           <ul className="space-y-3">
             {cplAchievement
               .filter(cpl => cpl.status === "perlu perbaikan")

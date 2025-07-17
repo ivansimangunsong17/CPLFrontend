@@ -1,437 +1,552 @@
-import React, { useState } from "react";
-import { AiFillDelete, AiOutlinePlus, AiFillEdit, AiOutlineArrowDown } from "react-icons/ai";
+import React, { useState, useMemo } from "react";
+import {
+  AiFillDelete,
+  AiOutlinePlus,
+  AiFillEdit,
+  AiOutlineArrowDown,
+} from "react-icons/ai";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import TableSkeleton from "../../components/TableSkeleton";
 import ConfirmModal from "../../components/Modal/ConfModal";
-import BaseModal from "../../components/Modal/BasedModal";
-import FormData from "../../components/Form/FormData";
+import FormBox from "../../components/Form/FormBox";
+import LoadingScreen from "../../components/LoadingScreen";
+import {
+  useAdminUnivList,
+  useAddAdminUniv,
+  useDeleteAdminUniv,
+  useUpdateAdminUniv,
+} from "../../hooks/admin-universitas/useAkunUniv";
+import {
+  useAdminProdiList,
+  useAddAdminProdi,
+  useDeleteAdminProdi,
+  useUpdateAdminProdi,
+} from "../../hooks/admin-universitas/useAkunProdi";
+import { useProdiList } from "../../hooks/admin-universitas/useDataProdi";
 
 const AkunUniversitas = () => {
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [selectAllUniv, setSelectAllUniv] = useState(false);
-  const [selectAllProdi, setSelectAllProdi] = useState(false);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [formMode, setFormMode] = useState("create");
-  const [editData, setEditData] = useState(null);
-
-  // Data sesuai dengan gambar (tanpa status active/inactive)
-  const [data, setData] = useState({
-    adminUniv: [
-      {
-        id: 1,
-        nama: "Rizka Andayani, S.T., M.T.",
-        email: "rizka.andayani@univti.ac.id",
-        password: "Rizk@T187",
-        role: "Admin Univ",
-      },
-      {
-        id: 2,
-        nama: "Ahmad Fadli, S.Kom., M.Kom.",
-        email: "ahmad.fadli@univti.ac.id",
-        password: "Fadl1Kom#85",
-        role: "Admin Univ",
-      },
-      {
-        id: 3,
-        nama: "Budi Santoso, S.Kom., M.Cs.",
-        email: "budi.santoso@univti.ac.id",
-        password: "Bud1Cs#80",
-        role: "Admin Univ",
-      }
-    ],
-    adminProdi: [
-      {
-        id: 4,
-        nama: "Rizka Andayani, S.T., M.T.",
-        email: "rizka.andayani@univti.ac.id",
-        password: "Rizk@T187",
-        role: "Admin TI",
-      },
-      {
-        id: 5,
-        nama: "Ahmad Fadli, S.Kom., M.Kom.",
-        email: "ahmad.fadli@univti.ac.id",
-        password: "Fadl1Kom#85",
-        role: "Admin TE",
-      },
-      {
-        id: 6,
-        nama: "Budi Santoso, S.Kom., M.Cs.",
-        email: "budi.santoso@univti.ac.id",
-        password: "Bud1Cs#80",
-        role: "Admin TM",
-      },
-      {
-        id: 7,
-        nama: "Hendra Gunawan, S.Kom., M.Kom.",
-        email: "hendra.gunawan@univti.ac.id",
-        password: "H3ndra#9004",
-        role: "Admin TS",
-      },
-      {
-        id: 8,
-        nama: "Dedi Firmansyah, S.T., M.T.I.",
-        email: "dedi.firmansyah@univti.ac.id",
-        password: "D3diT1#9106",
-        role: "Admin Ilkom",
-      }
-    ]
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [selectedItems, setSelectedItems] = useState({
+    adminUniv: [],
+    adminProdi: []
   });
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formType, setFormType] = useState(null);
+  const [editData, setEditData] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
-  const formFields = [
-    {
-      name: "nama",
-      label: "Nama Lengkap",
-      type: "text",
-      placeholder: "Masukkan nama lengkap",
-      required: true,
-    },
-    {
-      name: "email",
-      label: "Email",
-      type: "email",
-      placeholder: "Masukkan email",
-      required: true,
-    },
-    {
-      name: "password",
-      label: "Password",
-      type: "password",
-      placeholder: "Masukkan password",
-      required: true,
-    },
-    {
-      name: "role",
-      label: "Role",
-      type: "select",
-      options: ["Admin Univ", "Admin Prodi TI", "Admin Prodi TE", "Admin Prodi Mesin", "Admin Prodi Sipil", "Admin Prodi Ilkom"],
-      required: true,
-    },
-  ];
+  const { data: adminUnivList, isLoading: isLoadingAdminUniv, isError: isErrorAdminUniv } = useAdminUnivList();
+  const { data: adminProdiList, isLoading: isLoadingAdminProdi, isError: isErrorAdminProdi } = useAdminProdiList();
+  const { data: prodiList } = useProdiList();
 
-  const toggleSelectRow = (id) => {
-    const newSelected = selectedRows.includes(id)
-      ? selectedRows.filter((row) => row !== id)
-      : [...selectedRows, id];
-    setSelectedRows(newSelected);
+  const deleteAdminUnivMutation = useDeleteAdminUniv();
+  const deleteAdminProdiMutation = useDeleteAdminProdi();
+  const addAdminUnivMutation = useAddAdminUniv();
+  const addAdminProdiMutation = useAddAdminProdi();
+  const updateAdminUnivMutation = useUpdateAdminUniv();
+  const updateAdminProdiMutation = useUpdateAdminProdi();
 
-    // Update select all status
-    const allUnivSelected = data.adminUniv.every(item => newSelected.includes(item.id));
-    const allProdiSelected = data.adminProdi.every(item => newSelected.includes(item.id));
-    setSelectAllUniv(allUnivSelected);
-    setSelectAllProdi(allProdiSelected);
+  const handleCheckboxChange = (type, id, isChecked) => {
+    setSelectedItems(prev => ({
+      ...prev,
+      [type]: isChecked ? [...prev[type], id] : prev[type].filter(itemId => itemId !== id)
+    }));
   };
 
-  const toggleSelectAllUniv = () => {
-    if (selectAllUniv) {
-      // Unselect all admin univ
-      setSelectedRows(selectedRows.filter(id =>
-        !data.adminUniv.some(item => item.id === id)
-      ));
-    } else {
-      // Select all admin univ
-      const univIds = data.adminUniv.map(item => item.id);
-      setSelectedRows([...new Set([...selectedRows, ...univIds])]);
+  const handleSelectAll = (type, isChecked) => {
+    const dataList = type === 'adminUniv' ? adminUnivList : adminProdiList;
+    setSelectedItems(prev => ({
+      ...prev,
+      [type]: isChecked ? dataList?.map(item => item.id) || [] : []
+    }));
+  };
+
+  const handleDeleteSingle = (type, id, name) => {
+    setDeleteTarget({ type, id, name, isBulk: false });
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleDeleteMultiple = (type) => {
+    const selectedIds = selectedItems[type];
+    if (selectedIds.length === 0) {
+      toast.warning('Pilih minimal satu item untuk dihapus');
+      return;
     }
-    setSelectAllUniv(!selectAllUniv);
+    setDeleteTarget({ type, ids: selectedIds, isBulk: true });
+    setIsConfirmModalOpen(true);
   };
 
-  const toggleSelectAllProdi = () => {
-    if (selectAllProdi) {
-      // Unselect all admin prodi
-      setSelectedRows(selectedRows.filter(id =>
-        !data.adminProdi.some(item => item.id === id)
-      ));
-    } else {
-      // Select all admin prodi
-      const prodiIds = data.adminProdi.map(item => item.id);
-      setSelectedRows([...new Set([...selectedRows, ...prodiIds])]);
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      if (deleteTarget.isBulk) {
+        const deletePromises = deleteTarget.ids.map(id => {
+          return deleteTarget.type === 'adminUniv'
+            ? deleteAdminUnivMutation.mutateAsync(id)
+            : deleteAdminProdiMutation.mutateAsync(id);
+        });
+        await Promise.all(deletePromises);
+        toast.success(`Berhasil menghapus ${deleteTarget.ids.length} akun`);
+        setSelectedItems(prev => ({ ...prev, [deleteTarget.type]: [] }));
+      } else {
+        if (deleteTarget.type === 'adminUniv') {
+          await deleteAdminUnivMutation.mutateAsync(deleteTarget.id);
+        } else {
+          await deleteAdminProdiMutation.mutateAsync(deleteTarget.id);
+        }
+        toast.success(`Berhasil menghapus akun ${deleteTarget.name}`);
+      }
+    } catch (error) {
+      toast.error('Gagal menghapus akun');
+    } finally {
+      setIsConfirmModalOpen(false);
+      setDeleteTarget(null);
     }
-    setSelectAllProdi(!selectAllProdi);
   };
 
-  const handleDelete = () => {
-    setData({
-      adminUniv: data.adminUniv.filter((item) => !selectedRows.includes(item.id)),
-      adminProdi: data.adminProdi.filter((item) => !selectedRows.includes(item.id))
-    });
-    setSelectedRows([]);
-    setSelectAllUniv(false);
-    setSelectAllProdi(false);
-    setIsConfirmOpen(false);
-  };
+  const handleEdit = (type, item) => {
+    console.log('Edit handler called:', { type, item });
 
-  const handleAddAkun = (formData) => {
-    const newId = Math.max(
-      ...data.adminUniv.map(item => item.id),
-      ...data.adminProdi.map(item => item.id)
-    ) + 1;
-
-    const newAkun = {
-      id: newId,
-      ...formData,
-    };
-
-    if (formData.role.includes("Admin Univ")) {
-      setData({
-        ...data,
-        adminUniv: [...data.adminUniv, newAkun]
-      });
-    } else {
-      setData({
-        ...data,
-        adminProdi: [...data.adminProdi, newAkun]
-      });
-    }
-
-    setIsFormOpen(false);
-    setEditData(null);
-  };
-
-  const handleEditAkun = (formData) => {
-    if (!editData) return;
-
-    const updatedData = {
-      adminUniv: data.adminUniv.map(item =>
-        item.id === editData.id ? { ...item, ...formData } : item
-      ),
-      adminProdi: data.adminProdi.map(item =>
-        item.id === editData.id ? { ...item, ...formData } : item
-      )
-    };
-
-    setData(updatedData);
-    setIsFormOpen(false);
-    setEditData(null);
-  };
-
-  const openEditModal = (item) => {
     setEditData(item);
-    setFormMode("edit");
+    setIsEditMode(true);
+    setFormType(type);
     setIsFormOpen(true);
   };
 
-  const openCreateModal = () => {
+  const handleAddAccount = (type) => {
     setEditData(null);
-    setFormMode("create");
+    setIsEditMode(false);
+    setFormType(type);
     setIsFormOpen(true);
   };
+
+  const handleFormSubmit = async (data) => {
+    console.log('Form submit:', { data, isEditMode, editData });
+
+    // ✅ Basic validation (nama dan email selalu required)
+    if (!data.name || !data.email) {
+      toast.error('Nama dan email harus diisi');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      toast.error('Format email tidak valid');
+      return;
+    }
+
+    // ✅ Password validation - hanya untuk create mode atau jika password diisi saat edit
+    if (!isEditMode) {
+      // Create mode - password wajib
+      if (!data.password || !data.password_confirmation) {
+        toast.error('Password dan konfirmasi password harus diisi');
+        return;
+      }
+      if (data.password.length < 6) {
+        toast.error('Password minimal 6 karakter');
+        return;
+      }
+      if (data.password !== data.password_confirmation) {
+        toast.error('Password dan konfirmasi tidak sama');
+        return;
+      }
+    } else {
+      // Edit mode - password optional
+      if (data.password || data.password_confirmation) {
+        // Jika user mengisi password, validasi lengkap
+        if (!data.password || !data.password_confirmation) {
+          toast.error('Jika ingin mengubah password, isi password dan konfirmasi');
+          return;
+        }
+        if (data.password.length < 6) {
+          toast.error('Password minimal 6 karakter');
+          return;
+        }
+        if (data.password !== data.password_confirmation) {
+          toast.error('Password dan konfirmasi tidak sama');
+          return;
+        }
+      }
+    }
+
+    // ✅ Prodi validation hanya untuk admin prodi
+    if (formType === 'adminProdi' && !data.prodi_id) {
+      toast.error('Program Studi harus dipilih');
+      return;
+    }
+
+    try {
+      // ✅ Build payload berdasarkan mode
+      const payload = {
+        name: data.name,
+        email: data.email,
+        ...(formType === 'adminProdi' && { prodi_id: data.prodi_id })
+      };
+
+      // ✅ Hanya tambahkan password jika diisi (create mode atau edit dengan password baru)
+      if (!isEditMode || (data.password && data.password_confirmation)) {
+        payload.password = data.password;
+        payload.password_confirmation = data.password_confirmation;
+      }
+
+      if (isEditMode) {
+        // ✅ UPDATE MODE
+        const updatePayload = {
+          id: editData.id,
+          ...payload
+        };
+
+        if (formType === 'adminUniv') {
+          await updateAdminUnivMutation.mutateAsync(updatePayload);
+          toast.success('Berhasil memperbarui Admin Universitas');
+        } else {
+          await updateAdminProdiMutation.mutateAsync(updatePayload);
+          toast.success('Berhasil memperbarui Admin Prodi');
+        }
+      } else {
+        // ✅ CREATE MODE  
+        if (formType === 'adminUniv') {
+          await addAdminUnivMutation.mutateAsync(payload);
+          toast.success('Berhasil menambah Admin Universitas');
+        } else {
+          await addAdminProdiMutation.mutateAsync(payload);
+          toast.success('Berhasil menambah Admin Prodi');
+        }
+      }
+
+      // Reset form
+      setIsFormOpen(false);
+      setFormType(null);
+      setEditData(null);
+      setIsEditMode(false);
+    } catch (error) {
+      console.error('Form submission error:', error);
+      const message =
+        error?.response?.data?.message ||
+        Object.values(error?.response?.data?.errors || {})[0]?.[0] ||
+        'Gagal memproses akun. Silakan coba lagi.';
+      toast.error(message);
+    }
+  };
+
+  const handleFormCancel = () => {
+    setIsFormOpen(false);
+    setFormType(null);
+    setEditData(null);
+    setIsEditMode(false);
+  };
+
+  const formFields = useMemo(() => {
+    const base = [
+      { name: 'name', label: 'Nama Lengkap', type: 'text', required: true },
+      { name: 'email', label: 'Email', type: 'email', required: true },
+      { name: 'password', label: isEditMode ? 'Password Baru (kosongkan jika tidak diubah)' : 'Password', type: 'password', required: !isEditMode },
+      { name: 'password_confirmation', label: isEditMode ? 'Konfirmasi Password Baru' : 'Konfirmasi Password', type: 'password', required: !isEditMode }
+    ];
+
+    if (formType === 'adminProdi') {
+      const prodiOptions = prodiList?.map(p => ({
+        value: p.prodi_id,
+        label: p.nama_prodi  // ✅ gunakan `nama_prodi` bukan `name`
+      })) || [];
+
+      return [...base, {
+        name: 'prodi_id',
+        label: 'Program Studi',
+        type: 'select',
+        required: true,
+        options: prodiOptions
+      }];
+    }
+
+    return base;
+  }, [formType, prodiList, isEditMode]);
+
+
+
+  const formInitialData = useMemo(() => {
+    if (isEditMode && editData) {
+      return {
+        name: editData.name || '',
+        email: editData.email || '',
+        password: '',
+        password_confirmation: '',
+        ...(formType === 'adminProdi' && { prodi_id: editData.prodi_id || '' })
+      };
+    }
+
+    return {
+      name: '',
+      email: '',
+      password: '',
+      password_confirmation: '',
+      ...(formType === 'adminProdi' && { prodi_id: '' })
+    };
+  }, [formType, editData, isEditMode]);
+
+  const getFormTitle = () => {
+    if (isEditMode) {
+      return formType === 'adminUniv' ? 'Edit Admin Universitas' : 'Edit Admin Prodi';
+    }
+    return formType === 'adminUniv' ? 'Tambah Admin Universitas' : 'Tambah Admin Prodi';
+  };
+  const isLoadingOperation =
+    addAdminUnivMutation.isPending ||
+    addAdminProdiMutation.isPending ||
+    updateAdminUnivMutation.isPending ||
+    updateAdminProdiMutation.isPending ||
+    deleteAdminUnivMutation.isPending ||
+    deleteAdminProdiMutation.isPending;
+
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Manajemen Akun Universitas</h1>
-        <div className="flex gap-3">
-          <button
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${selectedRows.length > 0
-              ? "bg-red-500 text-white hover:bg-red-600"
-              : "bg-gray-200 text-gray-500 cursor-not-allowed"
-              }`}
-            disabled={selectedRows.length === 0}
-            onClick={() => setIsConfirmOpen(true)}
-          >
-            <AiFillDelete size={18} />
-            <span>Hapus</span>
-          </button>
-          <button
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            onClick={openCreateModal}
-          >
-            <AiOutlinePlus size={18} />
-
-            <span>Tambah Akun</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Admin Universitas Section */}
+      <ToastContainer autoClose={2500} hideProgressBar />
+      {isLoadingOperation && <LoadingScreen message="Memproses data..." />}
+      {/* Tabel Admin Universitas */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">Admin Universitas</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-700">Admin Universitas</h2>
+          <div className="flex gap-3">
+            <button
+              onClick={() => handleDeleteMultiple('adminUniv')}
+              disabled={selectedItems.adminUniv.length === 0}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${selectedItems.adminUniv.length === 0
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-red-500 text-white hover:bg-red-600'
+                }`}
+            >
+              <AiFillDelete size={18} />
+              <span>Hapus</span>
+            </button>
+            <button
+              onClick={() => handleAddAccount('adminUniv')}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              <AiOutlinePlus size={18} /> <span>Tambah Akun</span>
+            </button>
+          </div>
+        </div>
+
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-200 text-black">
+            <thead className="bg-blue-200 text-black">
               <tr>
                 <th className="p-4 w-12">
                   <input
                     type="checkbox"
-                    checked={selectAllUniv}
-                    onChange={toggleSelectAllUniv}
-                    className="w-4 h-4 accent-blue-500 focus:ring-blue-300"
+                    className="w-4 h-4 accent-blue-500"
+                    checked={adminUnivList?.length > 0 && selectedItems.adminUniv.length === adminUnivList?.length}
+                    onChange={(e) => handleSelectAll('adminUniv', e.target.checked)}
                   />
                 </th>
-                <th className="p-4 text-left">
-                  <div className="flex items-center gap-1">
-                    Nama Lengkap <AiOutlineArrowDown />
-                  </div>
-                </th>
-                <th className="p-4 text-left">
-                  <div className="flex items-center gap-1">
-                    Email <AiOutlineArrowDown />
-                  </div>
-                </th>
-                <th className="p-4 text-left">
-                  <div className="flex items-center gap-1">
-                    Password <AiOutlineArrowDown />
-                  </div>
-                </th>
-                <th className="p-4 text-left">
-                  <div className="flex items-center gap-1">
-                    Role <AiOutlineArrowDown />
-                  </div>
-                </th>
-                <th className="p-4 text-left">
-                  <div className="flex items-center gap-1">
-                    Aksi <AiOutlineArrowDown />
-                  </div>
-                </th>
+                {["Nama Lengkap", "Email", "Role", "Aksi"].map((label, i) => (
+                  <th key={i} className="p-4 text-left">
+                    <div className="flex items-center gap-1">
+                      {label} <AiOutlineArrowDown />
+                    </div>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {data.adminUniv.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50 transition">
-                  <td className="p-4">
-                    <input
-                      type="checkbox"
-                      checked={selectedRows.includes(item.id)}
-                      onChange={() => toggleSelectRow(item.id)}
-                      className="w-4 h-4 rounded accent-blue-500 focus:ring-blue-300"
-                    />
-                  </td>
-                  <td className="p-4 font-medium text-gray-800">
-                    {item.nama}
-                  </td>
-                  <td className="p-4 text-gray-600">{item.email}</td>
-                  <td className="p-4 text-gray-600">{item.password}</td>
-                  <td className="p-4">
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {item.role}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <button
-                      onClick={() => openEditModal(item)}
-                      className="text-blue-600 hover:text-blue-800 transition flex items-center gap-1"
-                    >
-                      Ubah
-                      <AiFillEdit size={16} />
-
-                    </button>
+              {isLoadingAdminUniv ? (
+                <TableSkeleton rows={3} />
+              ) : isErrorAdminUniv ? (
+                <tr>
+                  <td colSpan={6} className="p-4 text-center text-red-600">
+                    Error loading data
                   </td>
                 </tr>
-              ))}
+              ) :
+                adminUnivList?.length > 0 ? (
+                  adminUnivList?.map((item) => (
+                    <tr key={item.id} className="hover:bg-gray-50 transition">
+                      <td className="p-4">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 accent-blue-500"
+                          checked={selectedItems.adminUniv.includes(item.id)}
+                          onChange={(e) => handleCheckboxChange('adminUniv', item.id, e.target.checked)}
+                        />
+                      </td>
+                      <td className="p-4 font-medium text-gray-800">{item.name}</td>
+                      <td className="p-4 text-gray-600">{item.email}</td>
+
+                      <td className="p-4">
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Admin Universitas
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleEdit('adminUniv', item)}
+                            className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                          >
+                            <AiFillEdit size={20} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSingle('adminUniv', item.id, item.name)}
+                            className="text-red-600 hover:text-red-800 flex items-center gap-1"
+                          >
+                            <AiFillDelete size={20} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="p-4 text-center text-gray-600">
+                      Tidak ada data
+                    </td>
+                  </tr>
+                )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Admin Program Studi Section */}
+      {/* Tabel Admin Prodi */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">Admin Program Studi</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-700">Admin Program Studi</h2>
+          <div className="flex gap-3">
+            <button
+              onClick={() => handleDeleteMultiple('adminProdi')}
+              disabled={selectedItems.adminProdi.length === 0}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${selectedItems.adminProdi.length === 0
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-red-500 text-white hover:bg-red-600'
+                }`}
+            >
+              <AiFillDelete size={18} />
+              <span>Hapus</span>
+            </button>
+            <button
+              onClick={() => handleAddAccount('adminProdi')}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              <AiOutlinePlus size={18} /> <span>Tambah Akun</span>
+            </button>
+          </div>
+        </div>
+
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-200 text-black">
+            <thead className="bg-blue-200 text-black">
               <tr>
                 <th className="p-4 w-12">
                   <input
                     type="checkbox"
-                    checked={selectAllProdi}
-                    onChange={toggleSelectAllProdi}
-                    className="w-4 h-4 accent-blue-500 focus:ring-blue-300"
+                    className="w-4 h-4 accent-blue-500"
+                    checked={adminProdiList?.length > 0 && selectedItems.adminProdi.length === adminProdiList?.length}
+                    onChange={(e) => handleSelectAll('adminProdi', e.target.checked)}
                   />
                 </th>
-                <th className="p-4 text-left">
-                  <div className="flex items-center gap-1">
-                    Nama Lengkap <AiOutlineArrowDown />
-                  </div>
-                </th>
-                <th className="p-4 text-left">
-                  <div className="flex items-center gap-1">
-                    Email <AiOutlineArrowDown />
-                  </div>
-                </th>
-                <th className="p-4 text-left">
-                  <div className="flex items-center gap-1">
-                    Password <AiOutlineArrowDown />
-                  </div>
-                </th>
-                <th className="p-4 text-left">
-                  <div className="flex items-center gap-1">
-                    Role <AiOutlineArrowDown />
-                  </div>
-                </th>
-                <th className="p-4 text-left">
-                  <div className="flex items-center gap-1">
-                    Aksi <AiOutlineArrowDown />
-                  </div>
-                </th>
+                {["Nama Lengkap", "Email", "Role", "Aksi"].map((label, i) => (
+                  <th key={i} className="p-4 text-left">
+                    <div className="flex items-center gap-1">
+                      {label} <AiOutlineArrowDown />
+                    </div>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {data.adminProdi.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50 transition">
-                  <td className="p-4">
-                    <input
-                      type="checkbox"
-                      checked={selectedRows.includes(item.id)}
-                      onChange={() => toggleSelectRow(item.id)}
-                      className="w-4 h-4 rounded accent-blue-500 focus:ring-blue-300"
-                    />
-                  </td>
-                  <td className="p-4 font-medium text-gray-800">
-                    {item.nama}
-                  </td>
-                  <td className="p-4 text-gray-600">{item.email}</td>
-                  <td className="p-4 text-gray-600">{item.password}</td>
-                  <td className="p-4">
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {item.role}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <button
-                      onClick={() => openEditModal(item)}
-                      className="text-blue-600 hover:text-blue-800 transition flex items-center gap-1"
-                    >
-                      Ubah
-                      <AiFillEdit size={16} />
-
-                    </button>
+              {isLoadingAdminProdi ? (
+                <TableSkeleton rows={3} />
+              ) : isErrorAdminProdi ? (
+                <tr>
+                  <td colSpan={6} className="p-4 text-center text-red-600">
+                    Error loading data
                   </td>
                 </tr>
-              ))}
+              ) : adminProdiList?.length > 0 ? (
+                adminProdiList?.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50 transition">
+                    <td className="p-4">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 accent-blue-500"
+                        checked={selectedItems.adminProdi.includes(item.id)}
+                        onChange={(e) => handleCheckboxChange('adminProdi', item.id, e.target.checked)}
+                      />
+                    </td>
+                    <td className="p-4 font-medium text-gray-800">{item.name}</td>
+                    <td className="p-4 text-gray-600">{item.email}</td>
+
+                    <td className="p-4">
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {prodiList?.find((p) => p.prodi_id === item.prodi_id)?.nama_prodi || 'Admin Prodi'}
+
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEdit('adminProdi', item)}
+                          className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                        >
+                          <AiFillEdit size={20} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteSingle('adminProdi', item.id, item.name)}
+                          className="text-red-600 hover:text-red-800 flex items-center gap-1"
+                        >
+                          <AiFillDelete size={20} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="p-4 text-center text-gray-600">
+                    Tidak ada data
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Modals */}
+      {/* Confirm Modal */}
       <ConfirmModal
-        isOpen={isConfirmOpen}
-        onClose={() => setIsConfirmOpen(false)}
-        onConfirm={handleDelete}
-        message="Apakah Anda yakin ingin menghapus akun yang dipilih?"
+        isOpen={isConfirmModalOpen}
+        onClose={() => {
+          setIsConfirmModalOpen(false);
+          setDeleteTarget(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        message={
+          deleteTarget?.isBulk
+            ? `Apakah Anda yakin ingin menghapus ${deleteTarget.ids.length} akun?`
+            : `Apakah Anda yakin ingin menghapus akun "${deleteTarget?.name}"?`
+        }
       />
 
-      {isFormOpen && (
-        <BaseModal
-          title={formMode === "create" ? "Tambah Akun" : "Edit Akun"}
-          onClose={() => {
-            setIsFormOpen(false);
-            setEditData(null);
-          }}
-        >
-          <FormData
-            fields={formFields.map(field => ({
-              ...field,
-              defaultValue: editData ? editData[field.name] : "",
-            }))}
-            onSubmit={formMode === "create" ? handleAddAkun : handleEditAkun}
-            onCancel={() => {
-              setIsFormOpen(false);
-              setEditData(null);
-            }}
-          />
-        </BaseModal>
-      )}
+      <FormBox
+        key={`${formType}-${isEditMode}-${editData?.id}`}
+        isOpen={isFormOpen}
+        title={getFormTitle()}
+        fields={formFields}
+        initialData={formInitialData}
+        onSubmit={handleFormSubmit}
+        onCancel={handleFormCancel}
+        isLoading={
+          addAdminUnivMutation.isPending ||
+          addAdminProdiMutation.isPending ||
+          updateAdminUnivMutation.isPending ||
+          updateAdminProdiMutation.isPending
+        }
+      />
+
+
     </div>
   );
 };
