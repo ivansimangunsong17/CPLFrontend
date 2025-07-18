@@ -33,7 +33,7 @@ const DetailMataKuliahProdi = () => {
     const [editData, setEditData] = useState(null);
     const [selectedRows, setSelectedRows] = useState([]);
     const [allSelected, setAllSelected] = useState(false);
-    
+
     // State untuk manajemen kelas
     const [isKelasFormOpen, setIsKelasFormOpen] = useState(false);
     const [editKelasData, setEditKelasData] = useState(null);
@@ -41,7 +41,7 @@ const DetailMataKuliahProdi = () => {
     const [allKelasSelected, setAllKelasSelected] = useState(false);
     const [showKelasDeleteModal, setShowKelasDeleteModal] = useState(false);
     const [kelasToDelete, setKelasToDelete] = useState(null);
-    
+
     // State untuk view detail kelas dan mahasiswa
     const [selectedKelas, setSelectedKelas] = useState(null);
     const [showMahasiswaView, setShowMahasiswaView] = useState(false);
@@ -104,35 +104,35 @@ const DetailMataKuliahProdi = () => {
 
     // Data kelas dengan informasi yang lebih lengkap
     const kelasData = [
-        { 
-            id: 1, 
-            kodeMK: mataKuliahData?.kode || "IF265365", 
-            namaMataKuliah: mataKuliahData?.nama || "Struktur Data", 
-            namaKelas: `${mataKuliahData?.nama || "Struktur Data"} A`, 
-            dosen: "Rizka Andayani, S.T., M.T.", 
+        {
+            id: 1,
+            kodeMK: mataKuliahData?.kode || "IF265365",
+            namaMataKuliah: mataKuliahData?.nama || "Struktur Data",
+            namaKelas: `${mataKuliahData?.nama || "Struktur Data"} A`,
+            dosen: "Rizka Andayani, S.T., M.T.",
             periode: "2024 Genap",
             kapasitas: 30,
-            terisi: 25 
+            terisi: 25
         },
-        { 
-            id: 2, 
-            kodeMK: mataKuliahData?.kode || "IF265365", 
-            namaMataKuliah: mataKuliahData?.nama || "Struktur Data", 
-            namaKelas: `${mataKuliahData?.nama || "Struktur Data"} B`, 
-            dosen: "Dr. Ahmad Hasan, M.Kom.", 
+        {
+            id: 2,
+            kodeMK: mataKuliahData?.kode || "IF265365",
+            namaMataKuliah: mataKuliahData?.nama || "Struktur Data",
+            namaKelas: `${mataKuliahData?.nama || "Struktur Data"} B`,
+            dosen: "Dr. Ahmad Hasan, M.Kom.",
             periode: "2024 Genap",
             kapasitas: 30,
-            terisi: 28 
+            terisi: 28
         },
-        { 
-            id: 3, 
-            kodeMK: mataKuliahData?.kode || "IF265365", 
-            namaMataKuliah: mataKuliahData?.nama || "Struktur Data", 
-            namaKelas: `${mataKuliahData?.nama || "Struktur Data"} C`, 
-            dosen: "Siti Rahayu, S.Kom., M.T.", 
+        {
+            id: 3,
+            kodeMK: mataKuliahData?.kode || "IF265365",
+            namaMataKuliah: mataKuliahData?.nama || "Struktur Data",
+            namaKelas: `${mataKuliahData?.nama || "Struktur Data"} C`,
+            dosen: "Siti Rahayu, S.Kom., M.T.",
             periode: "2024 Genap",
             kapasitas: 30,
-            terisi: 22 
+            terisi: 22
         },
     ];
 
@@ -172,7 +172,7 @@ const DetailMataKuliahProdi = () => {
         item.periode.toLowerCase().includes(searchKelas.toLowerCase())
     );
 
-    const filteredMahasiswa = selectedKelas 
+    const filteredMahasiswa = selectedKelas
         ? (mahasiswaData[selectedKelas.id] || []).filter((item) =>
             item.nim.toLowerCase().includes(searchMahasiswa.toLowerCase()) ||
             item.nama.toLowerCase().includes(searchMahasiswa.toLowerCase()) ||
@@ -326,7 +326,7 @@ const DetailMataKuliahProdi = () => {
             }
 
             console.log('Adding/Updating Kelas:', formData);
-            
+
             // Simulate API call success
             if (editKelasData) {
                 toast.success('Kelas berhasil diperbarui');
@@ -760,8 +760,8 @@ const DetailMataKuliahProdi = () => {
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-sm">{item.terisi}/{item.kapasitas}</span>
                                                     <div className="w-16 bg-gray-200 rounded-full h-2">
-                                                        <div 
-                                                            className="bg-blue-600 h-2 rounded-full" 
+                                                        <div
+                                                            className="bg-blue-600 h-2 rounded-full"
                                                             style={{ width: `${(item.terisi / item.kapasitas) * 100}%` }}
                                                         ></div>
                                                     </div>
@@ -769,21 +769,21 @@ const DetailMataKuliahProdi = () => {
                                             </td>
                                             <td className="p-4">
                                                 <div className="flex items-center gap-2">
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleViewKelasDetail(item)}
                                                         className="flex items-center gap-1 text-green-600 hover:text-green-800 transition"
                                                         title="Lihat Detail Mahasiswa"
                                                     >
                                                         <AiOutlineEye size={18} />
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleEditKelas(item)}
                                                         className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition"
                                                         title="Edit Kelas"
                                                     >
                                                         <AiFillEdit size={18} />
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         onClick={() => {
                                                             setKelasToDelete(item);
                                                             setShowKelasDeleteModal(true);
@@ -992,7 +992,7 @@ const DetailMataKuliahProdi = () => {
                 }}
                 title="Konfirmasi Hapus Kelas"
                 message={
-                    kelasToDelete 
+                    kelasToDelete
                         ? `Apakah Anda yakin ingin menghapus kelas "${kelasToDelete.namaKelas}"? Tindakan ini tidak dapat dibatalkan.`
                         : `Apakah Anda yakin ingin menghapus ${selectedKelasRows.length} kelas yang dipilih? Tindakan ini tidak dapat dibatalkan.`
                 }
