@@ -27,6 +27,8 @@ import {
   DataMahasiswaProdi,
   DataMataKuliahProdi,
   DetailMataKuliahProdi,
+  PemetaanProdi,
+  DetailPemetaanProdi,
   DashboardKaprodi,
   DataMahasiswaKaprodi,
   DataMataKuliahKaprodi,
@@ -77,6 +79,8 @@ const router = createBrowserRouter([
               { path: "data_mahasiswa", element: <DataMahasiswaProdi /> },
               { path: "data_matakuliah", element: <DataMataKuliahProdi /> },
               { path: "detail_matakuliah/:mataKuliahId", element: <DetailMataKuliahProdi /> },
+              { path: "pemetaan_cpl", element: <PemetaanProdi /> },
+              { path: "detail_pemetaan/:mataKuliahId", element: <DetailPemetaanProdi /> },
               { path: "hasil_perhitungan", element: <HasilPerhitunganProdi /> },
             ]
           },

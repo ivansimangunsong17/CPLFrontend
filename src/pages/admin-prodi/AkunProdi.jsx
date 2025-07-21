@@ -498,10 +498,10 @@ const AkunProdi = () => {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {isLoadingKaprodi ? (
-                <TableSkeleton rows={5} columns={6} />
+                <TableSkeleton columns={5} />
               ) : filteredDataKaprodi.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="p-6 text-center text-gray-500">
+                  <td colSpan="5" className="p-6 text-center text-gray-500">
                     Tidak ada data akun kaprodi.
                   </td>
                 </tr>
@@ -620,10 +620,10 @@ const AkunProdi = () => {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {isLoadingDosen ? (
-                <TableSkeleton rows={5} columns={6} />
+                <TableSkeleton columns={5} />
               ) : filteredDataDosen.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="p-6 text-center text-gray-500">
+                  <td colSpan="5" className="p-6 text-center text-gray-500">
                     Tidak ada data akun dosen.
                   </td>
                 </tr>

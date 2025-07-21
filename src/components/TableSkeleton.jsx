@@ -1,13 +1,12 @@
-const TableSkeleton = ({ rows = 3, columns = 5 }) => {
+import React from 'react';
+
+const TableSkeleton = ({ columns = 5, rows = 5 }) => {
     return (
         <>
-            {Array.from({ length: rows }).map((_, index) => (
-                <tr key={index} className="animate-pulse">
-                    <td className="p-4">
-                        <div className="w-4 h-4 bg-gray-300 rounded"></div>
-                    </td>
-                    {[...Array(columns - 1)].map((_, i) => (
-                        <td key={i} className="p-4">
+            {Array.from({ length: rows }).map((_, rowIndex) => (
+                <tr key={rowIndex} className="animate-pulse">
+                    {Array.from({ length: columns }).map((_, colIndex) => (
+                        <td key={colIndex} className="p-4">
                             <div className="h-4 bg-gray-300 rounded w-full"></div>
                         </td>
                     ))}
@@ -16,4 +15,5 @@ const TableSkeleton = ({ rows = 3, columns = 5 }) => {
         </>
     );
 };
+
 export default TableSkeleton;

@@ -22,6 +22,8 @@ import DataCPL from '../pages/admin-prodi/DataCPL';
 import DataMahasiswaProdi from '../pages/admin-prodi/DataMahasiswaProdi';
 import DataMataKuliahProdi from '../pages/admin-prodi/DataMataKuliahProdi';
 import DetailMataKuliahProdi from '../pages/admin-prodi/DetailMataKuliahProdi';
+import PemetaanProdi from '../pages/admin-prodi/PemetaanProdi';
+import DetailPemetaanProdi from '../pages/admin-prodi/DetailPemetaanProdi';
 
 
 //Kaprodi
@@ -60,6 +62,8 @@ export {
     DataMataKuliahProdi,
     DetailMataKuliahProdi,
     DataCPL,
+    PemetaanProdi,
+    DetailPemetaanProdi,
     HasilPerhitunganProdi,
 
     DashboardKaprodi,

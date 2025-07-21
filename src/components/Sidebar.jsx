@@ -87,14 +87,7 @@ const Sidebar = () => {
                     { label: "Data CPL", path: "/dashboard/admin_prodi/data_cpl", icon: <MdSchool /> },
                 ],
             },
-            {
-                label: "Pemetaan",
-                icon: <MdOutlineSubject />,
-                children: [
-                    { label: "Pemetaan CPL", path: "/dashboard/admin_prodi/pemetaan_cpl", icon: <MdOutlineSubject /> },
-                    { label: "Pemetaan CPMK", path: "/dashboard/admin_prodi/pemetaan_cpmk", icon: <MdOutlineSubject /> },
-                ],
-            },
+            { label: "Pemetaan", path: "/dashboard/admin_prodi/pemetaan_cpl", icon: <MdOutlineSubject /> },
             { label: "Hasil Perhitungan", path: "/dashboard/admin_prodi/hasil_perhitungan", icon: <BsClipboardData /> },
         ],
         kaprodi: [

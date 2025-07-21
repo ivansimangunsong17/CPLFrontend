@@ -216,11 +216,29 @@ function FormField({ field, register, error, value, touched }) {
                     <select
                         id={name}
                         {...register(name, validationRules)}
-                        className={inputClass}
+                        className={`${inputClass} ${field.className || ''} text-sm leading-5`}
+                        style={{ 
+                            minHeight: '3rem',
+                            paddingRight: '2.5rem' // Space for dropdown arrow
+                        }}
                     >
-                        <option value="">-- Pilih {label} --</option>
+                        <option value="" className="text-gray-500">-- Pilih {label} --</option>
                         {options.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
+                            <option
+                                key={opt.value}
+                                value={opt.value}
+                                title={opt.title || opt.label}
+                                className="py-3 px-4 text-sm leading-relaxed text-gray-800 bg-white hover:bg-blue-50"
+                                style={{
+                                    whiteSpace: 'pre-wrap',
+                                    wordBreak: 'break-word',
+                                    lineHeight: '1.5',
+                                    maxHeight: '4rem',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    display: 'block'
+                                }}
+                            >
                                 {opt.label}
                             </option>
                         ))}

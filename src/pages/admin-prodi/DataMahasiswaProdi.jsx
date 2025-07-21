@@ -341,13 +341,13 @@ const DataMahasiswaProdi = () => {
     event.target.value = '';
   }, [user, createMutation]);
 
-  if (isLoading) return <LoadingScreen />;
   if (error) return <div className="text-red-500">Error: {error.message}</div>;
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* Header */}
       {isMutating && <LoadingScreen />}
+
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Data Mahasiswa Program Studi</h1>
         <div className="flex gap-3">
@@ -428,35 +428,35 @@ const DataMahasiswaProdi = () => {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-blue-100 text-black">
               <tr>
-                <th className="p-4">
+                <th className="p-4 w-12 text-center">
                   <input
                     type="checkbox"
                     checked={isAllSelected}
                     onChange={toggleSelectAll}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 rounded accent-blue-500 focus:ring-blue-300"
                   />
                 </th>
                 <th className="p-4 text-left">Nama</th>
                 <th className="p-4 text-left">NPM</th>
                 <th className="p-4 text-left">Email</th>
                 <th className="p-4 text-left">Angkatan</th>
-                <th className="p-4 text-left">Aksi</th>
+                <th className="p-4 text-left w-20">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {isLoading ? (
-                <TableSkeleton />
+                <TableSkeleton rows={5} columns={6} />
               ) : filteredData.length > 0 ? (
                 filteredData.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="p-4">
+                    <td className="p-4 text-center">
                       <input
                         type="checkbox"
                         checked={selectedRows.includes(item.id)}
                         onChange={() => toggleSelectRow(item.id)}
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                        className="w-4 h-4 rounded accent-blue-500 focus:ring-blue-300"
                       />
                     </td>
                     <td className="p-4 font-medium text-gray-800">{item.nama}</td>
@@ -469,13 +469,13 @@ const DataMahasiswaProdi = () => {
                           onClick={() => openEditModal(item)}
                           className="p-1 text-blue-600 hover:bg-blue-100 rounded"
                         >
-                          <AiFillEdit size={16} />
+                          <AiFillEdit size={20} />
                         </button>
                         <button
                           onClick={() => openDeleteModal(item.id)}
                           className="p-1 text-red-600 hover:bg-red-100 rounded"
                         >
-                          <AiFillDelete size={16} />
+                          <AiFillDelete size={20} />
                         </button>
                       </div>
                     </td>
@@ -483,7 +483,7 @@ const DataMahasiswaProdi = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="text-center py-8 text-gray-500">
+                  <td colSpan="6" className="p-8 text-center text-gray-500">
                     {searchTerm ? "Tidak ada data yang sesuai dengan pencarian" : "Belum ada data mahasiswa"}
                   </td>
                 </tr>
