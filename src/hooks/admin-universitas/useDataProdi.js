@@ -8,6 +8,14 @@ export const useProdiList = () => {
   })
 }
 
+export const useFakultasList = () => {
+  return useQuery({
+    queryKey: ['prodi'],
+    queryFn: () => prodiService.getFakultas().then((res) => res.data.data),
+  })
+}
+
+
 export const useAddProdi = () => {
   const queryClient = useQueryClient()
   return useMutation({

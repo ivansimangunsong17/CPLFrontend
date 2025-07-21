@@ -29,14 +29,41 @@ function FormBox({
         }
     }, [isOpen, initialData, reset]);
 
+    // Handle ESC key to close modal
+    useEffect(() => {
+        const handleEscKey = (event) => {
+            if (event.key === 'Escape' && isOpen && onCancel) {
+                onCancel();
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('keydown', handleEscKey);
+            return () => document.removeEventListener('keydown', handleEscKey);
+        }
+    }, [isOpen, onCancel]);
+
     if (!isOpen) return null;
 
     const watchedFields = watch();
     const hasChanges = Object.keys(touchedFields).length > 0;
 
+    // Handle backdrop click to close modal
+    const handleBackdropClick = (e) => {
+        if (e.target === e.currentTarget && onCancel) {
+            onCancel();
+        }
+    };
+
     return (
-        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xs flex items-center justify-center animate-fadeIn">
-            <div className="relative bg-white w-full max-w-lg mx-4 rounded-2xl shadow-2xl animate-slideUp border border-gray-100 max-h-[90vh] overflow-hidden">
+        <div
+            className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xs flex items-center justify-center animate-fadeIn"
+            onClick={handleBackdropClick}
+        >
+            <div
+                className="relative bg-white w-full max-w-lg mx-4 rounded-2xl shadow-2xl animate-slideUp border border-gray-100 max-h-[90vh] overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+            >
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
                     <div>

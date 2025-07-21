@@ -23,6 +23,8 @@ const prodiService = {
       action: 'delete',
       prodi_id,
     }),
+
+  getFakultas: () => api.get('/data-fakultas', {}),
 }
 
 export default prodiService

@@ -31,7 +31,6 @@ import DataMataKuliahKaprodi from '../pages/kaprodi/DataMatkulKaprodi';
 import DataProdiKaprodi from '../pages/kaprodi/DataProdiKaprodi';
 import HasilPerhitunganKaprodi from '../pages/kaprodi/HasilPerhitunganKaprodi';
 import PemetaanCPLKaprodi from '../pages/kaprodi/PemetaanCPLKaprodi';
-import PemetaanCPMKKaprodi from '../pages/kaprodi/PemetaanCPMKKaprodi';
 
 
 //Dosen
@@ -61,7 +60,6 @@ export {
     DataMataKuliahProdi,
     DetailMataKuliahProdi,
     DataCPL,
-
     HasilPerhitunganProdi,
 
     DashboardKaprodi,
@@ -70,7 +68,6 @@ export {
     DataProdiKaprodi,
     HasilPerhitunganKaprodi,
     PemetaanCPLKaprodi,
-    PemetaanCPMKKaprodi,
 
 
     DashboardDosen,

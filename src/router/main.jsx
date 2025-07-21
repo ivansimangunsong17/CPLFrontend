@@ -33,7 +33,6 @@ import {
   DataProdiKaprodi,
   HasilPerhitunganKaprodi,
   PemetaanCPLKaprodi,
-  PemetaanCPMKKaprodi,
   DashboardDosen,
   HasilPerhitunganDosen,
   InputNilaiDosen
@@ -94,7 +93,6 @@ const router = createBrowserRouter([
               { path: "data_mahasiswa", element: <DataMahasiswaKaprodi /> },
               { path: "data_matakuliah", element: <DataMataKuliahKaprodi /> },
               { path: "pemetaan_cpl", element: <PemetaanCPLKaprodi /> },
-              { path: "pemetaan_cpmk", element: <PemetaanCPMKKaprodi /> },
               { path: "hasil_perhitungan", element: <HasilPerhitunganKaprodi /> },
             ]
           },
