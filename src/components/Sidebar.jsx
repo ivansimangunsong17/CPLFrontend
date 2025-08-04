@@ -8,7 +8,7 @@ import { IoHomeOutline } from "react-icons/io5";
 import { FiChevronDown, FiLogOut } from "react-icons/fi";
 import { FaRegFileAlt, FaUsers, FaUserGraduate } from "react-icons/fa";
 import { BsClipboardData } from "react-icons/bs";
-import { MdSchool, MdOutlineSubject } from "react-icons/md";
+import { MdSchool, MdOutlineSubject, MdSettings } from "react-icons/md";
 
 const Sidebar = () => {
     const navigate = useNavigate();
@@ -57,6 +57,7 @@ const Sidebar = () => {
             return location.pathname === path ||
                 location.pathname.startsWith("/dashboard/dosen/detail_");
         }
+     
 
         // For other paths, use exact match
         return location.pathname === path;
@@ -88,6 +89,7 @@ const Sidebar = () => {
                 ],
             },
             { label: "Pemetaan", path: "/dashboard/admin_prodi/pemetaan_cpl", icon: <MdOutlineSubject /> },
+            { label: "Atur Penilaian", path: "/dashboard/admin_prodi/atur_penilaian", icon: <MdSettings /> },
             { label: "Hasil Perhitungan", path: "/dashboard/admin_prodi/hasil_perhitungan", icon: <BsClipboardData /> },
         ],
         kaprodi: [

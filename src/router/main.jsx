@@ -29,6 +29,7 @@ import {
   DetailMataKuliahProdi,
   PemetaanProdi,
   DetailPemetaanProdi,
+  AturPenilaianProdi,
   DashboardKaprodi,
   DataMahasiswaKaprodi,
   DataMataKuliahKaprodi,
@@ -82,6 +83,7 @@ const router = createBrowserRouter([
               { path: "pemetaan_cpl", element: <PemetaanProdi /> },
               { path: "detail_pemetaan/:mataKuliahId", element: <DetailPemetaanProdi /> },
               { path: "hasil_perhitungan", element: <HasilPerhitunganProdi /> },
+              { path: "atur_penilaian", element: <AturPenilaianProdi /> },
             ]
           },
         ],

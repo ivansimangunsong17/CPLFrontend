@@ -1,124 +1,80 @@
-// services/admin-prodi/DataCPMKService.js
 import api from '../../api/api'
 
-export const getCPMK = async (prodiId) => {
+// Ambil semua CPMK berdasarkan ID Mata Kuliah
+export const getCPMKByMatkul = async (mataKuliahId) => {
   try {
-    console.log('Fetching CPMK for prodi_id:', prodiId)
-
-    // Validasi prodi_id
-    if (!prodiId) {
-      throw new Error('Prodi ID tidak tersedia')
-    }
-
-    // Menggunakan POST dengan action seperti service lainnya
-    const res = await api.post('/kelola-data-cpmk', {
+    const response = await api.post('/kelola-data-cpmk', {
       action: 'view',
-      prodi_id: prodiId,
+      mata_kuliah_id: mataKuliahId,
     })
-
-    console.log('CPMK API Response:', res.data)
-
-    if (!res.data) {
-      throw new Error('Response tidak valid')
-    }
-
-    // Handle jika tidak ada data (empty array)
-    if (!res.data.data || res.data.data.length === 0) {
-      console.log('No CPMK data found for prodi_id:', prodiId)
-      return []
-    }
-
-    const rawData = res.data.data
-
-    // Mapping sesuai dengan struktur response backend
-    const cpmk = rawData.map((item) => ({
-      ...item,
-      id: item.cpmk_id, // untuk keperluan React key dan selection
-      kode: item.kode_cpmk, // untuk konsistensi dengan komponen
-      nama: item.nama_cpmk, // untuk konsistensi dengan komponen
-      deskripsi: item.deskripsi,
-      prodiId: item.prodi_id,
-      prodi: item.prodi,
-    }))
-
-    console.log('Mapped CPMK data:', cpmk)
-    return cpmk
+    // Pastikan mengembalikan array data kosong jika tidak ada data
+    return response.data?.data || []
   } catch (error) {
     console.error('Error fetching CPMK:', error)
-    console.error('Error response:', error.response?.data)
-
-    // Jika error 422, kemungkinan prodi_id tidak valid atau data tidak ditemukan
-    if (error.response?.status === 422) {
-      console.warn('Prodi ID mungkin tidak valid atau tidak memiliki data CPMK:', prodiId)
-      return [] // Return empty array instead of throwing error
-    }
-
-    throw new Error(error.response?.data?.message || 'Gagal mengambil data CPMK')
+    throw error
   }
 }
 
-export const createCPMK = async (data) => {
+// Tambah CPMK
+export const createCPMK = async (payload) => {
   try {
-    console.log('=== CREATE CPMK DEBUG ===')
-    console.log('Input data:', data)
-    
-    // Mengikuti pattern dari DataMahasiswaService yang menggunakan 'store'
-    const payload = {
+    const response = await api.post('/kelola-data-cpmk', {
       action: 'store',
-      kode_cpmk: data.kode_cpmk,
-      nama_cpmk: data.nama_cpmk, 
-      deskripsi: data.deskripsi,
-      prodi_id: data.prodi_id
-    }
-    
-    console.log('Payload being sent:', payload)
-    console.log('API endpoint:', '/kelola-data-cpmk')
-    
-    const res = await api.post('/kelola-data-cpmk', payload)
-    console.log('Create CPMK SUCCESS response:', res.data)
-    
-    // Return consistent format like createMahasiswa
-    const cpmk = res.data.data
-    return {
-      ...cpmk,
-      id: cpmk.cpmk_id || cpmk.id, // ensure id field exists
-    }
+      kode_cpmk: payload.kode_cpmk,
+      nama_cpmk: payload.nama_cpmk,
+      deskripsi: payload.deskripsi,
+      mata_kuliah_id: payload.mata_kuliah_id,
+      prodi_id: payload.prodi_id,
+    })
+    return response.data
   } catch (error) {
-    console.error('=== CREATE CPMK ERROR ===')
-    console.error('Error object:', error)
-    console.error('Error response:', error.response?.data)
-    console.error('Error status:', error.response?.status)
-    console.error('Error message:', error.message)
-    
-    throw new Error(error.response?.data?.message || 'Gagal menambahkan CPMK')
+    console.error('Error creating CPMK:', error)
+    throw error
   }
 }
 
-export const updateCPMK = async (data) => {
+// Update CPMK
+export const updateCPMK = async (payload) => {
   try {
-    console.log('Updating CPMK:', data)
-    const res = await api.post('/kelola-data-cpmk', {
+    const response = await api.post('/kelola-data-cpmk', {
       action: 'update',
-      cpmk_id: data.cpmk_id,
-      ...data,
+      cpmk_id: payload.id,
+      kode_cpmk: payload.kode_cpmk,
+      nama_cpmk: payload.nama_cpmk,
+      deskripsi: payload.deskripsi,
+      mata_kuliah_id: payload.mata_kuliah_id,
+      prodi_id: payload.prodi_id,
     })
-    return res.data
+    return response.data
   } catch (error) {
     console.error('Error updating CPMK:', error)
-    throw new Error(error.response?.data?.message || 'Gagal memperbarui CPMK')
+    throw error
   }
 }
 
-export const deleteCPMK = async (cpmkId) => {
+// Hapus CPMK by ID (single atau multiple)
+export const deleteCPMK = async (ids) => {
   try {
-    console.log('Deleting CPMK:', cpmkId)
-    const res = await api.post('/kelola-data-cpmk', {
+    // Jika input array, delete satu per satu
+    if (Array.isArray(ids)) {
+      const results = []
+      for (const id of ids) {
+        const response = await api.post('/kelola-data-cpmk', {
+          action: 'delete',
+          cpmk_id: id,
+        })
+        results.push(response.data)
+      }
+      return results
+    }
+    // Jika single id
+    const response = await api.post('/kelola-data-cpmk', {
       action: 'delete',
-      cpmk_id: cpmkId,
+      cpmk_id: ids,
     })
-    return res.data
+    return response.data
   } catch (error) {
     console.error('Error deleting CPMK:', error)
-    throw new Error(error.response?.data?.message || 'Gagal menghapus CPMK')
+    throw error
   }
 }

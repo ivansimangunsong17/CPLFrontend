@@ -180,8 +180,9 @@ const AkunUniversitas = () => {
       // ✅ Build payload berdasarkan mode
       const payload = {
         name: data.name,
+        nip: data.nip,
         email: data.email,
-        ...(formType === 'adminProdi' && { prodi_id: data.prodi_id })
+        ...(formType === 'adminProdi' && { prodi_id: data.prodi_id }),
       };
 
       // ✅ Hanya tambahkan password jika diisi (create mode atau edit dengan password baru)
@@ -240,6 +241,7 @@ const AkunUniversitas = () => {
   const formFields = useMemo(() => {
     const base = [
       { name: 'name', label: 'Nama Lengkap', type: 'text', required: true },
+      { name: 'nip', label: 'NIP', type: 'text', required: true },
       { name: 'email', label: 'Email', type: 'email', required: true },
       { name: 'password', label: isEditMode ? 'Password Baru (kosongkan jika tidak diubah)' : 'Password', type: 'password', required: !isEditMode },
       { name: 'password_confirmation', label: isEditMode ? 'Konfirmasi Password Baru' : 'Konfirmasi Password', type: 'password', required: !isEditMode }
@@ -269,6 +271,7 @@ const AkunUniversitas = () => {
     if (isEditMode && editData) {
       return {
         name: editData.name || '',
+        nip: editData.nip || '',
         email: editData.email || '',
         password: '',
         password_confirmation: '',
@@ -278,6 +281,7 @@ const AkunUniversitas = () => {
 
     return {
       name: '',
+      nip: '',
       email: '',
       password: '',
       password_confirmation: '',
@@ -341,7 +345,7 @@ const AkunUniversitas = () => {
                     onChange={(e) => handleSelectAll('adminUniv', e.target.checked)}
                   />
                 </th>
-                {["Nama Lengkap", "Email", "Role", "Aksi"].map((label, i) => (
+                {["Nama Lengkap", "NIP", "Email", "Role", "Aksi"].map((label, i) => (
                   <th key={i} className="p-4 text-left">
                     <div className="flex items-center gap-1">
                       {label} <AiOutlineArrowDown />
@@ -372,6 +376,7 @@ const AkunUniversitas = () => {
                         />
                       </td>
                       <td className="p-4 font-medium text-gray-800">{item.name}</td>
+                      <td className="p-4 text-gray-600">{item.nip}</td>
                       <td className="p-4 text-gray-600">{item.email}</td>
 
                       <td className="p-4">
@@ -447,7 +452,7 @@ const AkunUniversitas = () => {
                     onChange={(e) => handleSelectAll('adminProdi', e.target.checked)}
                   />
                 </th>
-                {["Nama Lengkap", "Email", "Role", "Aksi"].map((label, i) => (
+                {["Nama Lengkap", "NIP", "Email", "Role", "Aksi"].map((label, i) => (
                   <th key={i} className="p-4 text-left">
                     <div className="flex items-center gap-1">
                       {label} <AiOutlineArrowDown />
@@ -477,6 +482,7 @@ const AkunUniversitas = () => {
                       />
                     </td>
                     <td className="p-4 font-medium text-gray-800">{item.name}</td>
+                    <td className="p-4 text-gray-600">{item.nip}</td>
                     <td className="p-4 text-gray-600">{item.email}</td>
 
                     <td className="p-4">

@@ -4,7 +4,13 @@ import akunService from '../../services/admin-universitas/AkunService'
 export const useAdminProdiList = () =>
   useQuery({
     queryKey: ['akun-prodi'],
-    queryFn: () => akunService.adminProdi.getAll().then((res) => res.data.data),
+    queryFn: () => akunService.adminProdi.getAll().then((res) => {
+      // Map to include nip if missing
+      return res.data.data.map(item => ({
+        ...item,
+        nip: item.nip || item.nip_number || '' // adjust field name if needed
+      }));
+    }),
   })
 
 export const useAddAdminProdi = () => {

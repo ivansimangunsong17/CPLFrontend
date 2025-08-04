@@ -19,6 +19,9 @@ const Navbar = () => {
         "/dashboard/admin_prodi/pemetaan_cpl": "Pemetaan CPL",
         "/dashboard/admin_prodi/pemetaan_cpmk": "Pemetaan CPMK",
         "/dashboard/admin_prodi/hasil_perhitungan": "Hasil Perhitungan",
+        "/dashboard/admin_prodi/data_cpl": "Data Capaian Pembelajaran Lulusan",
+        "/dashboard/admin_prodi/atur_penilaian": "Atur Penilaian",
+      
 
         "/dashboard/kaprodi": "Dashboard",
         "/dashboard/kaprodi/data_prodi": "Data Program Studi",
