@@ -12,8 +12,7 @@ export const getAkunDosen = async (userProdiId = null) => {
     }
 
     const rawData = res.data.data
-    console.log('AkunDosenService - rawData:', rawData)
-    console.log('AkunDosenService - userProdiId:', userProdiId)
+
 
     // Filter berdasarkan prodi admin yang login jika userProdiId diberikan
     let filteredData = rawData

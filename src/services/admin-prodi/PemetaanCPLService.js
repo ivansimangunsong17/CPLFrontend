@@ -1,59 +1,39 @@
 import api from '../../api/api'
 
 const PemetaanCPLService = {
-  // Menyimpan pemetaan CPL
-  storePemetaan: async (data) => {
-    try {
-      const response = await api.post('/pemetaan-cpl', data)
-      return response.data
-    } catch (error) {
-      console.error('Error storing pemetaan CPL:', error)
-      throw error
-    }
+  getByMataKuliah: async (mataKuliahId) => {
+    const response = await api.post('/pemetaan-cpl', {
+      action: 'view',
+      mata_kuliah_id: mataKuliahId,
+    })
+    return response.data
   },
 
-  // Mengambil data pemetaan berdasarkan mata kuliah
-  getPemetaanByMataKuliah: async (mataKuliahId) => {
-    try {
-      const response = await api.get(`/pemetaan-cpl/mata-kuliah/${mataKuliahId}`)
-      return response.data
-    } catch (error) {
-      console.error('Error fetching pemetaan CPL:', error)
-      throw error
-    }
+  store: async ({ mata_kuliah_id, cpl_id, bobot }) => {
+    const response = await api.post('/pemetaan-cpl', {
+      action: 'store',
+      mata_kuliah_id,
+      cpls: [{ cpl_id, bobot }],
+    })
+    return response.data
   },
 
-  // Mengambil semua data pemetaan
-  getAllPemetaan: async () => {
-    try {
-      const response = await api.get('/pemetaan-cpl')
-      return response.data
-    } catch (error) {
-      console.error('Error fetching all pemetaan CPL:', error)
-      throw error
-    }
+  update: async ({ pemetaan_id, bobot }) => {
+    const response = await api.post('/pemetaan-cpl', {
+      action: 'update',
+      pemetaan_id,
+      bobot,
+    })
+    return response.data
   },
 
-  // Update pemetaan CPL
-  updatePemetaan: async (id, data) => {
-    try {
-      const response = await api.put(`/pemetaan-cpl/${id}`, data)
-      return response.data
-    } catch (error) {
-      console.error('Error updating pemetaan CPL:', error)
-      throw error
-    }
-  },
-
-  // Menghapus pemetaan CPL
-  deletePemetaan: async (id) => {
-    try {
-      const response = await api.delete(`/pemetaan-cpl/${id}`)
-      return response.data
-    } catch (error) {
-      console.error('Error deleting pemetaan CPL:', error)
-      throw error
-    }
+  delete: async ({ mata_kuliah_id, cpl_id = null }) => {
+    const response = await api.post('/pemetaan-cpl', {
+      action: 'delete',
+      mata_kuliah_id,
+      ...(cpl_id ? { cpl_id } : {}), // hanya kirim cpl_id jika ada
+    })
+    return response.data
   },
 }
 

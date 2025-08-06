@@ -1,118 +1,63 @@
-import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import PemetaanCPLService from '../../services/admin-prodi/PemetaanCPLService'
 import { toast } from 'react-toastify'
+import PemetaanCPLService from '../../services/admin-prodi/PemetaanCPLService'
 
-export const usePemetaanCPL = (mataKuliahId = null) => {
+export const usePemetaanCPL = (mataKuliahId) => {
   const queryClient = useQueryClient()
 
-  // Query untuk mengambil data pemetaan berdasarkan mata kuliah
   const pemetaanQuery = useQuery({
     queryKey: ['pemetaan-cpl', mataKuliahId],
-    queryFn: () => {
-      if (mataKuliahId) {
-        return PemetaanCPLService.getPemetaanByMataKuliah(mataKuliahId)
-      }
-      return PemetaanCPLService.getAllPemetaan()
-    },
-    enabled: !!mataKuliahId || mataKuliahId === null,
-    staleTime: 5 * 60 * 1000, // 5 menit
-    cacheTime: 10 * 60 * 1000, // 10 menit
+    queryFn: () => PemetaanCPLService.getByMataKuliah(mataKuliahId),
+    select: (res) => res.data || [],
+    enabled: !!mataKuliahId,
+    staleTime: 1000 * 60,
   })
 
-  // Mutation untuk menyimpan pemetaan CPL
-  const storePemetaanMutation = useMutation({
-    mutationFn: PemetaanCPLService.storePemetaan,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries(['pemetaan-cpl'])
-      toast.success('Pemetaan CPL berhasil disimpan')
+  const storeMutation = useMutation({
+    mutationFn: (data) => PemetaanCPLService.store(data),
+    onSuccess: () => {
+      toast.success('Pemetaan CPL berhasil ditambahkan')
+      queryClient.invalidateQueries(['pemetaan-cpl', mataKuliahId])
     },
     onError: (error) => {
-      console.error('Error storing pemetaan:', error)
-      const errorMessage = error.response?.data?.message || 'Gagal menyimpan pemetaan CPL'
-      toast.error(errorMessage)
+      toast.error(error.response?.data?.message || 'Gagal menambahkan pemetaan CPL')
     },
   })
 
-  // Mutation untuk update pemetaan CPL
-  const updatePemetaanMutation = useMutation({
-    mutationFn: ({ id, data }) => PemetaanCPLService.updatePemetaan(id, data),
+  const updateMutation = useMutation({
+    mutationFn: (data) => PemetaanCPLService.update(data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['pemetaan-cpl'])
       toast.success('Pemetaan CPL berhasil diperbarui')
+      queryClient.invalidateQueries(['pemetaan-cpl', mataKuliahId])
     },
     onError: (error) => {
-      console.error('Error updating pemetaan:', error)
-      const errorMessage = error.response?.data?.message || 'Gagal memperbarui pemetaan CPL'
-      toast.error(errorMessage)
+      toast.error(error.response?.data?.message || 'Gagal memperbarui pemetaan CPL')
     },
   })
 
-  // Mutation untuk menghapus pemetaan CPL
-  const deletePemetaanMutation = useMutation({
-    mutationFn: PemetaanCPLService.deletePemetaan,
+  const deleteMutation = useMutation({
+    mutationFn: (data) => PemetaanCPLService.delete(data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['pemetaan-cpl'])
       toast.success('Pemetaan CPL berhasil dihapus')
+      queryClient.invalidateQueries(['pemetaan-cpl', mataKuliahId])
     },
     onError: (error) => {
-      console.error('Error deleting pemetaan:', error)
-      const errorMessage = error.response?.data?.message || 'Gagal menghapus pemetaan CPL'
-      toast.error(errorMessage)
+      toast.error(error.response?.data?.message || 'Gagal menghapus pemetaan CPL')
     },
   })
-
-  // Helper function untuk menyimpan pemetaan
-  const storePemetaan = (mataKuliahId, cplData) => {
-    const payload = {
-      action: 'store',
-      mata_kuliah_id: mataKuliahId,
-      cpls: cplData.map((cpl) => ({
-        cpl_id: cpl.cpl_id,
-        bobot: parseFloat(cpl.bobot),
-      })),
-    }
-
-    storePemetaanMutation.mutate(payload)
-  }
-
-  // Helper function untuk update pemetaan
-  const updatePemetaan = (id, mataKuliahId, cplData) => {
-    const payload = {
-      action: 'update',
-      mata_kuliah_id: mataKuliahId,
-      cpls: cplData.map((cpl) => ({
-        cpl_id: cpl.cpl_id,
-        bobot: parseFloat(cpl.bobot),
-      })),
-    }
-
-    updatePemetaanMutation.mutate({ id, data: payload })
-  }
-
-  // Helper function untuk menghapus pemetaan
-  const deletePemetaan = (id) => {
-    deletePemetaanMutation.mutate(id)
-  }
 
   return {
-    // Data
     pemetaanData: pemetaanQuery.data,
     isLoading: pemetaanQuery.isLoading,
     isError: pemetaanQuery.isError,
-    error: pemetaanQuery.error,
 
-    // Actions
-    storePemetaan,
-    updatePemetaan,
-    deletePemetaan,
+    storePemetaan: storeMutation.mutate,
+    updatePemetaan: updateMutation.mutate,
+    deletePemetaan: deleteMutation.mutate,
 
-    // Mutation states
-    isStoring: storePemetaanMutation.isPending,
-    isUpdating: updatePemetaanMutation.isPending,
-    isDeleting: deletePemetaanMutation.isPending,
-
-    // Refetch
+    isStoring: storeMutation.isPending,
+    isUpdating: updateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
     refetch: pemetaanQuery.refetch,
   }
 }
