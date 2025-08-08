@@ -13,16 +13,21 @@ const PemetaanCPLService = {
     const response = await api.post('/pemetaan-cpl', {
       action: 'store',
       mata_kuliah_id,
-      cpls: [{ cpl_id, bobot }],
+      cpls: [
+        {
+          cpl_id: parseInt(cpl_id),
+          bobot: bobot,
+        },
+      ],
     })
     return response.data
   },
 
-  update: async ({ pemetaan_id, bobot }) => {
+  update: async ({ mata_kuliah_id, cpls }) => {
     const response = await api.post('/pemetaan-cpl', {
       action: 'update',
-      pemetaan_id,
-      bobot,
+      mata_kuliah_id,
+      cpls,
     })
     return response.data
   },

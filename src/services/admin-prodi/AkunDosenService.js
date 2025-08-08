@@ -18,7 +18,7 @@ export const getAkunDosen = async (userProdiId = null) => {
     let filteredData = rawData
     if (userProdiId) {
       filteredData = rawData.filter((akun) => akun.prodi_id === userProdiId || akun.prodi_id === null)
-      console.log('AkunDosenService - filteredData:', filteredData)
+     
     }
 
     // Mapping sesuai dengan struktur response backend

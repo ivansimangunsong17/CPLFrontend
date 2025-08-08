@@ -8,8 +8,7 @@ export const useAkunDosen = () => {
   const { user } = useAuth()
   const userProdiId = user?.prodi_id
 
-  console.log('useAkunDosen - user:', user)
-  console.log('useAkunDosen - userProdiId:', userProdiId)
+
 
   const akunDosenQuery = useQuery({
     queryKey: ['akunDosen', userProdiId],

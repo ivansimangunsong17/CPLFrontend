@@ -1,3 +1,5 @@
+// Updated version of DetailPemetaanProdi with clean CRUD handling, unified loading screen, and concise success/error toasts
+
 import React, { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -27,19 +29,20 @@ const DetailPemetaanProdi = () => {
     const { mataKuliahQuery } = useMataKuliah();
     const { dataCPLQuery } = useDataCPL();
     const {
-        pemetaanData,
-        isLoading: isPemetaanLoading,
-        storePemetaan,
-        updatePemetaan,
-        deletePemetaan,
-        isStoring,
-        isUpdating,
-        isDeleting,
+        pemetaanQuery,
+        createMutation,
+        updateMutation,
+        deleteMutation,
     } = usePemetaanCPL(mataKuliahId);
+
+    const isInitialLoading = mataKuliahQuery.isLoading || pemetaanQuery.isLoading;
+    const isMutating = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
+    const pemetaanData = pemetaanQuery.data;
 
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editData, setEditData] = useState(null);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isLoadingScreen, setIsLoadingScreen] = useState(false);
 
     const handleBack = () => navigate("/dashboard/admin_prodi/pemetaan_cpl");
 
@@ -63,61 +66,118 @@ const DetailPemetaanProdi = () => {
     };
 
     const handleSubmitPemetaan = async (formData) => {
-        if (!formData.cpl_id || !formData.bobot) {
-            toast.error("Semua field wajib diisi");
-            return;
+        // Validasi input untuk create
+        if (!editData && (!formData.cpl_id || !formData.bobot)) {
+            return toast.error("Semua field wajib diisi");
+        }
+        // Validasi input untuk edit
+        if (editData && !formData.bobot) {
+            return toast.error("Bobot wajib diisi");
         }
 
         const bobot = parseFloat(formData.bobot);
         if (bobot < 0 || bobot > 100) {
-            toast.error("Bobot harus antara 0-100");
-            return;
+            return toast.error("Bobot harus antara 0-100");
         }
 
         try {
-            if (editData) {
-                await updatePemetaan({
-                    pemetaan_id: editData.pemetaan_id,
-                    bobot,
+            const mata_kuliah_id = parseInt(mataKuliahId);
+            const isEdit = Boolean(editData);
+
+            // Tampilkan loading screen
+            setIsLoadingScreen(true);
+
+            // Tunggu mutasi selesai
+            if (isEdit) {
+                await updateMutation.mutateAsync({
+                    mata_kuliah_id: mata_kuliah_id,
+                    cpls: [{
+                        cpl_id: parseInt(editData.cpl_id),
+                        bobot: parseFloat(formData.bobot).toFixed(2)
+                    }]
                 });
             } else {
-                await storePemetaan({
-                    mata_kuliah_id: parseInt(mataKuliahId),
+                await createMutation.mutateAsync({
+                    mata_kuliah_id: mata_kuliah_id,
                     cpl_id: parseInt(formData.cpl_id),
-                    bobot,
+                    bobot: bobot.toString()
                 });
             }
 
-            await refetch(); // ✅ Pastikan data terbaru muncul
+            // Pastikan data diperbarui sebelum menutup form
+            await pemetaanQuery.refetch();
+
+            // Tutup form dan loading screen, lalu tampilkan pesan sukses
             setIsFormOpen(false);
-        } catch (error) {
-            toast.error("Gagal menyimpan pemetaan");
+            setEditData(null);
+            setIsLoadingScreen(false);
+            toast.success("Pemetaan berhasil ditambahkan");
+        } catch (err) {
+            console.error(err);
+            setIsLoadingScreen(false);
+            toast.error(err?.response?.data?.message || "Terjadi kesalahan saat menyimpan data");
         }
     };
 
     const handleConfirmDelete = async () => {
         try {
-            await deletePemetaan({
+            // Tampilkan loading screen
+            setIsLoadingScreen(true);
+
+            // Tunggu mutasi selesai
+            await deleteMutation.mutateAsync({
+                action: 'delete',
                 mata_kuliah_id: parseInt(mataKuliahId),
-                cpl_id: null, // Hapus semua
+                cpl_id: null,
             });
-            await refetch(); // ✅ Refresh data setelah hapus
+
+            // Pastikan data diperbarui sebelum menutup modal
+            await pemetaanQuery.refetch();
+
+            // Tutup modal dan loading screen, lalu tampilkan pesan sukses
             setIsConfirmOpen(false);
-        } catch {
-            toast.error("Gagal menghapus pemetaan");
+            setIsLoadingScreen(false);
+            toast.success("Semua pemetaan berhasil dihapus");
+        } catch (err) {
+            console.error(err);
+            toast.error(err?.response?.data?.message || "Gagal menghapus data");
         }
     };
 
-    const handleDeleteItem = (cplId) => {
-        deletePemetaan({ mata_kuliah_id: parseInt(mataKuliahId), cpl_id: cplId });
+    const handleDeleteItem = async (cplId) => {
+        try {
+            // Tampilkan loading screen
+            setIsLoadingScreen(true);
+
+            // Tunggu mutasi selesai
+            await deleteMutation.mutateAsync({
+                action: 'delete',
+                mata_kuliah_id: parseInt(mataKuliahId),
+                cpl_id: cplId,
+            });
+
+            // Pastikan data diperbarui
+            await pemetaanQuery.refetch();
+
+            // Tutup loading screen
+            setIsLoadingScreen(false);
+            toast.success("Pemetaan berhasil dihapus");
+        } catch (err) {
+            console.error(err);
+            toast.error(err?.response?.data?.message || "Gagal menghapus data");
+        }
     };
 
-    if (mataKuliahQuery.isLoading) {
+    if (isInitialLoading) {
         return (
             <div className="p-6 max-w-7xl mx-auto space-y-6">
                 <CardSkeleton />
                 <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                    <TableSkeleton columns={4} rows={3} />
+                    <table className="w-full">
+                        <tbody>
+                            <TableSkeleton columns={4} rows={3} />
+                        </tbody>
+                    </table>
                 </div>
             </div>
         );
@@ -143,19 +203,18 @@ const DetailPemetaanProdi = () => {
 
     return (
         <div className="p-6 max-w-7xl mx-auto">
-            {(isStoring || isUpdating || isDeleting) && (
+            {isLoadingScreen && (
                 <LoadingScreen
                     message={
-                        isStoring
+                        createMutation.isPending
                             ? "Menyimpan pemetaan..."
-                            : isUpdating
+                            : updateMutation.isPending
                                 ? "Mengupdate pemetaan..."
                                 : "Menghapus pemetaan..."
                     }
                 />
             )}
 
-            {/* Header */}
             <div className="mb-6 flex items-center justify-between">
                 <button
                     onClick={handleBack}
@@ -169,7 +228,6 @@ const DetailPemetaanProdi = () => {
                 </h2>
             </div>
 
-            {/* Card Info */}
             <div className="bg-white rounded-lg shadow p-6 mb-6">
                 <div className="grid grid-cols-2 gap-4">
                     <div className="p-3 border rounded-lg text-center bg-gray-50">
@@ -183,7 +241,6 @@ const DetailPemetaanProdi = () => {
                 </div>
             </div>
 
-            {/* Table */}
             <div className="bg-white rounded-xl shadow overflow-hidden">
                 <div className="flex justify-between items-center px-4 py-3 border-b">
                     <h3 className="font-semibold text-gray-700">Daftar Pemetaan CPL</h3>
@@ -191,7 +248,7 @@ const DetailPemetaanProdi = () => {
                         <button
                             onClick={handleAddCPL}
                             className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
-                            disabled={isStoring || isUpdating}
+                            disabled={isMutating}
                         >
                             <AiOutlinePlus size={14} /> Tambah
                         </button>
@@ -199,7 +256,7 @@ const DetailPemetaanProdi = () => {
                             <button
                                 onClick={() => setIsConfirmOpen(true)}
                                 className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm"
-                                disabled={isDeleting}
+                                disabled={isMutating}
                             >
                                 <AiFillDelete size={14} /> Hapus Semua
                             </button>
@@ -211,35 +268,47 @@ const DetailPemetaanProdi = () => {
                         <tr>
                             <th className="p-4 text-left">CPL</th>
                             <th className="p-4 text-left">CPMK</th>
-                            <th className="p-4 text-center">Bobot</th>
+                            <th className="p-4 text-center">Bobot CPMK</th>
                             <th className="p-4 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {isPemetaanLoading ? (
-                            <TableSkeleton columns={4} rows={3} />
-                        ) : pemetaanData?.length === 0 ? (
+                        {pemetaanData?.length === 0 ? (
                             <tr>
                                 <td colSpan="4" className="p-8 text-center text-gray-500">
                                     Tidak ada pemetaan CPL.
                                 </td>
                             </tr>
                         ) : (
-                            pemetaanData.map((item) => (
+                            pemetaanData?.map((item) => (
                                 <tr key={item.cpl_id} className="hover:bg-blue-50">
                                     <td className="p-4">
                                         <p className="font-semibold">{item.kode_cpl}</p>
-                                        <p className="text-sm text-gray-600">{item.nama_cpl}</p>
+                                        <p className="text-sm  text-black text-justify list-disc italic">{item.deskripsi}</p>
+                                        <span className="text-xs text-white bg-green-500 p-0.5 m-0.5 rounded-lg ">Jumblah Bobot CPL {item.pivot?.bobot || 0}%</span>
+                                        <button
+                                            // onClick={() => handleAddCPMK(item.cpmk_id)}
+                                            className="flex items-center px-1 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
+                                            disabled={isMutating}
+                                        >
+                                            Tambah CPMK
+                                        </button>
                                     </td>
-                                    <td className="p-4 text-gray-700">Belum ada CPMK</td>
+                                    <tr key={item.cpl_id}>
+                                        <td className="p-4">
+                                            <p className="font-semibold">{item.kode_cpl}</p>
+                                            <p className="list-disc text-sm text-gray-600 italic">{item.deskripsi || "Belum ada CPMK"}</p>
+                                        </td>
+                                    </tr>
+
                                     <td className="p-4 text-center font-semibold">
-                                        {item.pivot?.bobot || 0}%
+                                        {/* {item.pivot?.bobot || 0}% */}
                                     </td>
                                     <td className="p-4 text-center space-x-2">
                                         <button
                                             onClick={() => handleDeleteItem(item.cpl_id)}
                                             className="text-red-600 hover:text-red-800"
-                                            disabled={isDeleting}
+                                            disabled={isMutating}
                                         >
                                             <AiFillDelete size={20} />
                                         </button>
@@ -249,7 +318,7 @@ const DetailPemetaanProdi = () => {
                                                 setIsFormOpen(true);
                                             }}
                                             className="inline-flex items-center gap-1 px-3 py-1 text-sm text-blue-600 bg-blue-100 rounded-lg hover:bg-blue-200"
-                                            disabled={isUpdating || isDeleting}
+                                            disabled={isMutating}
                                         >
                                             <FiEdit2 size={14} /> Edit
                                         </button>
@@ -268,14 +337,15 @@ const DetailPemetaanProdi = () => {
                     onSubmit={handleSubmitPemetaan}
                     cplOptions={cplData}
                     initialData={editData}
-                    isLoading={isStoring || isUpdating}
+                    isLoading={isMutating}
+                    pemetaanData={pemetaanData}
                 />
             )}
 
             <ConfirmModal
                 isOpen={isConfirmOpen}
                 onClose={() => setIsConfirmOpen(false)}
-                onConfirm={handleConfirmDeleteAll}
+                onConfirm={handleConfirmDelete}
                 message="Apakah Anda yakin ingin menghapus semua pemetaan CPL?"
             />
         </div>
