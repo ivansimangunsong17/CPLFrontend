@@ -57,7 +57,7 @@ function FormBox({
 
     return (
         <div
-            className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xs flex items-center justify-center animate-fadeIn"
+            className="fixed inset-0 z-[8888] bg-black/60 backdrop-blur-xs flex items-center justify-center animate-fadeIn"
             onClick={handleBackdropClick}
         >
             <div
@@ -217,7 +217,7 @@ function FormField({ field, register, error, value, touched }) {
                         id={name}
                         {...register(name, validationRules)}
                         className={`${inputClass} ${field.className || ''} text-sm leading-5`}
-                        style={{ 
+                        style={{
                             minHeight: '3rem',
                             paddingRight: '2.5rem' // Space for dropdown arrow
                         }}

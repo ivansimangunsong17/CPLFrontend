@@ -1,232 +1,163 @@
 import React, { useState } from "react";
-import { AiOutlineSearch } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
+import { AiOutlineArrowDown } from "react-icons/ai";
+import { FaSearch } from "react-icons/fa";
 import { useProdiList } from "../../hooks/admin-universitas/useDataProdi";
-
 import TableSkeleton from "../../components/TableSkeleton";
 
 const HasilPerhitunganUniv = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const navigate = useNavigate();
-  const itemsPerPage = 10;
-
-  // Fetch data prodi using useProdiList hook
   const { data: prodiList, isLoading, isError } = useProdiList();
 
-  // Transform data to match the table structure
-  const prodiData = prodiList || [];
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  // Filter data berdasarkan search
-  const filteredData = prodiData.filter(item =>
-    item.nama_prodi?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.kode_prodi?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.fakultas?.nama_fakultas?.toLowerCase().includes(searchTerm.toLowerCase())
+  // 🔎 Filtering data
+  const filteredData = (prodiList || []).filter(
+    (item) =>
+      item.nama_prodi.toLowerCase().includes(search.toLowerCase()) ||
+      item.kode_prodi.toLowerCase().includes(search.toLowerCase()) ||
+      item.fakultas.nama_fakultas.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Pagination
+  // 👉 Pagination
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentData = filteredData.slice(startIndex, endIndex);
-
-  // Generate page numbers untuk pagination
-  const getPageNumbers = () => {
-    const pageNumbers = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-      }
-    } else {
-      // Always show first page
-      pageNumbers.push(1);
-
-      // Add ellipsis if current page is far from start
-      if (currentPage > 3) {
-        pageNumbers.push('...');
-      }
-
-      // Add pages around current page
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(totalPages - 1, currentPage + 1);
-
-      for (let i = start; i <= end; i++) {
-        if (!pageNumbers.includes(i)) {
-          pageNumbers.push(i);
-        }
-      }
-
-      // Add ellipsis if current page is far from end
-      if (currentPage < totalPages - 2) {
-        pageNumbers.push('...');
-      }
-
-      // Always show last page
-      if (!pageNumbers.includes(totalPages)) {
-        pageNumbers.push(totalPages);
-      }
-    }
-
-    return pageNumbers;
-  };
-
-  const handlePageChange = (page) => {
-    if (page !== '...' && page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  const handleDetailClick = (prodiId) => {
-    navigate(`/dashboard/admin_universitas/detail_prodi/${prodiId}`);
-  };
-
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page when searching
-  };
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      {/* Loading Screen */}
-      
-
-      <div className="max-w-7xl mx-auto">
-        {/* Error Handling */}
-        {isError && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <p className="font-semibold">Error</p>
-            <p>Terjadi kesalahan saat mengambil data program studi. Silakan coba lagi nanti.</p>
-          </div>
-        )}
-
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold text-gray-800">Daftar Program Studi</h1>
-            {!isLoading && prodiData.length > 0 && (
-              <div className="text-sm text-gray-600">
-                {searchTerm ? (
-                  <>Menampilkan {filteredData.length} dari {prodiData.length} program studi</>
-                ) : (
-                  <>Total {prodiData.length} program studi</>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Search Bar */}
-          <div className="flex justify-end mb-4">
-            <div className="relative w-80">
-              <AiOutlineSearch className="absolute right-3 top-3 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Cari Program Studi..."
-                className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={searchTerm}
-                onChange={handleSearchChange}
-              />
-              <button className="absolute right-0 top-0 h-full px-4 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition">
-                <AiOutlineSearch size={20} />
-              </button>
-            </div>
-          </div>
+      {/* Error Handling */}
+      {isError && (
+        <div className="text-red-600 mb-4 text-center">
+          Terjadi kesalahan saat mengambil data program studi.
         </div>
+      )}
 
-        {/* Table */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <h1 className="text-2xl font-bold text-gray-800">
+          Manajemen Program Studi
+        </h1>
+
+        {/* 🔎 Input Search */}
+        <div className="relative mt-4 sm:mt-0 w-full sm:w-auto sm:max-w-xs">
+          <input
+            type="text"
+            placeholder="Cari Program Studi..."
+            className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1); // reset ke halaman 1 kalau searching
+            }}
+          />
+          <button className="absolute right-0 top-0 h-full px-3 bg-blue-500 text-white rounded-r-lg flex items-center justify-center">
+            <FaSearch />
+          </button>
+        </div>
+      </div>
+
+      {/* Tabel */}
+      <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-blue-200 ">
+            <thead className="bg-blue-200 text-black">
               <tr>
-                <th className="px-6 py-4 text-left font-medium">
-                  <div className="flex items-center gap-2">
-                    Kode Program Studi
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </th>
-                <th className="px-6 py-4 text-left font-medium">
-                  <div className="flex items-center gap-2">
-                    Nama Program Studi
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </th>
-                <th className="px-6 py-4 text-left font-medium">
-                  <div className="flex items-center gap-2">
-                    Fakultas
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </th>
-                <th className="px-6 py-4 text-left font-medium">Detail</th>
+                {["Kode Prodi", "Nama Program Studi", "Fakultas", "Detail"].map(
+                  (label, idx) => (
+                    <th key={idx} className="p-4 text-left">
+                      <div className="flex items-center gap-1">
+                        {label} <AiOutlineArrowDown size={14} />
+                      </div>
+                    </th>
+                  )
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {isLoading ? (
-                <TableSkeleton rows={itemsPerPage} columns={4} />
-              ) : (
-                currentData.map((item, index) => (
-                  <tr key={item.prodi_id || index} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-gray-900 font-medium">{item.kode_prodi || "-"}</td>
-                    <td className="px-6 py-4 text-gray-900">{item.nama_prodi || "-"}</td>
-                    <td className="px-6 py-4 text-gray-700">{item.fakultas?.nama_fakultas || "-"}</td>                  <td className="px-6 py-4">
-                      <button
-                        className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
-                        onClick={() => handleDetailClick(item.prodi_id)}
-                      >
+                <TableSkeleton rows={3} />
+              ) : currentData.length > 0 ? (
+                currentData.map((item) => (
+                  <tr
+                    key={item.prodi_id}
+                    className="hover:bg-gray-50 transition"
+                  >
+                    <td className="p-4 font-medium text-gray-800">
+                      {item.kode_prodi}
+                    </td>
+                    <td className="p-4">{item.nama_prodi}</td>
+                    <td className="p-4">
+                      <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                        {item.fakultas?.nama_fakultas || "-"}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <button className="text-blue-600 hover:text-blue-800">
                         Lihat Detail
                       </button>
                     </td>
                   </tr>
                 ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="py-10 text-center text-gray-400 italic"
+                  >
+                    Tidak ada data ditemukan.
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
-
-          {/* Empty State */}
-          {!isLoading && currentData.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <AiOutlineSearch size={48} className="mx-auto" />
-              </div>
-              <p className="text-gray-500 text-lg">
-                {prodiData.length === 0 ? "Belum ada data program studi" : "Tidak ada data yang ditemukan"}
-              </p>
-              <p className="text-gray-400 text-sm mt-2">
-                {prodiData.length === 0
-                  ? "Data program studi akan muncul di sini setelah ditambahkan"
-                  : "Coba ubah kata kunci pencarian Anda"
-                }
-              </p>
-            </div>
-          )}
         </div>
 
-        {/* Pagination */}
-        {!isLoading && totalPages > 1 && (
-          <div className="flex justify-center items-center mt-6 gap-2">
-            {getPageNumbers().map((page, index) => (
-              <button
-                key={index}
-                onClick={() => handlePageChange(page)}
-                disabled={page === '...'}
-                className={`px-3 py-2 rounded-lg font-medium transition-colors ${page === currentPage
-                  ? 'bg-blue-600 text-white'
-                  : page === '...'
-                    ? 'text-gray-400 cursor-not-allowed'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
-        )}
+        {/* 📌 Pagination */}
+        <div className="flex justify-center items-center space-x-2 p-4">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-2 py-1 text-gray-500 hover:text-blue-600 disabled:opacity-40"
+          >
+            ‹
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter((page) => {
+              if (page === 1 || page === totalPages) return true;
+              if (page >= currentPage - 1 && page <= currentPage + 1) return true;
+              return false;
+            })
+            .map((page, idx, arr) => {
+              const prevPage = arr[idx - 1];
+              return (
+                <React.Fragment key={page}>
+                  {prevPage && page - prevPage > 1 && (
+                    <span className="px-2 text-gray-400">...</span>
+                  )}
+                  <button
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 rounded-lg transition ${currentPage === page
+                        ? "bg-blue-100 text-blue-600 font-semibold"
+                        : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                  >
+                    {page}
+                  </button>
+                </React.Fragment>
+              );
+            })}
+
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="px-2 py-1 text-gray-500 hover:text-blue-600 disabled:opacity-40"
+          >
+            ›
+          </button>
+        </div>
       </div>
     </div>
   );

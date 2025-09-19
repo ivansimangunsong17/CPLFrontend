@@ -25,6 +25,8 @@ import DetailMataKuliahProdi from '../pages/admin-prodi/DetailMataKuliahProdi';
 import PemetaanProdi from '../pages/admin-prodi/PemetaanProdi';
 import DetailPemetaanProdi from '../pages/admin-prodi/DetailPemetaanProdi';
 import AturPenilaianProdi from '../pages/admin-prodi/AturPenilaianProdi';
+import DetailKelasProdi from '../pages/admin-prodi/DetailKelasProdi';
+import DetailPenilaianProdi from '../pages/admin-prodi/DetailPenilaianProdi';
 
 
 //Kaprodi
@@ -67,6 +69,8 @@ export {
     DetailPemetaanProdi,
     HasilPerhitunganProdi,
     AturPenilaianProdi,
+    DetailKelasProdi,
+    DetailPenilaianProdi,
 
     DashboardKaprodi,
     DataMahasiswaKaprodi,

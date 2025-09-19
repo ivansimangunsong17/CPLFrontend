@@ -1,201 +1,121 @@
 import React, { useState } from "react";
-import { FaDownload, FaSearch, FaUniversity, FaChalkboardTeacher, FaUsers, FaUserGraduate } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
+import { FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 const DashboardUniversitas = () => {
   const [search, setSearch] = useState("");
 
-  // Sample data
-  const dataFakultas = [
-    { id: 1, nama: "Fakultas Teknologi Informasi", kode: "FTI", dekan: "Prof. Dr. Andi", jumlahProdi: 5 },
-    { id: 2, nama: "Fakultas Teknik Elektro", kode: "FTE", dekan: "Prof. Dr. Budi", jumlahProdi: 4 },
+  // Sample data updated to match the new design
+  const dataCPL = [
+    { id: 1, kode: "IF3873833", programStudi: "Teknik Informatika", fakultas: "Teknik", status: "Selesai" },
+    { id: 2, kode: "PK847834", programStudi: "Perikanan dan Kelautan", fakultas: "Pertanian", status: "Selesai" },
+    { id: 3, kode: "HM834837", programStudi: "Hukum", fakultas: "Hukum", status: "Selesai" },
+    { id: 4, kode: "KE734734", programStudi: "Pendidikan Kedokteran", fakultas: "Kedokteran", status: "Selesai" },
+    { id: 5, kode: "EL756765", programStudi: "Teknik Elektro", fakultas: "Teknik", status: "Selesai" },
+    { id: 6, kode: "ME85866", programStudi: "Teknik Mesin", fakultas: "Teknik", status: "Belum Selesai" },
+    { id: 7, kode: "SI746764", programStudi: "Teknik Sipil", fakultas: "Teknik", status: "Belum Selesai" },
+    { id: 8, kode: "KI784784", programStudi: "Teknik Kimia", fakultas: "Teknik", status: "Belum Selesai" },
+    { id: 9, kode: "LI975757", programStudi: "Teknik Lingkungan", fakultas: "Teknik", status: "Belum Selesai" },
+    { id: 10, kode: "IK85858", programStudi: "Ilmu Komputer", fakultas: "MIPA", status: "Belum Selesai" },
   ];
 
-  const dataProdi = [
-    { id: 1, nama: "Teknik Informatika", fakultas: "FTI", kaprodi: "Dr. Ahmad", jumlahMahasiswa: 350, status: "Aktif" },
-    { id: 2, nama: "Sistem Informasi", fakultas: "FTI", kaprodi: "Dr. Budi", jumlahMahasiswa: 280, status: "Aktif" },
-  ];
-
-  const dataAkun = [
-    { id: 1, nama: "Admin FTI", email: "admin.fti@univ.ac.id", role: "Admin Fakultas", status: "Aktif" },
-    { id: 2, nama: "Kaprodi TI", email: "kaprodi.ti@univ.ac.id", role: "Admin Prodi", status: "Aktif" },
-  ];
-
-  // Data hasil perhitungan CPL
-  const hasilPerhitunganCPL = [
-    { id: 1, programStudi: "Teknik Informatika", nilaiCPL: 88, nilaiCPMK: 90, status: "Selesai" },
-    { id: 2, programStudi: "Perikanan dan Kelautan", nilaiCPL: 87, nilaiCPMK: 85, status: "Selesai" },
-    { id: 3, programStudi: "Hukum", nilaiCPL: 86, nilaiCPMK: 88, status: "Proses" },
-    { id: 4, programStudi: "Pendidikan Kedokteran", nilaiCPL: null, nilaiCPMK: null, status: "Tidak ada" },
-    { id: 5, programStudi: "Teknik Elektro", nilaiCPL: 88, nilaiCPMK: 90, status: "Proses" },
-    { id: 6, programStudi: "Teknik Mesin", nilaiCPL: 87, nilaiCPMK: 89, status: "Proses" },
-    { id: 7, programStudi: "Teknik Sipil", nilaiCPL: 86, nilaiCPMK: 88, status: "Proses" },
-    { id: 8, programStudi: "Teknik Kimia", nilaiCPL: 87, nilaiCPMK: 89, status: "Proses" },
-    { id: 9, programStudi: "Teknik Lingkungan", nilaiCPL: 87, nilaiCPMK: 90, status: "Proses" },
-    { id: 10, programStudi: "Ilmu Komputer", nilaiCPL: 88, nilaiCPMK: 89, status: "Proses" },
-  ];
-
-  const statistics = {
-    totalFakultas: dataFakultas.length,
-    totalProdi: dataProdi.length,
-    totalDosen: 45,
-    totalMahasiswa: 1200,
-  };
-
-  // Filter data berdasarkan search
-  const filteredHasilPerhitungan = hasilPerhitunganCPL.filter(item =>
+  // Filter data based on search
+  const filteredData = dataCPL.filter(item =>
     item.programStudi.toLowerCase().includes(search.toLowerCase())
   );
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case "Selesai":
-        return "bg-green-100 text-green-800";
-      case "Proses":
-        return "bg-yellow-100 text-yellow-800";
-      case "Tidak ada":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+  const StatusBadge = ({ status }) => {
+    const isSelesai = status === "Selesai";
+    const color = isSelesai ? "text-green-600" : "text-red-600";
+    const bgColor = isSelesai ? "bg-green-500" : "bg-red-500";
+
+    return (
+      <div className={`flex items-center gap-2 ${color}`}>
+        <div className={`w-2 h-2 rounded-full ${bgColor}`}></div>
+        <span className="font-medium">{status}</span>
+      </div>
+    );
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Dashboard Universitas</h1>
-
-      {/* Statistik Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <div className="flex items-center">
-            <FaUniversity className="text-blue-500 text-2xl mr-3" />
-            <div>
-              <p className="text-gray-500 text-sm">Fakultas</p>
-              <p className="text-xl font-bold">{statistics.totalFakultas}</p>
-            </div>
+    <div className="p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen font-sans">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Status Pengisian Nilai CPL Program Studi</h1>
+          <div className="relative mt-4 sm:mt-0 w-full sm:w-auto sm:max-w-xs">
+            <input
+              type="text"
+              placeholder="Cari Program Studi..."
+              className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <button className="absolute right-0 top-0 h-full px-3 bg-blue-500 text-white rounded-r-lg flex items-center justify-center">
+              <FaSearch />
+            </button>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <div className="flex items-center">
-            <FaChalkboardTeacher className="text-green-500 text-2xl mr-3" />
-            <div>
-              <p className="text-gray-500 text-sm">Program Studi</p>
-              <p className="text-xl font-bold">{statistics.totalProdi}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <div className="flex items-center">
-            <FaUsers className="text-purple-500 text-2xl mr-3" />
-            <div>
-              <p className="text-gray-500 text-sm">Dosen</p>
-              <p className="text-xl font-bold">{statistics.totalDosen}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <div className="flex items-center">
-            <FaUserGraduate className="text-yellow-500 text-2xl mr-3" />
-            <div>
-              <p className="text-gray-500 text-sm">Mahasiswa</p>
-              <p className="text-xl font-bold">{statistics.totalMahasiswa}</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Hasil Perhitungan Capaian Pembelajaran Lulusan */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-        <div className="p-6 border-b border-gray-100">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800">Hasil Perhitungan Capaian Pembelajaran Lulusan</h2>
-            <div className="max-w-md">
-              <div className="relative">
-                <FaSearch className="absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Cari Program Studi..."
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Search Bar */}
-
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-blue-500 text-white">
-              <tr>
-                <th className="px-6 py-4 text-left font-medium">
-                  <div className="flex items-center gap-2">
-                    Program Studi
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </th>
-                <th className="px-6 py-4 text-left font-medium">
-                  <div className="flex items-center gap-2">
-                    Nilai CPL
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </th>
-                <th className="px-6 py-4 text-left font-medium">
-                  <div className="flex items-center gap-2">
-                    Nilai CPMK
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </th>
-                <th className="px-6 py-4 text-left font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredHasilPerhitungan.map((item, index) => (
-                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-gray-900">{item.programStudi}</td>
-                  <td className="px-6 py-4 text-gray-700 font-medium">
-                    {item.nilaiCPL || '-'}
-                  </td>
-                  <td className="px-6 py-4 text-gray-700 font-medium">
-                    {item.nilaiCPMK || '-'}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full ${item.status === 'Selesai' ? 'bg-green-500' :
-                        item.status === 'Proses' ? 'bg-yellow-500' : 'bg-red-500'
-                        }`}></div>
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(item.status)}`}>
-                        {item.status}
-                      </span>
-                    </div>
-                  </td>
+        {/* Table Card */}
+        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-blue-600 text-white">
+                <tr>
+                  {["Kode Program Studi", "Program Studi", "Fakultas", "Status"].map((header) => (
+                    <th key={header} className="px-6 py-4 text-left font-semibold text-sm">
+                      <div className="flex items-center gap-2 cursor-pointer">
+                        {header}
+                        <FiChevronDown className="w-4 h-4" />
+                      </div>
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Empty State */}
-        {filteredHasilPerhitungan.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <FaSearch size={48} className="mx-auto" />
-            </div>
-            <p className="text-gray-500 text-lg">Tidak ada data yang ditemukan</p>
-            <p className="text-gray-400 text-sm mt-2">
-              Coba ubah kata kunci pencarian Anda
-            </p>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredData.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50 transition-colors duration-200">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{item.kode}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.programStudi}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{item.fakultas}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <StatusBadge status={item.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+
+          {/* Empty State */}
+          {filteredData.length === 0 && (
+            <div className="text-center py-16">
+              <FaSearch size={40} className="mx-auto text-gray-300" />
+              <p className="mt-4 text-gray-600 font-semibold">Program Studi Tidak Ditemukan</p>
+              <p className="text-gray-400 text-sm mt-1">Coba gunakan kata kunci lain.</p>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {filteredData.length > 0 && (
+            <div className="flex items-center justify-center px-4 py-4 border-t border-gray-200">
+              <nav className="flex items-center gap-1">
+                <button className="p-2 rounded-md hover:bg-gray-100 text-gray-500">
+                  <FiChevronLeft />
+                </button>
+                <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100 text-gray-700">1</button>
+                <button className="px-4 py-2 rounded-md text-sm bg-blue-100 text-blue-600 font-semibold">2</button>
+                <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100 text-gray-700">3</button>
+                <span className="px-4 py-2 text-sm text-gray-700">...</span>
+                <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100 text-gray-700">6</button>
+                <button className="p-2 rounded-md hover:bg-gray-100 text-gray-500">
+                  <FiChevronRight />
+                </button>
+              </nav>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

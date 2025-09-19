@@ -41,13 +41,6 @@ const DataCPL = () => {
       required: true,
     },
     {
-      name: "nama_cpl",
-      label: "Nama CPL",
-      type: "text",
-      placeholder: "Masukkan nama CPL",
-      required: true,
-    },
-    {
       name: "deskripsi",
       label: "Deskripsi",
       type: "textarea",
@@ -62,7 +55,6 @@ const DataCPL = () => {
       const term = (searchTerm || "").toLowerCase().trim();
       return (
         item.kode_cpl?.toLowerCase().includes(term) ||
-        item.nama_cpl?.toLowerCase().includes(term) ||
         item.deskripsi?.toLowerCase().includes(term)
       );
     });
@@ -94,7 +86,7 @@ const DataCPL = () => {
 
   const handleAddCPL = useCallback((formData) => {
     // Validasi dasar
-    if (!formData.kode_cpl || !formData.nama_cpl || !formData.deskripsi) {
+    if (!formData.kode_cpl || !formData.deskripsi) {
       toast.error('Semua field wajib diisi');
       return;
     }
@@ -102,12 +94,6 @@ const DataCPL = () => {
     // Validasi format kode CPL (contoh: CPL-1, CPL-2, dll)
     if (!/^CPL-\d+$/.test(formData.kode_cpl)) {
       toast.error('Format kode CPL harus: CPL-[angka] (contoh: CPL-1)');
-      return;
-    }
-
-    // Validasi panjang nama CPL
-    if (formData.nama_cpl.length < 10) {
-      toast.error('Nama CPL minimal 10 karakter');
       return;
     }
 
@@ -131,7 +117,6 @@ const DataCPL = () => {
       const exportData = data.map((item, index) => ({
         'No': index + 1,
         'Kode CPL': item.kode_cpl || '',
-        'Nama CPL': item.nama_cpl || '',
         'Deskripsi': item.deskripsi || ''
       }));
 
@@ -170,12 +155,10 @@ const DataCPL = () => {
       const templateData = [
         {
           'Kode CPL': 'CPL-1',
-          'Nama CPL': 'Mahasiswa mampu menerapkan pengetahuan matematika',
           'Deskripsi': 'Mahasiswa mampu menerapkan pengetahuan matematika, ilmu alam, ilmu rekayasa dan ilmu komputer untuk menyelesaikan permasalahan rekayasa di bidang informatika'
         },
         {
           'Kode CPL': 'CPL-2',
-          'Nama CPL': 'Mahasiswa mampu merancang dan mengimplementasikan solusi',
           'Deskripsi': 'Mahasiswa mampu merancang dan mengimplementasikan solusi berbasis teknologi informasi untuk memenuhi kebutuhan pengguna'
         }
       ];
@@ -187,7 +170,6 @@ const DataCPL = () => {
       // Set lebar kolom
       ws['!cols'] = [
         { wch: 15 },  // Kode CPL
-        { wch: 25 },  // Nama CPL
         { wch: 50 }   // Deskripsi
       ];
 
@@ -228,8 +210,8 @@ const DataCPL = () => {
           const rowNum = index + 2; // +2 karena header di row 1 dan index dimulai dari 0
 
           // Validasi required fields
-          if (!row['Kode CPL'] || !row['Nama CPL'] || !row['Deskripsi']) {
-            throw new Error(`Baris ${rowNum}: Kode CPL, Nama CPL, dan Deskripsi wajib diisi`);
+          if (!row['Kode CPL'] || !row['Deskripsi']) {
+            throw new Error(`Baris ${rowNum}: Kode CPL dan Deskripsi wajib diisi`);
           }
 
           // Validasi format kode CPL (CPL-angka)
@@ -237,10 +219,6 @@ const DataCPL = () => {
             throw new Error(`Baris ${rowNum}: Format kode CPL harus: CPL-[angka] (contoh: CPL-1)`);
           }
 
-          // Validasi nama CPL (minimal 10 karakter)
-          if (row['Nama CPL'].toString().trim().length < 10) {
-            throw new Error(`Baris ${rowNum}: Nama CPL minimal 10 karakter`);
-          }
 
           // Validasi deskripsi (minimal 20 karakter)
           if (row['Deskripsi'].toString().trim().length < 20) {
@@ -249,7 +227,6 @@ const DataCPL = () => {
 
           return {
             kode_cpl: row['Kode CPL']?.toString().trim(),
-            nama_cpl: row['Nama CPL']?.toString().trim(),
             deskripsi: row['Deskripsi']?.toString().trim(),
             prodi_id: user.prodi_id // Otomatis menambahkan prodi_id dari user yang login
           };
@@ -417,7 +394,6 @@ const DataCPL = () => {
                   />
                 </th>
                 <th className="p-4 text-left">Kode CPL</th>
-                <th className="p-4 text-left">Nama CPL</th>
                 <th className="p-4 text-left">Deskripsi</th>
                 <th className="p-4 text-center">Aksi</th>
               </tr>
@@ -443,7 +419,6 @@ const DataCPL = () => {
                       />
                     </td>
                     <td className="p-4 font-medium text-gray-600">{item.kode_cpl}</td>
-                    <td className="p-4 font-medium text-gray-800">{item.nama_cpl}</td>
                     <td className="p-4 text-gray-600">
                       <div className="max-w-xs truncate" title={item.deskripsi}>
                         {item.deskripsi}

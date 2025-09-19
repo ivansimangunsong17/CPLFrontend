@@ -34,7 +34,6 @@ const DataMahasiswaProdi = () => {
   const formFields = useMemo(() => [
     { name: 'name', label: 'Nama', type: 'text', required: true },
     { name: 'npm', label: 'NPM', type: 'text', required: true },
-    { name: 'email', label: 'Email', type: 'email', required: true },
     { name: 'angkatan', label: 'Angkatan', type: 'number', required: true },
   ], []);
 
@@ -45,7 +44,6 @@ const DataMahasiswaProdi = () => {
       return (
         item.nama?.toLowerCase().includes(term) ||
         item.npm?.toLowerCase().includes(term) ||
-        item.email?.toLowerCase().includes(term) ||
         item.angkatan?.toString().includes(term)
       );
     });
@@ -77,16 +75,12 @@ const DataMahasiswaProdi = () => {
 
   const handleAddMahasiswa = useCallback((formData) => {
     // Validasi dasar
-    if (!formData.name || !formData.npm || !formData.email || !formData.angkatan) {
+    if (!formData.name || !formData.npm || !formData.angkatan) {
       toast.error('Semua field wajib diisi');
       return;
     }
 
-    // Validasi email format
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      toast.error('Format email tidak valid');
-      return;
-    }
+ 
 
     // Validasi NPM (asumsi harus berupa angka dan minimal 8 karakter)
     if (!/^\d{8,}$/.test(formData.npm)) {
@@ -109,15 +103,11 @@ const DataMahasiswaProdi = () => {
     if (!editData) return;
 
     // Validasi sama seperti handleAddMahasiswa
-    if (!formData.name || !formData.npm || !formData.email || !formData.angkatan) {
+    if (!formData.name || !formData.npm || !formData.angkatan) {
       toast.error('Semua field wajib diisi');
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      toast.error('Format email tidak valid');
-      return;
-    }
 
     if (!/^\d{8,}$/.test(formData.npm)) {
       toast.error('NPM harus berupa angka minimal 8 digit');
@@ -186,7 +176,6 @@ const DataMahasiswaProdi = () => {
         'No': index + 1,
         'Nama': item.nama || '',
         'NPM': item.npm || '',
-        'Email': item.email || '',
         'Angkatan': item.angkatan || ''
       }));
 
@@ -228,13 +217,11 @@ const DataMahasiswaProdi = () => {
         {
           'Nama': 'John Doe',
           'NPM': '12345678',
-          'Email': 'john.doe@email.com',
           'Angkatan': '2024'
         },
         {
           'Nama': 'Jane Smith',
           'NPM': '87654321',
-          'Email': 'jane.smith@email.com',
           'Angkatan': '2023'
         }
       ];
@@ -293,11 +280,7 @@ const DataMahasiswaProdi = () => {
             throw new Error(`Baris ${rowNum}: Nama, NPM, Email, dan Angkatan wajib diisi`);
           }
 
-          // Validasi email format
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row['Email'])) {
-            throw new Error(`Baris ${rowNum}: Format email tidak valid`);
-          }
-
+        
           // Validasi NPM (harus berupa angka dan minimal 8 karakter)
           if (!/^\d{8,}$/.test(row['NPM'])) {
             throw new Error(`Baris ${rowNum}: NPM harus berupa angka minimal 8 digit`);
@@ -313,7 +296,7 @@ const DataMahasiswaProdi = () => {
           return {
             name: row['Nama']?.toString().trim(),
             npm: row['NPM']?.toString().trim(),
-            email: row['Email']?.toString().trim(),
+          
             angkatan: angkatan,
             prodi_id: user.prodi_id // Otomatis menambahkan prodi_id dari user yang login
           };
@@ -416,7 +399,7 @@ const DataMahasiswaProdi = () => {
           <AiOutlineSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
-            placeholder="Cari berdasarkan nama, NPM, email, atau angkatan..."
+            placeholder="Cari berdasarkan nama, NPM, atau angkatan..."
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -440,7 +423,6 @@ const DataMahasiswaProdi = () => {
                 </th>
                 <th className="p-4 text-left">Nama</th>
                 <th className="p-4 text-left">NPM</th>
-                <th className="p-4 text-left">Email</th>
                 <th className="p-4 text-left">Angkatan</th>
                 <th className="p-4 text-left w-20">Aksi</th>
               </tr>
@@ -461,7 +443,6 @@ const DataMahasiswaProdi = () => {
                     </td>
                     <td className="p-4 font-medium text-gray-800">{item.nama}</td>
                     <td className="p-4 text-gray-600">{item.npm}</td>
-                    <td className="p-4 text-gray-600">{item.email}</td>
                     <td className="p-4 text-gray-600">{item.angkatan}</td>
                     <td className="p-4">
                       <div className="flex gap-2">

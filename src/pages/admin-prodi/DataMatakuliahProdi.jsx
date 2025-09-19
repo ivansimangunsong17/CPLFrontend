@@ -10,6 +10,7 @@ import { useMataKuliah } from "../../hooks/admin-prodi/useMataKuliah";
 import LoadingScreen from "../../components/LoadingScreen";
 import TableSkeleton from "../../components/TableSkeleton";
 import { AuthContext } from "../../context/AuthContext";
+import { BsEyeFill } from "react-icons/bs";
 
 
 const DataMatakuliahProdi = () => {
@@ -448,7 +449,7 @@ const DataMatakuliahProdi = () => {
                           onClick={() => handleViewDetail(item.id)}
                           className="p-1 text-green-600 hover:bg-green-100 rounded"
                         >
-                          <FiEye size={20} />
+                          <BsEyeFill size={20} />
                         </button>
                       </div>
                     </td>

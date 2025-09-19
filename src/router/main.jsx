@@ -27,6 +27,7 @@ import {
   DataMahasiswaProdi,
   DataMataKuliahProdi,
   DetailMataKuliahProdi,
+  DetailKelasProdi,
   PemetaanProdi,
   DetailPemetaanProdi,
   AturPenilaianProdi,
@@ -38,7 +39,8 @@ import {
   PemetaanCPLKaprodi,
   DashboardDosen,
   HasilPerhitunganDosen,
-  InputNilaiDosen
+  InputNilaiDosen,
+  DetailPenilaianProdi
 } from './index';
 
 const queryClient = new QueryClient();
@@ -82,8 +84,10 @@ const router = createBrowserRouter([
               { path: "detail_matakuliah/:mataKuliahId", element: <DetailMataKuliahProdi /> },
               { path: "pemetaan_cpl", element: <PemetaanProdi /> },
               { path: "detail_pemetaan/:mataKuliahId", element: <DetailPemetaanProdi /> },
+              { path: "detail_kelas/:kelasId", element: <DetailKelasProdi /> },
               { path: "hasil_perhitungan", element: <HasilPerhitunganProdi /> },
               { path: "atur_penilaian", element: <AturPenilaianProdi /> },
+              { path: "detail_penilaian/:mataKuliahId", element: <DetailPenilaianProdi /> },
             ]
           },
         ],

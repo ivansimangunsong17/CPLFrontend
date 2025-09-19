@@ -1,13 +1,18 @@
-import React, { useState } from "react";
-import { FaPlus, FaTrash } from "react-icons/fa";
-import FormBox from "../../components/Form/FormBox"; // Pastikan path sesuai
+import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaPlus, FaTrash, FaRegEdit } from "react-icons/fa";
+import FormBox from "../../components/Form/FormBox";
+import { useMataKuliah } from "../../hooks/admin-prodi/useMataKuliah";
+import TableSkeleton from "../../components/TableSkeleton";
 
 const AturPenilaianProdi = () => {
+    const navigate = useNavigate();
+    const { mataKuliahQuery } = useMataKuliah();
+
     const [assessments, setAssessments] = useState([
-        { jenis: "Tugas", subs: ["Tugas 1", "Tugas 2", "Tugas 3"] },
-        { jenis: "Kuis", subs: ["Kuis 1", "Kuis 2", "Kuis 3"] },
+        { jenis: "Tugas", subs: ["Tugas 1", "Tugas 2"] },
+        { jenis: "Kuis", subs: ["Kuis 1"] },
         { jenis: "Hasil Projek", subs: [] },
-        { jenis: "Aktivitas Partisipasi", subs: [] },
         { jenis: "Ujian Tengah Semester", subs: [] },
         { jenis: "Ujian Akhir Semester", subs: [] },
     ]);
@@ -16,41 +21,22 @@ const AturPenilaianProdi = () => {
     const [isSubFormOpen, setIsSubFormOpen] = useState(false);
     const [selectedAssessmentIndex, setSelectedAssessmentIndex] = useState(null);
 
-    // Fields untuk FormBox utama
+    // Form field
     const fieldsJenisPenilaian = [
-        {
-            name: "jenis",
-            label: "Jenis Penilaian",
-            type: "text",
-            required: true,
-            placeholder: "Masukkan nama penilaian",
-        },
+        { name: "jenis", label: "Jenis Penilaian", type: "text", required: true },
     ];
 
-    // Fields untuk Sub-Penilaian
     const fieldsSubPenilaian = [
-        {
-            name: "sub",
-            label: "Nama Sub Penilaian",
-            type: "text",
-            required: true,
-            placeholder: "Contoh: Tugas 1, Kuis 2",
-        },
+        { name: "sub", label: "Nama Sub Penilaian", type: "text", required: true },
     ];
 
-    // Tambah Jenis Penilaian
+    // Tambah jenis penilaian
     const handleAddAssessment = (data) => {
-        // Cek duplikat
-        const isDuplicate = assessments.some(a => a.jenis.toLowerCase() === data.jenis.toLowerCase());
-        if (isDuplicate) {
-            alert("Jenis penilaian sudah ada!");
-            return;
-        }
         setAssessments([...assessments, { jenis: data.jenis, subs: [] }]);
         setIsFormOpen(false);
     };
 
-    // Tambah Sub Penilaian
+    // Tambah sub penilaian
     const handleAddSubAssessment = (data) => {
         const updated = [...assessments];
         updated[selectedAssessmentIndex].subs.push(data.sub);
@@ -59,11 +45,19 @@ const AturPenilaianProdi = () => {
         setSelectedAssessmentIndex(null);
     };
 
-    // Hapus Sub
+    // Hapus sub penilaian
     const removeSub = (i, subIndex) => {
         const updated = [...assessments];
         updated[i].subs.splice(subIndex, 1);
         setAssessments(updated);
+    };
+
+    // Data mata kuliah dari API
+    const data = useMemo(() => mataKuliahQuery.data || [], [mataKuliahQuery.data]);
+    const isLoading = mataKuliahQuery.isLoading;
+
+    const handleClick = (mataKuliahId) => {
+        navigate(`/dashboard/admin_prodi/detail_penilaian/${mataKuliahId}`);
     };
 
     return (
@@ -73,62 +67,109 @@ const AturPenilaianProdi = () => {
                 <h2 className="text-xl font-semibold text-gray-700">Jenis Penilaian</h2>
                 <button
                     onClick={() => setIsFormOpen(true)}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition"
+                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg  hover:bg-blue-700 transition"
                 >
                     <FaPlus size={14} /> Tambah Penilaian
                 </button>
             </div>
 
-            {/* Table */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-                <table className="w-full border-collapse text-gray-700">
+            {/* Table Penilaian */}
+            <div className="bg-white rounded-xl shadow-md overflow-hidden">
+                <table className="w-full text-gray-700">
                     <thead>
                         <tr className="bg-blue-600 text-white text-sm uppercase">
-                            <th className="p-4 text-left border">Penilaian</th>
-                            <th className="p-4 text-left border">Sub - Penilaian</th>
+                            <th className="p-4 text-left">Penilaian</th>
+                            <th className="p-4 text-left">Sub - Penilaian</th>
+                            <th className="p-4 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {assessments.map((a, i) => (
-                            <tr key={i} className="hover:bg-gray-50 transition">
-                                <td className="p-4 border">
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-medium">{a.jenis}</span>
-                                        <button
-                                            onClick={() => {
-                                                setSelectedAssessmentIndex(i);
-                                                setIsSubFormOpen(true);
-                                            }}
-                                            className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition"
-                                        >
-                                            <FaPlus size={14} />
-                                        </button>
-                                    </div>
-                                </td>
-                                <td className="p-4 border">
-                                    {a.subs.length > 0 ? (
-                                        <div className="space-y-2">
-                                            {a.subs.map((sub, subIndex) => (
-                                                <div
-                                                    key={subIndex}
-                                                    className="flex justify-between items-center bg-gray-100 rounded px-3 py-2"
+                        {assessments.map((a, i) => {
+                            const rowSpan = Math.max(1, a.subs.length);
+                            return (
+                                <React.Fragment key={i}>
+                                    <tr>
+                                        <td className="p-4 border font-medium align-top" rowSpan={rowSpan}>
+                                            <div className="flex justify-between items-center">
+                                                {a.jenis}
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedAssessmentIndex(i);
+                                                        setIsSubFormOpen(true);
+                                                    }}
+                                                    className="bg-blue-500 text-white p-1.5 rounded-full hover:bg-blue-600 transition"
                                                 >
-                                                    <span>{sub}</span>
-                                                    <button
-                                                        onClick={() => removeSub(i, subIndex)}
-                                                        className="text-red-500 hover:text-red-700 transition"
-                                                    >
-                                                        <FaTrash />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <span className="text-gray-400 italic">Belum ada sub-penilaian</span>
-                                    )}
+                                                    <FaPlus size={12} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td className="p-4 border">{a.subs[0] || "-"}</td>
+                                        <td className="p-4 border text-center">
+                                            {a.subs[0] && (
+                                                <button
+                                                    onClick={() => removeSub(i, 0)}
+                                                    className="text-red-500 hover:text-red-700 transition"
+                                                >
+                                                    <FaTrash />
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                    {a.subs.slice(1).map((sub, subIndex) => (
+                                        <tr key={subIndex}>
+                                            <td className="p-4 border">{sub}</td>
+                                            <td className="p-4 border text-center">
+                                                <button
+                                                    onClick={() => removeSub(i, subIndex + 1)}
+                                                    className="text-red-500 hover:text-red-700 transition"
+                                                >
+                                                    <FaTrash />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </React.Fragment>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Table Mata Kuliah */}
+            <div className="bg-white rounded-xl shadow-md overflow-hidden mt-10">
+                <table className="w-full text-gray-700">
+                    <thead>
+                        <tr className="bg-blue-600 text-white text-sm uppercase">
+                            <th className="p-4 text-left">Kode MK</th>
+                            <th className="p-4 text-left">Nama Mata Kuliah</th>
+                            <th className="p-4 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {isLoading ? (
+                            <TableSkeleton rows={5} columns={3} />
+                        ) : data.length === 0 ? (
+                            <tr>
+                                <td colSpan="3" className="p-8 text-center text-gray-500">
+                                    Belum ada data mata kuliah
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            data.map((mk, i) => (
+                                <tr key={i} className="hover:bg-gray-50 transition-colors duration-200">
+                                    <td className="p-4 border font-medium">{mk.kode}</td>
+                                    <td className="p-4 border">{mk.nama}</td>
+                                    <td className="p-4 border text-center">
+                                        <button
+                                            onClick={() => handleClick(mk.id)}
+                                            className="flex items-center gap-1 justify-center text-blue-600 hover:text-blue-800 font-medium transition"
+                                        >
+                                            Atur <FaRegEdit size={14} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -147,7 +188,8 @@ const AturPenilaianProdi = () => {
             {/* Modal Tambah Sub Penilaian */}
             <FormBox
                 title="Tambah Sub Penilaian"
-                subtitle={`Untuk ${selectedAssessmentIndex !== null ? assessments[selectedAssessmentIndex].jenis : ""}`}
+                subtitle={`Untuk ${selectedAssessmentIndex !== null ? assessments[selectedAssessmentIndex].jenis : ""
+                    }`}
                 fields={fieldsSubPenilaian}
                 initialData={{ sub: "" }}
                 onSubmit={handleAddSubAssessment}

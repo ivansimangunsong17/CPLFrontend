@@ -17,6 +17,7 @@ import {
 import ConfirmModal from '../../components/Modal/ConfModal';
 import FormBox from '../../components/Form/FormBox';
 import TableSkeleton from '../../components/TableSkeleton';
+import { FaSearch } from 'react-icons/fa';
 
 const DataProdiUniv = () => {
   const { data: prodiList, isLoading, isError } = useProdiList();
@@ -28,6 +29,11 @@ const DataProdiUniv = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeFormProdi, setActiveFormProdi] = useState(null);
+  const [search, setSearch] = useState("");
+
+  // 👉 Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const FakultasList = Array.from(
     new Map(
@@ -40,6 +46,20 @@ const DataProdiUniv = () => {
       ])
     ).values()
   );
+
+  // 🔎 Filtering data
+  const filteredData = (prodiList || []).filter(
+    (item) =>
+      item.nama_prodi.toLowerCase().includes(search.toLowerCase()) ||
+      item.kode_prodi.toLowerCase().includes(search.toLowerCase()) ||
+      item.fakultas.nama_fakultas.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // 👉 Data per halaman
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
   const toggleSelect = (id) => {
     setSelectedIds((prev) =>
@@ -129,6 +149,7 @@ const DataProdiUniv = () => {
         if (deleteMutation.isPending) return <LoadingScreen message="Menghapus Program Studi..." />;
         return null;
       })()}
+
       {/* Error Handling */}
       {isError && (
         <div className="text-red-600 mb-4 text-center">
@@ -137,8 +158,29 @@ const DataProdiUniv = () => {
       )}
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Manajemen Program Studi</h1>
+
+        {/* 🔎 Input Search */}
+      
+        <div className="relative mt-4 sm:mt-0 w-full sm:w-auto sm:max-w-xs">
+          <input
+            type="text"
+            placeholder="Cari Program Studi..."
+            className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1); // reset ke halaman 1 kalau searching
+            }}
+          />
+          <button className="absolute right-0 top-0 h-full px-3 bg-blue-500 text-white rounded-r-lg flex items-center justify-center">
+            <FaSearch />
+          </button>
+        </div>
+
+
+
         <div className="flex gap-3">
           <button
             onClick={() => setIsModalOpen(true)}
@@ -187,8 +229,8 @@ const DataProdiUniv = () => {
             <tbody className="divide-y divide-gray-200">
               {isLoading ? (
                 <TableSkeleton rows={3} />
-              ) : prodiList?.length > 0 ? (
-                prodiList.map((item) => (
+              ) : currentData.length > 0 ? (
+                currentData.map((item) => (
                   <tr key={item.prodi_id} className="hover:bg-gray-50 transition">
                     <td className="p-4">
                       <input
@@ -229,14 +271,61 @@ const DataProdiUniv = () => {
               ) : (
                 <tr>
                   <td colSpan={5} className="py-10 text-center text-gray-400 italic">
-                    Tidak ada data tersedia.
+                    Tidak ada data ditemukan.
                   </td>
                 </tr>
               )}
             </tbody>
-
           </table>
         </div>
+
+        {/* 📌 Pagination */}
+        {/* 📌 Pagination */}
+        <div className="flex justify-center items-center space-x-2 p-4">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-2 py-1 text-gray-500 hover:text-blue-600 disabled:opacity-40"
+          >
+            ‹
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter((page) => {
+              if (page === 1 || page === totalPages) return true;
+              if (page >= currentPage - 1 && page <= currentPage + 1) return true;
+              return false;
+            })
+            .map((page, idx, arr) => {
+              const prevPage = arr[idx - 1];
+              return (
+                <React.Fragment key={page}>
+                  {/* Tambah "..." kalau ada gap */}
+                  {prevPage && page - prevPage > 1 && (
+                    <span className="px-2 text-gray-400">...</span>
+                  )}
+                  <button
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 rounded-lg transition ${currentPage === page
+                      ? "bg-blue-100 text-blue-600 font-semibold"
+                      : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                  >
+                    {page}
+                  </button>
+                </React.Fragment>
+              );
+            })}
+
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="px-2 py-1 text-gray-500 hover:text-blue-600 disabled:opacity-40"
+          >
+            ›
+          </button>
+        </div>
+
 
         {/* Modal Konfirmasi Hapus */}
         <ConfirmModal

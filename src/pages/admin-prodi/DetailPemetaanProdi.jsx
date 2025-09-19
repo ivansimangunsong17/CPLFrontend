@@ -1,12 +1,6 @@
-// Updated version of DetailPemetaanProdi with clean CRUD handling, unified loading screen, and concise success/error toasts
-
 import React, { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-    AiFillDelete,
-    AiOutlineArrowLeft,
-    AiOutlinePlus,
-} from "react-icons/ai";
+import { AiFillDelete, AiOutlineArrowLeft, AiOutlinePlus } from "react-icons/ai";
 import { FiEdit2 } from "react-icons/fi";
 import { toast } from "react-toastify";
 
@@ -14,9 +8,12 @@ import { toast } from "react-toastify";
 import { useMataKuliah } from "../../hooks/admin-prodi/useMataKuliah";
 import { useDataCPL } from "../../hooks/admin-prodi/useDataCPL";
 import { usePemetaanCPL } from "../../hooks/admin-prodi/usePemetaanCPL";
+import { useCPMK } from "../../hooks/admin-prodi/useCPMK";
+import { usePemetaanCPMK } from "../../hooks/admin-prodi/usePemetaanCPMK";
 
 // Components
 import FormPemetaanCPL from "../../components/Form/FormPemetaanCPL";
+import FormPemetaanCPMK from "../../components/Form/FormPemetaanCPMK";
 import ConfirmModal from "../../components/Modal/ConfModal";
 import TableSkeleton from "../../components/TableSkeleton";
 import CardSkeleton from "../../components/CardSkeleton";
@@ -26,6 +23,7 @@ const DetailPemetaanProdi = () => {
     const { mataKuliahId } = useParams();
     const navigate = useNavigate();
 
+    // Hooks data & mutasi
     const { mataKuliahQuery } = useMataKuliah();
     const { dataCPLQuery } = useDataCPL();
     const {
@@ -35,17 +33,43 @@ const DetailPemetaanProdi = () => {
         deleteMutation,
     } = usePemetaanCPL(mataKuliahId);
 
-    const isInitialLoading = mataKuliahQuery.isLoading || pemetaanQuery.isLoading;
-    const isMutating = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
-    const pemetaanData = pemetaanQuery.data;
+    const {
+        pemetaanCPMKQuery,
+        createCPMKMutation,
+        updateCPMKMutation,
+        deleteCPMKMutation,
+    } = usePemetaanCPMK(mataKuliahId);
 
+    const { cpmkQuery } = useCPMK(mataKuliahId);
+
+    // State CPL
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editData, setEditData] = useState(null);
-    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    const [isLoadingScreen, setIsLoadingScreen] = useState(false);
 
+    // State CPMK
+    const [isCpmkModalOpen, setIsCpmkModalOpen] = useState(false);
+    const [currentCplId, setCurrentCplId] = useState(null);
+    const [editCpmkData, setEditCpmkData] = useState(null);
+
+    // State delete confirm
+    const [confirmDelete, setConfirmDelete] = useState({ type: null, id: null });
+
+    // Status loading
+    const isInitialLoading = mataKuliahQuery.isLoading || pemetaanQuery.isLoading;
+    const isMutating =
+        createMutation.isPending ||
+        updateMutation.isPending ||
+        deleteMutation.isPending ||
+        createCPMKMutation.isPending ||
+        updateCPMKMutation.isPending ||
+        deleteCPMKMutation.isPending;
+
+    const pemetaanData = pemetaanQuery.data;
+
+    // Navigasi kembali
     const handleBack = () => navigate("/dashboard/admin_prodi/pemetaan_cpl");
 
+    // Data memoized
     const mataKuliah = useMemo(() => {
         const data = mataKuliahQuery.data || [];
         return data.find(
@@ -60,114 +84,145 @@ const DetailPemetaanProdi = () => {
         return allCPL.filter((cpl) => !mappedIds.has(cpl.id));
     }, [dataCPLQuery.data, pemetaanData, editData]);
 
+    // Handler CPL
     const handleAddCPL = () => {
         setEditData(null);
         setIsFormOpen(true);
     };
 
-    const handleSubmitPemetaan = async (formData) => {
-        // Validasi input untuk create
-        if (!editData && (!formData.cpl_id || !formData.bobot)) {
-            return toast.error("Semua field wajib diisi");
-        }
-        // Validasi input untuk edit
-        if (editData && !formData.bobot) {
-            return toast.error("Bobot wajib diisi");
+
+    const handleSubmitPemetaan = (formData) => {
+        if ((!editData && !formData.cpl_id) || !formData.bobot) {
+            return toast.error("Semua field wajib diisi.");
         }
 
         const bobot = parseFloat(formData.bobot);
-        if (bobot < 0 || bobot > 100) {
-            return toast.error("Bobot harus antara 0-100");
+        if (isNaN(bobot) || bobot < 0 || bobot > 100) {
+            return toast.error("Bobot harus berupa angka antara 0-100.");
         }
 
-        try {
-            const mata_kuliah_id = parseInt(mataKuliahId);
-            const isEdit = Boolean(editData);
-
-            // Tampilkan loading screen
-            setIsLoadingScreen(true);
-
-            // Tunggu mutasi selesai
-            if (isEdit) {
-                await updateMutation.mutateAsync({
-                    mata_kuliah_id: mata_kuliah_id,
-                    cpls: [{
-                        cpl_id: parseInt(editData.cpl_id),
-                        bobot: parseFloat(formData.bobot).toFixed(2)
-                    }]
-                });
-            } else {
-                await createMutation.mutateAsync({
-                    mata_kuliah_id: mata_kuliah_id,
-                    cpl_id: parseInt(formData.cpl_id),
-                    bobot: bobot.toString()
-                });
-            }
-
-            // Pastikan data diperbarui sebelum menutup form
-            await pemetaanQuery.refetch();
-
-            // Tutup form dan loading screen, lalu tampilkan pesan sukses
+        const commonOnSuccess = () => {
             setIsFormOpen(false);
             setEditData(null);
-            setIsLoadingScreen(false);
-            toast.success("Pemetaan berhasil ditambahkan");
-        } catch (err) {
-            console.error(err);
-            setIsLoadingScreen(false);
-            toast.error(err?.response?.data?.message || "Terjadi kesalahan saat menyimpan data");
+        };
+
+        if (editData) {
+            updateMutation.mutate(
+                {
+                    mata_kuliah_id: parseInt(mataKuliahId),
+                    cpls: [{ cpl_id: parseInt(editData.cpl_id), bobot: bobot.toFixed(2) }],
+                },
+                { onSuccess: commonOnSuccess }
+            );
+        } else {
+            createMutation.mutate(
+                {
+                    mata_kuliah_id: parseInt(mataKuliahId),
+                    cpls: [{ cpl_id: parseInt(formData.cpl_id), bobot: parseFloat(bobot.toFixed(2)) }],
+                },
+                { onSuccess: commonOnSuccess }
+            );
+
         }
     };
+
+
 
     const handleConfirmDelete = async () => {
+        if (!confirmDelete.id) {
+            toast.error("ID pemetaan tidak ditemukan!");
+            return;
+        }
+
         try {
-            // Tampilkan loading screen
-            setIsLoadingScreen(true);
+            if (confirmDelete.type === "cpl") {
+                await deleteMutation.mutateAsync({
+                    cpl_mata_kuliah_id: confirmDelete.id,
+                });
+                toast.success("Pemetaan CPL berhasil dihapus");
+            } else if (confirmDelete.type === "cpmk") {
+                await deleteCPMKMutation.mutateAsync({
+                    cpmk_mata_kuliah_id: confirmDelete.id,
+                });
+                toast.success("Pemetaan CPMK berhasil dihapus");
+            }
 
-            // Tunggu mutasi selesai
-            await deleteMutation.mutateAsync({
-                action: 'delete',
-                mata_kuliah_id: parseInt(mataKuliahId),
-                cpl_id: null,
-            });
-
-            // Pastikan data diperbarui sebelum menutup modal
-            await pemetaanQuery.refetch();
-
-            // Tutup modal dan loading screen, lalu tampilkan pesan sukses
-            setIsConfirmOpen(false);
-            setIsLoadingScreen(false);
-            toast.success("Semua pemetaan berhasil dihapus");
-        } catch (err) {
-            console.error(err);
-            toast.error(err?.response?.data?.message || "Gagal menghapus data");
+            setConfirmDelete({ type: null, id: null });
+        } catch (error) {
+            console.error("Error delete:", error);
+            toast.error("Gagal menghapus pemetaan");
         }
     };
 
-    const handleDeleteItem = async (cplId) => {
-        try {
-            // Tampilkan loading screen
-            setIsLoadingScreen(true);
 
-            // Tunggu mutasi selesai
-            await deleteMutation.mutateAsync({
-                action: 'delete',
-                mata_kuliah_id: parseInt(mataKuliahId),
-                cpl_id: cplId,
-            });
 
-            // Pastikan data diperbarui
-            await pemetaanQuery.refetch();
 
-            // Tutup loading screen
-            setIsLoadingScreen(false);
-            toast.success("Pemetaan berhasil dihapus");
-        } catch (err) {
-            console.error(err);
-            toast.error(err?.response?.data?.message || "Gagal menghapus data");
-        }
+
+
+    // Handler CPMK
+    const handleAddCpmk = (cplId) => {
+        setCurrentCplId(cplId);
+        setEditCpmkData(null);
+        setIsCpmkModalOpen(true);
     };
 
+    const handleEditCpmk = (cplId, cpmk) => {
+        setCurrentCplId(cplId);
+        setEditCpmkData(cpmk);
+        setIsCpmkModalOpen(true);
+    };
+
+
+
+    const submitCpmkMapping = (formData) => {
+        if (!formData.cpmk_id) return toast.error("Pilih CPMK terlebih dahulu.");
+        if (!formData.bobot) return toast.error("Masukkan bobot CPMK.");
+
+        const bobotNum = Number(formData.bobot);
+        if (isNaN(bobotNum) || bobotNum < 0 || bobotNum > 100) {
+            return toast.error("Bobot harus angka antara 0-100.");
+        }
+
+        const existingTotal = (pemetaanCPMKQuery.data || [])
+            .filter((cpmk) => cpmk.cpl_id === currentCplId)
+            .reduce((sum, cpmk) => sum + Number(cpmk.bobot), 0);
+
+        const cplMapping = pemetaanData.find((cpl) => cpl.cpl_id === currentCplId);
+        const maxBobot = Number(cplMapping?.bobot || 0);
+
+        const adjustedTotal = editCpmkData
+            ? existingTotal - Number(editCpmkData.bobot) + bobotNum
+            : existingTotal + bobotNum;
+
+        if (adjustedTotal > maxBobot) {
+            return toast.error(
+                `Total bobot CPMK melebihi bobot acuan`
+            );
+        }
+
+        const payload = {
+            action: editCpmkData ? "update" : "store",
+            mata_kuliah_id: parseInt(mataKuliahId),
+            cpmks: [
+                {
+                    cpmk_id: Number(formData.cpmk_id),
+                    cpl_id: parseInt(currentCplId),
+                    bobot: bobotNum,
+                },
+            ],
+        };
+
+        const mutation = editCpmkData ? updateCPMKMutation : createCPMKMutation;
+        mutation.mutate(payload, {
+            onSuccess: () => {
+                setIsCpmkModalOpen(false);
+                setCurrentCplId(null);
+                setEditCpmkData(null);
+            },
+        });
+    };
+
+    // Loading awal
     if (isInitialLoading) {
         return (
             <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -175,7 +230,7 @@ const DetailPemetaanProdi = () => {
                 <div className="bg-white rounded-xl shadow-md overflow-hidden">
                     <table className="w-full">
                         <tbody>
-                            <TableSkeleton columns={4} rows={3} />
+                            <TableSkeleton columns={3} rows={3} />
                         </tbody>
                     </table>
                 </div>
@@ -185,36 +240,25 @@ const DetailPemetaanProdi = () => {
 
     if (!mataKuliah) {
         return (
-            <div className="p-6 max-w-7xl mx-auto">
-                <div className="text-center py-12">
-                    <h3 className="text-lg font-medium text-red-600 mb-2">
-                        Mata Kuliah Tidak Ditemukan
-                    </h3>
-                    <button
-                        onClick={handleBack}
-                        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                    >
-                        Kembali ke Daftar
-                    </button>
-                </div>
+            <div className="p-6 max-w-7xl mx-auto text-center py-12">
+                <h3 className="text-lg font-medium text-red-600 mb-2">
+                    Mata Kuliah Tidak Ditemukan
+                </h3>
+                <button
+                    onClick={handleBack}
+                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                >
+                    Kembali ke Daftar
+                </button>
             </div>
         );
     }
 
     return (
         <div className="p-6 max-w-7xl mx-auto">
-            {isLoadingScreen && (
-                <LoadingScreen
-                    message={
-                        createMutation.isPending
-                            ? "Menyimpan pemetaan..."
-                            : updateMutation.isPending
-                                ? "Mengupdate pemetaan..."
-                                : "Menghapus pemetaan..."
-                    }
-                />
-            )}
+            {isMutating && <LoadingScreen message="Memproses permintaan Anda..." />}
 
+            {/* Header */}
             <div className="mb-6 flex items-center justify-between">
                 <button
                     onClick={handleBack}
@@ -223,13 +267,14 @@ const DetailPemetaanProdi = () => {
                     <AiOutlineArrowLeft size={20} />
                     <span>Kembali</span>
                 </button>
-                <h2 className="text-xl font-semibold text-gray-800">
+                <h2 className="text-xl font-semibold text-gray-800 text-right">
                     Pemetaan CPL - {mataKuliah.nama_mata_kuliah}
                 </h2>
             </div>
 
+            {/* Info Mata Kuliah */}
             <div className="bg-white rounded-lg shadow p-6 mb-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="p-3 border rounded-lg text-center bg-gray-50">
                         <p className="text-sm text-gray-500">Kode Mata Kuliah</p>
                         <p className="font-semibold">{mataKuliah.kode_mata_kuliah}</p>
@@ -241,8 +286,9 @@ const DetailPemetaanProdi = () => {
                 </div>
             </div>
 
+            {/* Table CPL & CPMK */}
             <div className="bg-white rounded-xl shadow overflow-hidden">
-                <div className="flex justify-between items-center px-4 py-3 border-b">
+                <div className="flex flex-wrap justify-between items-center px-4 py-3 border-b gap-3">
                     <h3 className="font-semibold text-gray-700">Daftar Pemetaan CPL</h3>
                     <div className="flex gap-3">
                         <button
@@ -250,86 +296,149 @@ const DetailPemetaanProdi = () => {
                             className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
                             disabled={isMutating}
                         >
-                            <AiOutlinePlus size={14} /> Tambah
+                            <AiOutlinePlus size={14} /> Tambah CPL
                         </button>
-                        {pemetaanData?.length > 0 && (
-                            <button
-                                onClick={() => setIsConfirmOpen(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm"
-                                disabled={isMutating}
-                            >
-                                <AiFillDelete size={14} /> Hapus Semua
-                            </button>
-                        )}
+
                     </div>
                 </div>
-                <table className="w-full">
-                    <thead className="bg-blue-500 text-white">
-                        <tr>
-                            <th className="p-4 text-left">CPL</th>
-                            <th className="p-4 text-left">CPMK</th>
-                            <th className="p-4 text-center">Bobot CPMK</th>
-                            <th className="p-4 text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                        {pemetaanData?.length === 0 ? (
-                            <tr>
-                                <td colSpan="4" className="p-8 text-center text-gray-500">
-                                    Tidak ada pemetaan CPL.
-                                </td>
-                            </tr>
-                        ) : (
-                            pemetaanData?.map((item) => (
-                                <tr key={item.cpl_id} className="hover:bg-blue-50">
-                                    <td className="p-4">
-                                        <p className="font-semibold">{item.kode_cpl}</p>
-                                        <p className="text-sm  text-black text-justify list-disc italic">{item.deskripsi}</p>
-                                        <span className="text-xs text-white bg-green-500 p-0.5 m-0.5 rounded-lg ">Jumblah Bobot CPL {item.pivot?.bobot || 0}%</span>
-                                        <button
-                                            // onClick={() => handleAddCPMK(item.cpmk_id)}
-                                            className="flex items-center px-1 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
-                                            disabled={isMutating}
-                                        >
-                                            Tambah CPMK
-                                        </button>
-                                    </td>
-                                    <tr key={item.cpl_id}>
-                                        <td className="p-4">
-                                            <p className="font-semibold">{item.kode_cpl}</p>
-                                            <p className="list-disc text-sm text-gray-600 italic">{item.deskripsi || "Belum ada CPMK"}</p>
-                                        </td>
-                                    </tr>
 
-                                    <td className="p-4 text-center font-semibold">
-                                        {/* {item.pivot?.bobot || 0}% */}
+                <div className="overflow-x-auto">
+                    <table className="w-full min-w-[640px]">
+                        <thead className="bg-blue-600 text-white">
+                            <tr>
+                                <th className="p-4 text-left">CPL</th>
+                                <th className="p-4 text-left">CPMK Terpetakan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {pemetaanData?.map((item) => (
+                                <tr key={item.cpl_mata_kuliah_id}>
+                                    {/* Info CPL */}
+                                    <td className="p-4 align-top">
+                                        <p className="font-semibold">{item.kode_cpl}</p>
+                                        <p className="text-sm text-gray-600">{item.deskripsi_cpl}</p>
+                                        <div className="inline-flex items-center gap-2 text-xs  px-2 py-0.5 rounded mt-1">
+                                            <p className="inline-flex items-center gap-2 text-xs bg-blue-100 px-4 py-1 rounded mt-1"> Bobot: {item.bobot}%</p>
+
+                                            {/* Tombol aksi CPL */}
+                                            <button
+                                                onClick={() => { setEditData(item); setIsFormOpen(true); }}
+                                                className="text-blue-600 hover:text-blue-800"
+                                                title="Edit CPL"
+                                            >
+                                                <FiEdit2 size={17} />
+                                            </button>
+                                            <button
+                                                onClick={() => setConfirmDelete({ type: "cpl", id: item.cpl_mata_kuliah_id })}
+                                                className="text-red-500 hover:text-red-700"
+                                                title="Hapus CPL"
+                                            >
+                                                <AiFillDelete size={18} />
+                                            </button>
+                                        </div>
                                     </td>
-                                    <td className="p-4 text-center space-x-2">
+
+
+                                    {/* CPMK List */}
+                                    <td className="p-4 align-top">
+                                        {pemetaanCPMKQuery.data
+                                            ?.filter((row) => row.cpl_id === item.cpl_id)
+                                            .map((row) => (
+                                                <div key={row.cpmk_mata_kuliah_id} className="mb-2">
+                                                    <p className="text-sm font-bold italic">
+                                                        {cpmkQuery.data?.find((c) => c.cpmk_id === row.cpmk_id)?.nama_cpmk ||
+                                                            `CPMK-${row.cpmk_id}`}
+                                                    </p>
+                                                    <p className="text-xs text-gray-600">
+                                                        {cpmkQuery.data?.find((c) => c.cpmk_id === row.cpmk_id)?.deskripsi || "-"}
+                                                    </p>
+                                                    <div className="inline-flex items-center gap-2 text-xs px-2 py-0.5 rounded">
+                                                        <p className="inline-flex items-center gap-2 text-xs bg-blue-100 px-4 py-1 rounded">
+                                                            Bobot: {row.bobot}%
+                                                        </p>
+                                                        {/* Tombol aksi CPMK */}
+                                                        <button
+                                                            onClick={() => handleEditCpmk(item.cpl_id, row)}
+                                                            className="text-blue-600 hover:text-blue-800"
+                                                            title="Edit CPMK"
+                                                        >
+                                                            <FiEdit2 size={17} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() =>
+                                                                setConfirmDelete({ type: "cpmk", id: row.cpmk_mata_kuliah_id })
+                                                            }
+                                                            className="text-red-500 hover:text-red-700"
+                                                            title="Hapus CPMK"
+                                                        >
+                                                            <AiFillDelete size={18} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+
                                         <button
-                                            onClick={() => handleDeleteItem(item.cpl_id)}
-                                            className="text-red-600 hover:text-red-800"
-                                            disabled={isMutating}
+                                            onClick={() => handleAddCpmk(item.cpl_id)}
+                                            className="mt-2 text-sm text-blue-600 hover:text-blue-800"
                                         >
-                                            <AiFillDelete size={20} />
+                                            <AiOutlinePlus size={14} className="inline" /> Tambah CPMK
                                         </button>
-                                        <button
-                                            onClick={() => {
-                                                setEditData(item);
-                                                setIsFormOpen(true);
-                                            }}
-                                            className="inline-flex items-center gap-1 px-3 py-1 text-sm text-blue-600 bg-blue-100 rounded-lg hover:bg-blue-200"
-                                            disabled={isMutating}
-                                        >
-                                            <FiEdit2 size={14} /> Edit
-                                        </button>
+
+                                        {/* Status total bobot */}
+                                        <div className="flex justify-end mt-2">
+                                            {(() => {
+                                                const total = (pemetaanCPMKQuery.data || [])
+                                                    .filter((row) => row.cpl_id === item.cpl_id)
+                                                    .reduce((sum, row) => sum + Number(row.bobot), 0);
+                                                const max = Number(item.bobot || 0);
+
+                                                if (total === 100) {
+                                                    return (
+                                                        <div className="p-2 rounded-lg text-xs font-medium bg-green-100 text-green-700 inline-block">
+                                                            Total bobot: {total}%
+                                                        </div>
+                                                    );
+                                                }
+                                                if (total < 100) {
+                                                    return (
+                                                        <div className="p-2 rounded-lg text-xs font-medium bg-yellow-100 text-yellow-700 inline-block">
+                                                            Total bobot: {total}%
+                                                        </div>
+                                                    );
+                                                }
+                                                return (
+                                                    <div className="p-2 rounded-lg text-xs font-medium bg-red-100 text-red-700 inline-block">
+                                                        Total bobot: {total}%
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
                                     </td>
+
+
+
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
+            {/* Modal Konfirmasi Hapus */}
+            <ConfirmModal
+                isOpen={!!confirmDelete.type}
+                onClose={() => setConfirmDelete({ type: null, id: null })}
+                onConfirm={handleConfirmDelete}
+                message={
+                    confirmDelete.type === "cpl"
+                        ? "Apakah Anda yakin ingin menghapus pemetaan CPL ini?"
+                        : confirmDelete.type === "cpmk"
+                            ? "Apakah Anda yakin ingin menghapus pemetaan CPMK ini?"
+                            : "Apakah Anda yakin ingin menghapus SEMUA pemetaan CPL dan CPMK untuk mata kuliah ini? Tindakan ini tidak dapat dibatalkan."
+                }
+            />
+
+            {/* Modal CPL */}
             {isFormOpen && (
                 <FormPemetaanCPL
                     isOpen={isFormOpen}
@@ -342,12 +451,36 @@ const DetailPemetaanProdi = () => {
                 />
             )}
 
-            <ConfirmModal
-                isOpen={isConfirmOpen}
-                onClose={() => setIsConfirmOpen(false)}
-                onConfirm={handleConfirmDelete}
-                message="Apakah Anda yakin ingin menghapus semua pemetaan CPL?"
-            />
+            {/* Modal CPMK */}
+            {isCpmkModalOpen && (
+                <FormPemetaanCPMK
+                    isOpen={isCpmkModalOpen}
+                    onClose={() => {
+                        setIsCpmkModalOpen(false);
+                        setEditCpmkData(null);
+                    }}
+                    onSubmit={submitCpmkMapping}
+                    cpmkOptions={(cpmkQuery.data || []).filter((cpmk) => {
+                        const sudahDipetakan = pemetaanCPMKQuery.data?.some(
+                            (row) => row.cpl_id === currentCplId && row.cpmk_id === cpmk.cpmk_id
+                        );
+                        if (editCpmkData && editCpmkData.cpmk_id === cpmk.cpmk_id) {
+                            return true;
+                        }
+                        return !sudahDipetakan;
+                    })}
+                    isLoading={createCPMKMutation.isPending || updateCPMKMutation.isPending}
+                    initialData={editCpmkData}
+                    cplBobot={
+                        pemetaanData.find((cpl) => cpl.cpl_id === currentCplId)?.bobot || 0
+                    }
+                    totalAcuan={
+                        pemetaanCPMKQuery.data
+                            ?.filter((row) => row.cpl_id === currentCplId)
+                            ?.reduce((sum, row) => sum + Number(row.bobot), 0) || 0
+                    }
+                />
+            )}
         </div>
     );
 };
