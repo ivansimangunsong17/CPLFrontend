@@ -4,6 +4,16 @@ import { AiFillDelete, AiOutlineArrowLeft, AiOutlinePlus } from "react-icons/ai"
 import { FiEdit2 } from "react-icons/fi";
 import { toast } from "react-toastify";
 
+const IconCheckCircle = ({ className }) => (
+    <svg className={className} fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path></svg>
+);
+const IconWarning = ({ className }) => (
+    <svg className={className} fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.03-1.742 3.03H4.42c-1.532 0-2.492-1.696-1.742-3.03l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-8a1 1 0 00-1 1v3a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path></svg>
+);
+const IconErrorCircle = ({ className }) => (
+    <svg className={className} fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"></path></svg>
+);
+
 // Hooks
 import { useMataKuliah } from "../../hooks/admin-prodi/useMataKuliah";
 import { useDataCPL } from "../../hooks/admin-prodi/useDataCPL";
@@ -222,6 +232,39 @@ const DetailPemetaanProdi = () => {
         });
     };
 
+
+    const totalBobotKeseluruhan = useMemo(() => {
+        // Kita hanya perlu menjumlahkan semua 'bobot' dari data pemetaanCPMKQuery
+        // tanpa mem-filter berdasarkan CPL
+        return (pemetaanCPMKQuery.data || []).reduce(
+            (total, cpmkMapping) => total + Number(cpmkMapping.bobot),
+            0 // Nilai awal
+        );
+    }, [pemetaanCPMKQuery.data]);
+
+    const getValidationInfo = (total) => {
+        if (total < 100) {
+            return {
+                icon: <IconWarning className="w-4 h-4" />,
+                text: `Kurang (${total}%)`,
+                className: "inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
+            };
+        }
+        if (total === 100) {
+            return {
+                icon: <IconCheckCircle className="w-4 h-4" />,
+                text: `Sesuai (${total}%)`,
+                className: "inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-medium bg-green-100 text-green-800"
+            };
+        }
+        return {
+            icon: <IconErrorCircle className="w-4 h-4" />,
+            text: `Berlebih (${total}%)`,
+            className: "inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-medium bg-red-100 text-red-800"
+        };
+    };
+
+
     // Loading awal
     if (isInitialLoading) {
         return (
@@ -288,22 +331,22 @@ const DetailPemetaanProdi = () => {
 
             {/* Table CPL & CPMK */}
             <div className="bg-white rounded-xl shadow overflow-hidden">
-                <div className="flex flex-wrap justify-between items-center px-4 py-3 border-b gap-3">
-                    <h3 className="font-semibold text-gray-700">Daftar Pemetaan CPL</h3>
-                    <div className="flex gap-3">
-                        <button
-                            onClick={handleAddCPL}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
-                            disabled={isMutating}
-                        >
-                            <AiOutlinePlus size={14} /> Tambah CPL
-                        </button>
-
-                    </div>
+                <div className="flex items-center gap-2 mt-2 mb-4">
+                    <p className="text-sm text-gray-500">Total Bobot CPMK Terpetakan:</p>
+                    {(() => {
+                        // Panggil fungsi baru untuk mendapatkan semua info validasi
+                        const validation = getValidationInfo(totalBobotKeseluruhan);
+                        return (
+                            // Gunakan info tersebut untuk merender badge
+                            <div className={validation.className}>
+                                {validation.icon}
+                                {validation.text}
+                            </div>
+                        );
+                    })()}
                 </div>
-
                 <div className="overflow-x-auto">
-                    <table className="w-full min-w-[640px]">
+                 <table className="w-full min-w-[640px] table-fixed">
                         <thead className="bg-blue-600 text-white">
                             <tr>
                                 <th className="p-4 text-left">CPL</th>

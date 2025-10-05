@@ -57,7 +57,8 @@ const Sidebar = () => {
             return location.pathname === path ||
                 location.pathname.startsWith("/dashboard/dosen/detail_");
         }
-     
+
+
 
         // For other paths, use exact match
         return location.pathname === path;
@@ -115,7 +116,8 @@ const Sidebar = () => {
         ],
         dosen: [
             { label: "Dashboard", path: "/dashboard/dosen", icon: <IoHomeOutline /> },
-            { label: "Input Nilai", path: "/dashboard/dosen/input_nilai", icon: <BsClipboardData /> },
+            { label: "Atur Penilaian", path: "/dashboard/dosen/atur_penilaian", icon: <MdSettings /> },
+            { label: "Penilaian", path: "/dashboard/dosen/penilaian", icon: <FaRegFileAlt /> },
             { label: "Hasil Perhitungan", path: "/dashboard/dosen/hasil_perhitungan", icon: <BsClipboardData /> },
         ],
     };
@@ -139,21 +141,13 @@ const Sidebar = () => {
     return (
         <aside className="w-[260px] h-screen bg-white shadow-xl flex flex-col fixed">
             {/* Header Logo */}
-            <div className="p-5 flex items-center gap-3 border-b border-gray-200">
-                <img src={LogoCPLLogin} alt="Logo CPL" className="w-8 h-8" />
+            <div className="p-7 ml-8 flex items-center gap-3 ">
+                <img src={LogoCPLLogin} alt="Logo CPL" className="w-10 h-10" />
                 <h1 className="text-sm font-bold text-gray-800 leading-5">
-                    Sistem Perhitungan CPL
+                    SIP-CPL
                 </h1>
             </div>
 
-            {/* Search */}
-            <div className="px-5 py-3 border-b border-gray-200">
-                <input
-                    type="text"
-                    placeholder="Search..."
-                    className="w-full px-3 py-2 border bg-gray-100 text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-            </div>
 
             {/* Menu Navigasi */}
             <div className="flex-1 overflow-y-auto px-4 py-3">

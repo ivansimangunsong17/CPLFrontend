@@ -350,6 +350,7 @@ const DetailMatakuliahProdi = () => {
                             <tr>
                                 <th className="p-4 text-left">Kode</th>
                                 <th className="p-4 text-left">Nama Kelas</th>
+                                <th className="p-4 text-left">Dosen</th>
                                 <th className="p-4 text-left">Jabatan</th>
                                 <th className="p-4 text-left">Periode</th>
                                 <th className="p-4 text-center">Aksi</th>
@@ -366,9 +367,12 @@ const DetailMatakuliahProdi = () => {
                                 </tr>
                             ) : (
                                 dataKelas.map((item) => (
+                                   
                                     <tr key={item.kelas_id} className="hover:bg-gray-50">
                                         <td className="p-4">{item.kode_kelas}</td>
                                         <td className="p-4">{item.nama_kelas}</td>
+                                        <td className='p-4'>{item.dosens?.[0]?.name}</td>
+
                                         <td className="p-4">{item.dosens?.[0]?.pivot?.jabatan || "-"}</td>
                                         <td className="p-4">{item.tahun_ajaran}</td>
                                         <td className="p-4 text-center">

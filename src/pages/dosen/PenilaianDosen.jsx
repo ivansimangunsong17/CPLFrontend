@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useKelas } from "../../hooks/admin-prodi/useKelas";
 import TableSkeleton from "../../components/TableSkeleton";
 
-const HasilPerhitunganProdi = () => {
+const PenilaianDosen = () => {
   const { kelasQuery } = useKelas();
   const navigate = useNavigate();
 
@@ -29,11 +29,8 @@ const HasilPerhitunganProdi = () => {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-800">
-          Hasil Perhitungan Program Studi
+          Daftar Mata Kuliah untuk Penilaian
         </h1>
-        <p className="text-gray-600">
-          Analisis pencapaian CPL dan CPMK semester ini
-        </p>
       </div>
 
       {/* Tabel Mata Kuliah */}
@@ -107,4 +104,4 @@ const HasilPerhitunganProdi = () => {
   );
 };
 
-export default HasilPerhitunganProdi;
+export default PenilaianDosen;

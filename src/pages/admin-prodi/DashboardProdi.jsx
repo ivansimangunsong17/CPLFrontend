@@ -1,167 +1,269 @@
-import React from "react";
-import { useParams } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import React, { useState } from "react";
 import {
   FiUsers,
   FiUserCheck,
   FiBook,
-  FiCheckCircle,
-  FiAlertTriangle
+  FiBarChart2,
+  FiSearch,
 } from "react-icons/fi";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import SpiderChartCPL from "../../components/Chart/SpiderChartCPL";
+import {
+  Legend
+} from "recharts";
+import { AiOutlineLine } from "react-icons/ai";
+import LineChartCPL from "../../components/Chart/LineChartCPL";
 
 const DashboardProdi = () => {
-  const { prodiId } = useParams();
-  const { user } = useAuth();
-
-  // Simulasi data prodi berdasarkan prodi_id (nanti bisa diganti dengan API call)
-  const prodiInfo = {
-    1: { name: "Teknik Informatika", fakultas: "Fakultas Teknik" },
-    2: { name: "Sistem Informasi", fakultas: "Fakultas Teknik" },
-    3: { name: "Teknik Elektro", fakultas: "Fakultas Teknik" },
-    // Tambahkan prodi lainnya sesuai kebutuhan
-  };
-
-  const currentProdi = prodiInfo[prodiId || user?.prodi_id] || { name: "Program Studi", fakultas: "Fakultas" };
-
-  // Data statistik
-  const cardData = [
+  // Dummy statistik
+  const stats = [
     {
-      title: "Mahasiswa",
-      value: "1.240",
+      title: "Total Mahasiswa",
+      value: 178,
       icon: FiUsers,
-      color: "bg-blue-100",
-      iconColor: "text-blue-600"
+      color: "text-blue-500",
     },
     {
-      title: "Dosen",
-      value: "28",
+      title: "Total Dosen",
+      value: 50,
       icon: FiUserCheck,
-      color: "bg-green-100",
-      iconColor: "text-green-600"
+      color: "text-gray-700",
     },
     {
-      title: "Matakuliah",
-      value: "45",
+      title: "Total Mata Kuliah",
+      value: 60,
       icon: FiBook,
-      color: "bg-purple-100",
-      iconColor: "text-purple-600"
+      color: "text-green-500",
     },
     {
-      title: "CPL Rata-rata",
-      value: "87%",
-      icon: FiCheckCircle,
-      color: "bg-amber-100",
-      iconColor: "text-amber-600"
-    }
+      title: "Jumlah CPL",
+      value: 10,
+      icon: FiBarChart2,
+      color: "text-yellow-500",
+    },
   ];
 
-  // Data ketercapaian per CPL
-  const cplAchievement = [
-    { cpl: "CPL 1", percentage: 92, status: "tercapai" },
-    { cpl: "CPL 2", percentage: 78, status: "perlu perbaikan" },
-    { cpl: "CPL 3", percentage: 85, status: "tercapai" },
-    { cpl: "CPL 4", percentage: 88, status: "tercapai" },
-    { cpl: "CPL 5", percentage: 65, status: "perlu perbaikan" },
+  // Dummy tabel data
+  const [search, setSearch] = useState("");
+  const data = [
+    {
+      matkul: "Struktur Data",
+      kelas: "Struktur Data A",
+      dosen: "Rizka Andayani, S.T., M.T.",
+      periode: "2024 Genap",
+      status: "Selesai",
+    },
+    {
+      matkul: "Struktur Data",
+      kelas: "Struktur Data B",
+      dosen: "Rizka Andayani, S.T., M.T.",
+      periode: "2024 Genap",
+      status: "Tidak ada",
+    },
+    {
+      matkul: "Struktur Data",
+      kelas: "Struktur Data C",
+      dosen: "Dr. Budi Santoso, S.Kom., M.Cs.",
+      periode: "2024 Genap",
+      status: "Selesai",
+    },
+    {
+      matkul: "Basis Data",
+      kelas: "Basis Data A",
+      dosen: "Nadia Amalia, S.T., M.T.I.",
+      periode: "2024 Genap",
+      status: "Tidak ada",
+    },
+    {
+      matkul: "Basis Data",
+      kelas: "Basis Data B",
+      dosen: "Nadia Amalia, S.T., M.T.I.",
+      periode: "2024 Genap",
+      status: "Selesai",
+    },
+    {
+      matkul: "Basis Data",
+      kelas: "Basis Data C",
+      dosen: "Nadia Amalia, S.T., M.T.I.",
+      periode: "2024 Genap",
+      status: "Tidak ada",
+    },
+    {
+      matkul: "Sistem Operasi",
+      kelas: "Sistem Operasi A",
+      dosen: "Taufik Hidayat, S.T., M.T.",
+      periode: "2024 Genap",
+      status: "Selesai",
+    },
+    {
+      matkul: "Sistem Operasi",
+      kelas: "Sistem Operasi B",
+      dosen: "Taufik Hidayat, S.T., M.T.",
+      periode: "2024 Genap",
+      status: "Tidak ada",
+    },
+    {
+      matkul: "Sistem Operasi",
+      kelas: "Sistem Operasi C",
+      dosen: "Taufik Hidayat, S.T., M.T.",
+      periode: "2024 Genap",
+      status: "Selesai",
+    },
+    {
+      matkul: "Kecerdasan Buatan",
+      kelas: "Kecerdasan Buatan A",
+      dosen: "Taufik Hidayat, S.T., M.T.",
+      periode: "2024 Genap",
+      status: "Tidak ada",
+    },
   ];
 
-  // Warna berdasarkan status
-  const getColor = (status) => {
-    return status === "tercapai" ? "#10B981" : "#EF4444";
-  };
+  // Filter pencarian
+  const filteredData = data.filter(
+    (row) =>
+      row.matkul.toLowerCase().includes(search.toLowerCase()) ||
+      row.kelas.toLowerCase().includes(search.toLowerCase()) ||
+      row.dosen.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header dengan informasi prodi */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard Prodi</h1>
-          <div className="mt-2 text-sm text-gray-600">
-            <span className="font-medium">{currentProdi.name}</span> • {currentProdi.fakultas}
-            {prodiId && (
-              <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                ID: {prodiId}
-              </span>
-            )}
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Welcome Section */}
+        <section className="bg-white shadow rounded-xl p-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+            Selamat Datang di Dashboard{" "}
+            <span role="img" aria-label="book">
+              📖
+            </span>{" "}
+            SIP-CPL
+          </h1>
+          <p className="text-gray-600 leading-relaxed">
+            SIP-CPL adalah sistem yang dirancang untuk mempermudah pengelolaan
+            kurikulum berbasis Outcome-Based Education (OBE). Fungsinya mencakup
+            pengelolaan data dosen, data mahasiswa, serta data kurikulum yang
+            meliputi Capaian Pembelajaran Lulusan (CPL), data mata kuliah,
+            pemetaan CPL, hingga proses penilaian pembelajaran.
+          </p>
+          <p className="text-gray-600 mt-3">
+            Untuk memudahkan penggunaan, tersedia file panduan tata cara
+            pemakaian website yang dapat Anda unduh di bawah ini.
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-4">
+            <button className="flex items-center gap-2 bg-red-100 text-red-600 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-red-200 transition">
+              <span>📕</span>
+              Panduan Tata Cara Pemakaian Website
+            </button>
+            <a
+              href="#"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium shadow hover:bg-blue-700 transition"
+            >
+              Download PDF
+            </a>
           </div>
-        </div>
+        </section>
 
-        {/* Kartu Statistik */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {cardData.map((card, index) => (
-            <div key={index} className="bg-white rounded-lg shadow p-4 flex items-center">
-              <div className={`p-3 rounded-lg ${card.color} ${card.iconColor} mr-3`}>
-                <card.icon className="text-lg" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">{card.title}</p>
-                <p className="text-xl font-semibold">{card.value}</p>
-              </div>
+        {/* Statistik Cards */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((item, idx) => (
+            <div
+              key={idx}
+              className="bg-white rounded-xl shadow p-6 flex flex-col items-center justify-center hover:shadow-md transition"
+            >
+              <item.icon size={40} className={`${item.color} mb-3`} />
+              <p className="text-sm text-gray-500">{item.title}</p>
+              <p className="text-2xl font-bold text-gray-800">{item.value}</p>
             </div>
           ))}
-        </div>
+        </section>
 
-        {/* Grafik Ketercapaian CPL */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-lg font-semibold mb-4">Ketercapaian per CPL</h2>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={cplAchievement}>
-                <XAxis
-                  dataKey="cpl"
-                  tick={{ fill: '#4B5563' }}
-                  axisLine={false}
-                />
-                <YAxis
-                  domain={[0, 100]}
-                  tick={{ fill: '#4B5563' }}
-                  axisLine={false}
-                  tickFormatter={(value) => `${value}%`}
-                />
-                <Tooltip
-                  formatter={(value) => [`${value}%`, "Pencapaian"]}
-                  contentStyle={{
-                    borderRadius: '6px',
-                    border: 'none',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                  }}
-                />
-                <Bar dataKey="percentage">
-                  {cplAchievement.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={getColor(entry.status)}
-                      radius={[4, 4, 0, 0]}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Daftar CPL Perlu Perbaikan */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center mb-4">
-            <div className="p-2 rounded-lg bg-red-100 text-red-600 mr-3">
-              <FiAlertTriangle className="text-lg" />
+        {/* Tabel Status Nilai */}
+        <section className="bg-white shadow rounded-xl p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-4">
+            <h2 className="text-lg font-semibold text-gray-800">
+              Status Pengisian / Upload Nilai Pada Mata Kuliah
+            </h2>
+            <div className="flex items-center border rounded-lg overflow-hidden shadow-sm">
+              <input
+                type="text"
+                placeholder="Cari Berdasarkan.."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="px-3 py-2 text-sm outline-none w-48"
+              />
+              <button className="bg-blue-600 text-white px-3 py-2 hover:bg-blue-700 transition">
+                <FiSearch size={18} />
+              </button>
             </div>
-            <h2 className="text-lg font-semibold">CPL Perlu Perbaikan</h2>
           </div>
 
-          <ul className="space-y-3">
-            {cplAchievement
-              .filter(cpl => cpl.status === "perlu perbaikan")
-              .map((cpl, index) => (
-                <li key={index} className="flex items-center">
-                  <span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-2"></span>
-                  <span className="font-medium">{cpl.cpl}:</span>
-                  <span className="ml-1 text-gray-700">{cpl.percentage}% (Target: 75%)</span>
-                  <span className="ml-2 text-red-500 text-sm">Gap: {75 - cpl.percentage}%</span>
-                </li>
-              ))}
-          </ul>
-        </div>
+          <div className="overflow-x-auto rounded-lg border">
+            <table className="w-full text-sm text-gray-700">
+              <thead>
+                <tr className="bg-blue-600 text-white text-sm">
+                  <th className="py-3 px-4 text-left">Mata Kuliah</th>
+                  <th className="py-3 px-4 text-left">Nama Kelas</th>
+                  <th className="py-3 px-4 text-left">Dosen</th>
+                  <th className="py-3 px-4 text-left">Periode</th>
+                  <th className="py-3 px-4 text-left">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredData.map((row, idx) => (
+                  <tr
+                    key={idx}
+                    className="border-b last:border-0 hover:bg-gray-50 transition"
+                  >
+                    <td className="py-3 px-4">{row.matkul}</td>
+                    <td className="py-3 px-4">{row.kelas}</td>
+                    <td className="py-3 px-4">{row.dosen}</td>
+                    <td className="py-3 px-4">{row.periode}</td>
+                    <td className="py-3 px-4">
+                      {row.status === "Selesai" ? (
+                        <span className="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-600">
+                          ● {row.status}
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600">
+                          ● {row.status}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* Spider Chart CPL */}
+        <section>
+          <div className="bg-white shadow rounded-xl p-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-6">
+              Spider Chart CPL
+            </h2>
+
+            {/* Grid Spider Chart */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+              <div className="flex flex-col items-center">
+                <SpiderChartCPL />
+                <p className="mt-4 text-gray-600 font-medium">Angkatan 2021-2025</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <SpiderChartCPL />
+                <p className="mt-4 text-gray-600 font-medium">Angkatan 2021</p>
+              </div>
+            </div>
+
+            {/* Tambahan Grafik Perkembangan */}
+            <div className="mt-10">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                Grafik Perkembangan CPL Tiap Angkatan
+              </h2>
+              <LineChartCPL/> {/* komponen grafik line */}
+            </div>
+          </div>
+        </section>
+
       </div>
     </div>
   );

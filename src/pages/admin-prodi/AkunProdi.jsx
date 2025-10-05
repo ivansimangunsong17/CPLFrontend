@@ -15,7 +15,6 @@ const AkunProdi = () => {
     createMutation: createKaprodiMutation,
     updateMutation: updateKaprodiMutation,
     deleteMutation: deleteKaprodiMutation,
-    user,
     userProdiId,
   } = useAkunKaprodi();
 
@@ -194,8 +193,10 @@ const AkunProdi = () => {
 
     if (editDataKaprodi) {
       updateKaprodiMutation.mutate({ id: editDataKaprodi.id, ...dataWithProdiId });
+    
     } else {
       createKaprodiMutation.mutate(dataWithProdiId);
+     
     }
     setIsFormOpenKaprodi(false);
     setEditDataKaprodi(null);
@@ -205,6 +206,7 @@ const AkunProdi = () => {
     const validIds = selectedRowsKaprodi.filter(id => {
       const akun = dataKaprodi.find(item => item.id === id);
       return akun && (akun.prodi_id === userProdiId || akun.prodi_id === null);
+
     });
 
     if (validIds.length === 0) {

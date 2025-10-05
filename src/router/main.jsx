@@ -39,9 +39,12 @@ import {
   PemetaanCPLKaprodi,
   DashboardDosen,
   HasilPerhitunganDosen,
-  InputNilaiDosen,
-  DetailPenilaianProdi
+  PenilaianDosen,
+  DetailPenilaianProdi,
+  DetailHasilPerhitungan,
+  AturPenilaianDosen
 } from './index';
+import DetailPenilaianDosen from '../pages/dosen/DetailPenilaianDosen';
 
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
@@ -88,6 +91,7 @@ const router = createBrowserRouter([
               { path: "hasil_perhitungan", element: <HasilPerhitunganProdi /> },
               { path: "atur_penilaian", element: <AturPenilaianProdi /> },
               { path: "detail_penilaian/:mataKuliahId", element: <DetailPenilaianProdi /> },
+              { path: "detail_hasil_perhitungan/:mataKuliahId", element: <DetailHasilPerhitungan /> },
             ]
           },
         ],
@@ -115,7 +119,9 @@ const router = createBrowserRouter([
           {
             path: "", element: <DashboardLayout />, children: [
               { path: "", element: <DashboardDosen /> },
-              { path: "input_nilai", element: <InputNilaiDosen /> },
+              { path: "atur_penilaian", element: <AturPenilaianDosen /> },
+              { path: "detail_penilaian/:mataKuliahId", element: <DetailPenilaianDosen /> },
+              { path: "penilaian", element: <PenilaianDosen /> },
               { path: "hasil_perhitungan", element: <HasilPerhitunganDosen /> },
             ]
           },
