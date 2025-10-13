@@ -356,7 +356,7 @@ const AkunUniversitas = () => {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {isLoadingAdminUniv ? (
-                <TableSkeleton rows={3} />
+                <TableSkeleton rows={3} columns={6} />
               ) : isErrorAdminUniv ? (
                 <tr>
                   <td colSpan={6} className="p-4 text-center text-red-600">
@@ -463,7 +463,7 @@ const AkunUniversitas = () => {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {isLoadingAdminProdi ? (
-                <TableSkeleton rows={3} />
+                <TableSkeleton rows={3} columns = {6} />
               ) : isErrorAdminProdi ? (
                 <tr>
                   <td colSpan={6} className="p-4 text-center text-red-600">

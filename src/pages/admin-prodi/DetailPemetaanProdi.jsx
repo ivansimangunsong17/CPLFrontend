@@ -331,22 +331,38 @@ const DetailPemetaanProdi = () => {
 
             {/* Table CPL & CPMK */}
             <div className="bg-white rounded-xl shadow overflow-hidden">
-                <div className="flex items-center gap-2 mt-2 mb-4">
-                    <p className="text-sm text-gray-500">Total Bobot CPMK Terpetakan:</p>
-                    {(() => {
-                        // Panggil fungsi baru untuk mendapatkan semua info validasi
-                        const validation = getValidationInfo(totalBobotKeseluruhan);
-                        return (
-                            // Gunakan info tersebut untuk merender badge
-                            <div className={validation.className}>
-                                {validation.icon}
-                                {validation.text}
-                            </div>
-                        );
-                    })()}
+                <div className="border-b p-4 flex justify-between ">
+                    <div className="flex items-center gap-2 mt-2 mb-4">
+                        <p className="text-sm text-gray-500">Total Bobot CPMK Terpetakan:</p>
+
+
+                        {(() => {
+                            // Panggil fungsi baru untuk mendapatkan semua info validasi
+                            const validation = getValidationInfo(totalBobotKeseluruhan);
+                            return (
+                                // Gunakan info tersebut untuk merender badge
+                                <div className={validation.className}>
+                                    {validation.icon}
+                                    {validation.text}
+                                </div>
+                            );
+                        })()}
+                    </div>
+
+                    <div className="flex items-center justify-between px-6 mb-4s">
+                        <button
+                            onClick={handleAddCPL}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            <AiOutlinePlus size={18} />
+                            Tambah CPL
+                        </button>
+                    </div>
                 </div>
+
+
                 <div className="overflow-x-auto">
-                 <table className="w-full min-w-[640px] table-fixed">
+                    <table className="w-full min-w-[640px] table-fixed">
                         <thead className="bg-blue-600 text-white">
                             <tr>
                                 <th className="p-4 text-left">CPL</th>

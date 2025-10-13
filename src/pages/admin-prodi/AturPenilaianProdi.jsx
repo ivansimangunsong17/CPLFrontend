@@ -1,211 +1,174 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaPlus, FaTrash, FaRegEdit } from "react-icons/fa";
-import FormBox from "../../components/Form/FormBox";
-import { useKelas } from "../../hooks/admin-prodi/useKelas";
+import { AiOutlineSearch, AiOutlineEye } from "react-icons/ai";
+import { useMataKuliah } from "../../hooks/admin-prodi/useMataKuliah";
 import TableSkeleton from "../../components/TableSkeleton";
 
 const AturPenilaianProdi = () => {
     const navigate = useNavigate();
-    const { kelasQuery } = useKelas();
+    const { mataKuliahQuery } = useMataKuliah();
+    const [searchTerm, setSearchTerm] = useState("");
 
+    // Memoized data extraction
+    const data = useMemo(() => {
+        const rawData = mataKuliahQuery.data || [];
+        console.log('Raw mata kuliah data:', rawData);
+        return rawData;
+    }, [mataKuliahQuery.data]);
+    const isLoading = mataKuliahQuery.isLoading;
+    const error = mataKuliahQuery.error;
 
-    const [assessments, setAssessments] = useState([
-        { jenis: "Tugas", subs: ["Tugas 1", "Tugas 2"] },
-        { jenis: "Kuis", subs: ["Kuis 1"] },
-        { jenis: "Hasil Projek", subs: [] },
-        { jenis: "Ujian Tengah Semester", subs: [] },
-        { jenis: "Ujian Akhir Semester", subs: [] },
-    ]);
+    // Memoized filtered data
+    const filteredData = useMemo(() => {
+        return data.filter((item) => {
+            const term = (searchTerm || "").toLowerCase().trim();
+            return (
+                item.kode_mata_kuliah?.toLowerCase().includes(term) ||
+                item.nama_mata_kuliah?.toLowerCase().includes(term) ||
+                item.kode?.toLowerCase().includes(term) ||
+                item.nama?.toLowerCase().includes(term)
+            );
+        });
+    }, [data, searchTerm]);
 
-    const [isFormOpen, setIsFormOpen] = useState(false);
-    const [isSubFormOpen, setIsSubFormOpen] = useState(false);
-    const [selectedAssessmentIndex, setSelectedAssessmentIndex] = useState(null);
+    // Data untuk pagination
+    const itemsPerPage = 10;
+    const [currentPage, setCurrentPage] = useState(1);
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
-    // Form field
-    const fieldsJenisPenilaian = [
-        { name: "jenis", label: "Jenis Penilaian", type: "text", required: true },
-    ];
-
-    const fieldsSubPenilaian = [
-        { name: "sub", label: "Nama Sub Penilaian", type: "text", required: true },
-    ];
-
-    // Tambah jenis penilaian
-    const handleAddAssessment = (data) => {
-        setAssessments([...assessments, { jenis: data.jenis, subs: [] }]);
-        setIsFormOpen(false);
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
     };
 
-    // Tambah sub penilaian
-    const handleAddSubAssessment = (data) => {
-        const updated = [...assessments];
-        updated[selectedAssessmentIndex].subs.push(data.sub);
-        setAssessments(updated);
-        setIsSubFormOpen(false);
-        setSelectedAssessmentIndex(null);
+    const handleViewDetail = (matakuliah) => {
+        // Navigasi ke halaman detail pemetaan mata kuliah
+        const mataKuliahId = matakuliah.id || matakuliah.mata_kuliah_id;
+        if (mataKuliahId) {
+            navigate(`/dashboard/admin_prodi/atur_penilaian/${mataKuliahId}`);
+
+        } else {
+            console.error("ID mata kuliah tidak ditemukan:", matakuliah);
+        }
     };
 
-    // Hapus sub penilaian
-    const removeSub = (i, subIndex) => {
-        const updated = [...assessments];
-        updated[i].subs.splice(subIndex, 1);
-        setAssessments(updated);
-    };
-
-    // Data mata kuliah dari API
-    const data = useMemo(() => kelasQuery.data || [], [kelasQuery.data]);
-    const isLoading = kelasQuery.isLoading;
-
-    const handleClick = (KelasId) => {
-        navigate(`/dashboard/admin_prodi/detail_penilaian/${KelasId}`);
-    };
+    if (error) return <div className="text-red-500">Error: {error.message}</div>;
 
     return (
-        <div className="p-6 bg-gray-50 min-h-screen">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-700">Jenis Penilaian</h2>
-                <button
-                    onClick={() => setIsFormOpen(true)}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg  hover:bg-blue-700 transition"
-                >
-                    <FaPlus size={14} /> Tambah Penilaian
-                </button>
-            </div>
+        <div className="p-6 max-w-7xl mx-auto">
 
-            {/* Table Penilaian */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
-    <table className="w-full text-gray-700">
-        <thead>
-            <tr className="bg-blue-600 text-white text-sm uppercase">
-                {/* PERBAIKAN: Padding diubah agar lebih lega */}
-                <th className="px-6 py-3 text-left">Penilaian</th>
-                <th className="px-6 py-3 text-left">Sub - Penilaian</th>
-                <th className="px-6 py-3 text-center">Aksi</th>
-            </tr>
-        </thead>
-        {/* PERBAIKAN: Menggunakan `divide-y` untuk garis horizontal yang rapi */}
-        <tbody className="divide-y divide-gray-200">
-            {assessments.map((a, i) => {
-                const rowSpan = Math.max(1, a.subs.length);
-                return (
-                    <React.Fragment key={i}>
-                        <tr className="hover:bg-gray-50">
-                            <td className="px-6 py-4 font-medium align-top" rowSpan={rowSpan}>
-                                <div className="flex justify-between items-center">
-                                    {a.jenis}
-                                    <button
-                                        onClick={() => {
-                                            setSelectedAssessmentIndex(i);
-                                            setIsSubFormOpen(true);
-                                        }}
-                                        className="bg-blue-500 text-white p-1.5 rounded-full hover:bg-blue-600 transition"
-                                    >
-                                        <FaPlus size={12} />
-                                    </button>
-                                </div>
-                            </td>
-                            {/* PERBAIKAN: `border` dihapus, padding diubah */}
-                            <td className="px-6 py-4">{a.subs[0] || "-"}</td>
-                            <td className="px-6 py-4 text-center">
-                                {a.subs[0] && (
-                                    <button
-                                        onClick={() => removeSub(i, 0)}
-                                        className="text-red-500 hover:text-red-700 transition"
-                                    >
-                                        <FaTrash />
-                                    </button>
-                                )}
-                            </td>
-                        </tr>
-                        {a.subs.slice(1).map((sub, subIndex) => (
-                            <tr key={subIndex} className="hover:bg-gray-50">
-                                <td className="px-6 py-4">{sub}</td>
-                                <td className="px-6 py-4 text-center">
-                                    <button
-                                        onClick={() => removeSub(i, subIndex + 1)}
-                                        className="text-red-500 hover:text-red-700 transition"
-                                    >
-                                        <FaTrash />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </React.Fragment>
-                );
-            })}
-        </tbody>
-    </table>
-</div>
 
-            {/* Table Mata Kuliah */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden mt-10">
-                <table className="w-full text-gray-700">
-                    <thead>
-                        <tr className="bg-blue-600 text-white text-sm uppercase">
-                            {/* PERUBAHAN: Padding diubah menjadi px-6 py-3 */}
-                            <th className="px-6 py-3 text-left">Kode Mata Kuliah</th>
-                            <th className="px-6 py-3 text-left">Nama Mata Kuliah</th>
-                            <th className="px-6 py-3 text-left">Kelas</th>
-                            {/* PERUBAHAN: Aksi dibuat rata kanan */}
-                            <th className="px-6 py-3 text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    {/* PERUBAHAN: Tambahkan `divide-y` untuk garis horizontal yang rapi */}
-                    <tbody className="divide-y divide-gray-200">
-                        {isLoading ? (
-                            <TableSkeleton rows={5} columns={4} />
-                        ) : data.length === 0 ? (
+            <div className="mb-8">
+                <div className="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-800">Daftar Mata Kuliah</h2>
+                        <p className="text-gray-600 mt-1">Kelola penilaian mata kuliah dengan CPL</p>
+                    </div>
+                </div>
+
+                {/* Search Bar */}
+                <div className="mb-6">
+                    <div className="relative max-w-md">
+                        <AiOutlineSearch className="absolute left-3 top-3 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Cari Mata Kuliah..."
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                {/* Table */}
+                <div className="bg-white rounded-xl shadow-md overflow-hidden">
+                    {error && (
+                        <div className="p-4 bg-red-50 border-l-4 border-red-400 text-red-700">
+                            <p className="font-medium">Error memuat data:</p>
+                            <p className="text-sm">{error.message}</p>
+                        </div>
+                    )}
+
+                    <table className="w-full">
+                        <thead className="bg-blue-100 ">
                             <tr>
-                                <td colSpan="4" className="p-8 text-center text-gray-500">
-                                    Belum ada data kelas
-                                </td>
+                                <th className="p-4 text-left">Kode MK </th>
+                                <th className="p-4 text-left">Mata Kuliah </th>
+                                <th className="p-4 text-center">Aksi</th>
                             </tr>
-                        ) : (
-                            data.map((k, i) => (
-                                <tr key={k.kelas_id || i} className="hover:bg-gray-50 transition-colors duration-200">
-                                    {/* PERUBAHAN: `border` dihapus, `p-4` diubah, dan ditambahkan hierarki visual */}
-                                    <td className="px-6 py-4 font-medium text-gray-800">{k.mata_kuliah?.kode_mata_kuliah || k.kode_kelas}</td>
-                                    <td className="px-6 py-4 text-gray-500">{k.mata_kuliah?.nama_mata_kuliah}</td>
-                                    <td className="px-6 py-4 font-semibold text-gray-900">{k.nama_kelas}</td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button
-                                            onClick={() => handleClick(k.kelas_id)}
-                                            className="flex items-center gap-2 ml-auto text-blue-600 hover:text-blue-800 font-medium transition"
-                                        >
-                                            Atur <FaRegEdit size={14} />
-                                        </button>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                            {isLoading ? (
+                                <TableSkeleton rows={itemsPerPage} columns={3} />
+                            ) : paginatedData.length === 0 ? (
+                                <tr>
+                                    <td colSpan="3" className="p-8 text-center text-gray-500">
+                                        {searchTerm ? "Tidak ada data yang sesuai dengan pencarian" : "Belum ada data mata kuliah"}
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ) : (
+                                paginatedData.map((item, index) => (
+                                    <tr key={item.id ?? index} className="hover:bg-gray-50 transition">
+                                        <td className="p-4 font-medium text-gray-800">
+                                            {item.kode_mata_kuliah || item.kode || 'IF265365'}
+                                        </td>
+                                        <td className="p-4 text-gray-700">
+                                            {item.nama_mata_kuliah || item.nama || 'Nama Mata Kuliah'}
+                                        </td>
+                                        <td className="p-4 text-center">
+                                            <button
+                                                onClick={() => handleViewDetail(item)}
+                                                className="inline-flex items-center gap-1 px-3 py-1 text-sm text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition"
+                                            >
+                                                Lihat
+                                                <AiOutlineEye size={16} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <div className="flex justify-center items-center py-4 border-t border-gray-200">
+                            <div className="flex gap-2">
+                                {Array.from({ length: Math.min(6, totalPages) }, (_, i) => {
+                                    const page = i + 1;
+                                    return (
+                                        <button
+                                            key={page}
+                                            onClick={() => handlePageChange(page)}
+                                            className={`px-3 py-1 rounded text-sm transition ${currentPage === page
+                                                ? "bg-blue-500 text-white"
+                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                }`}
+                                        >
+                                            {page < 10 ? `0${page}` : page}
+                                        </button>
+                                    );
+                                })}
+                                {totalPages > 6 && (
+                                    <>
+                                        <span className="px-2 text-gray-500">...</span>
+                                        <button
+                                            onClick={() => handlePageChange(totalPages)}
+                                            className={`px-3 py-1 rounded text-sm transition ${currentPage === totalPages
+                                                ? "bg-blue-500 text-white"
+                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                }`}
+                                        >
+                                            {totalPages < 10 ? `0${totalPages}` : totalPages}
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
-
-            {/* Modal Tambah Jenis Penilaian */}
-            <FormBox
-                title="Tambah Jenis Penilaian"
-                subtitle="Lengkapi informasi jenis penilaian"
-                fields={fieldsJenisPenilaian}
-                initialData={{ jenis: "" }}
-                onSubmit={handleAddAssessment}
-                onCancel={() => setIsFormOpen(false)}
-                isOpen={isFormOpen}
-            />
-
-            {/* Modal Tambah Sub Penilaian */}
-            <FormBox
-                title="Tambah Sub Penilaian"
-                subtitle={`Untuk ${selectedAssessmentIndex !== null ? assessments[selectedAssessmentIndex].jenis : ""
-                    }`}
-                fields={fieldsSubPenilaian}
-                initialData={{ sub: "" }}
-                onSubmit={handleAddSubAssessment}
-                onCancel={() => setIsSubFormOpen(false)}
-                isOpen={isSubFormOpen}
-            />
         </div>
     );
 };

@@ -5,6 +5,7 @@ import { AuthContext } from "../../context/AuthContext";
 import BgLogin from "../../assets/BgLogin.png";
 import LogoCPLLogin from "../../assets/LogoCPLLogin.png";
 import LoadingScreen from "../../components/LoadingScreen";
+import { MdErrorOutline } from "react-icons/md";
 
 const LoginPage = () => {
 
@@ -16,7 +17,7 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Reset error
+
 
     const email = e.target.email.value;
     const password = e.target.password.value;
@@ -56,7 +57,7 @@ const LoginPage = () => {
         },
         onError: (error) => {
           console.error('Login error:', error);
-          setError("Email atau password salah!");
+          setError("Email atau password salah");
         },
       }
     );
@@ -96,15 +97,6 @@ const LoginPage = () => {
                 required
               />
             </div>
-            <div>
-              <label className="inline-flex items-center mt-3">
-                <input type="checkbox" className="form-checkbox text-indigo-600" />
-                <span className="ml-2 text-xs text-slate-400">
-                  Ingat saya sebagai anggota komunitas{" "}
-                  <span className="font-semibold text-black">Sistem Informasi CPL</span> Unila
-                </span>
-              </label>
-            </div>
             <button
               type="submit"
               className="w-full bg-blue-600 text-sm text-white py-2 mt-2.5 rounded-sm hover:bg-blue-700 transition"
@@ -112,7 +104,12 @@ const LoginPage = () => {
             >
               {loginMutation.status === 'pending' ? "Logging in..." : "Login"}
             </button>
-            {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
+            {error && (
+              <div className="flex items-center gap-2 text-red-600 text-sm mt-2">
+                <MdErrorOutline className="h-5 w-5" />
+                <p>{error}</p>
+              </div>
+            )}
           </form>
         </div>
       </div>

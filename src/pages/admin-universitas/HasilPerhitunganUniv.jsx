@@ -77,7 +77,7 @@ const HasilPerhitunganUniv = () => {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {isLoading ? (
-                <TableSkeleton rows={3} />
+                <TableSkeleton rows={3} columns={4} />
               ) : currentData.length > 0 ? (
                 currentData.map((item) => (
                   <tr
@@ -140,8 +140,8 @@ const HasilPerhitunganUniv = () => {
                   <button
                     onClick={() => setCurrentPage(page)}
                     className={`px-3 py-1 rounded-lg transition ${currentPage === page
-                        ? "bg-blue-100 text-blue-600 font-semibold"
-                        : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-blue-100 text-blue-600 font-semibold"
+                      : "text-gray-700 hover:bg-gray-100"
                       }`}
                   >
                     {page}
