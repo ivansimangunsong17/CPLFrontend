@@ -7,6 +7,7 @@ import ConfirmModal from '../../components/Modal/ConfModal';
 import FormBox from '../../components/Form/FormBox';
 import LoadingScreen from '../../components/LoadingScreen';
 import TableSkeleton from '../../components/TableSkeleton';
+import CardSkeleton from '../../components/CardSkeleton';
 import { useCPMK } from '../../hooks/admin-prodi/useCPMK';
 import { useKelas } from "../../hooks/admin-prodi/useKelas";
 import { AuthContext } from '../../context/AuthContext';
@@ -57,7 +58,7 @@ const DetailMatakuliahProdi = () => {
 
     // Data Kelas
     const dataKelas = useMemo(() => (Array.isArray(kelasQuery.data) ? kelasQuery.data : []), [kelasQuery.data]);
-    const isLoadingKelas = kelasQuery.isLoading;
+    const isLoadingKelas = kelasQuery.isPending;
 
     // Base form fields kelas
     const formFieldsKelas = [
@@ -124,7 +125,7 @@ const DetailMatakuliahProdi = () => {
 
     // CPMK data
     const data = useMemo(() => (Array.isArray(cpmkQuery.data) ? cpmkQuery.data : []), [cpmkQuery.data]);
-    const isLoading = cpmkQuery.isLoading;
+    const isLoading = cpmkQuery.isPending;
     const error = cpmkQuery.error;
 
     const filteredData = useMemo(() => {
@@ -213,22 +214,31 @@ const DetailMatakuliahProdi = () => {
     if (error) return <div className="text-red-500">Error: {error.message}</div>;
     return (
         <div className="p-6 max-w-7xl mx-auto">
-            {(createMutation.isLoading || updateMutation.isLoading || deleteMutation.isLoading) && <LoadingScreen />}
+            {(createMutation.isPending || updateMutation.isPending || deleteMutation.isPending) && <LoadingScreen />}
+            {(createKelasMutation.isPending || updateKelasMutation.isPending || deleteKelasMutation.isPending) && <LoadingScreen />}
+
 
             {/* Header Mata Kuliah */}
-            <div className="mb-6 bg-white p-4 shadow rounded-lg flex justify-between">
-                <div>
-                    <p className="text-sm text-gray-500">Kode Mata Kuliah</p>
-                    <p className="text-lg font-bold">{mataKuliahInfo.kode_mata_kuliah || '-'}</p>
+            {isLoading ? (
+                // Jika sedang loading, tampilkan CardSkeleton
+                <CardSkeleton />
+            ) : (
+                // Jika sudah selesai, tampilkan data
+                <div className="mb-6 bg-white p-4 shadow rounded-lg flex justify-between">
+                    <div>
+                        <p className="text-sm text-gray-500">Kode Mata Kuliah</p>
+                        <p className="text-lg font-bold">{mataKuliahInfo.kode_mata_kuliah || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="text-sm text-gray-500">Nama Mata Kuliah</p>
+                        <p className="text-lg font-bold">{mataKuliahInfo.nama_mata_kuliah || '-'}</p>
+                    </div>
                 </div>
-                <div>
-                    <p className="text-sm text-gray-500">Nama Mata Kuliah</p>
-                    <p className="text-lg font-bold">{mataKuliahInfo.nama_mata_kuliah || '-'}</p>
-                </div>
-            </div>
+            )}
 
             {/* === CPMK Section === */}
             {/* Actions */}
+
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold">Capaian Pembelajaran Mata Kuliah (CPMK)</h2>
                 <div className="flex gap-3">
@@ -367,7 +377,7 @@ const DetailMatakuliahProdi = () => {
                                 </tr>
                             ) : (
                                 dataKelas.map((item) => (
-                                   
+
                                     <tr key={item.kelas_id} className="hover:bg-gray-50">
                                         <td className="p-4">{item.kode_kelas}</td>
                                         <td className="p-4">{item.nama_kelas}</td>

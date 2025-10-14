@@ -13,7 +13,8 @@ export const useMahasiswaKelas = ({ kelas_id }) => {
 
   // CREATE
   const createMutation = useMutation({
-    mutationFn: (payload) => createMahasiswaKelas({ kelas_id, ...payload }),
+    // 'mahasiswasArray' sekarang adalah payload-nya langsung (bukan payload.mahasiswas)
+    mutationFn: (mahasiswasArray) => createMahasiswaKelas({ kelas_id, mahasiswas: mahasiswasArray }),
     onSuccess: () => {
       toast.success('Mahasiswa berhasil ditambahkan')
       queryClient.invalidateQueries({ queryKey: ['mahasiswaKelas', kelas_id] }) // ✅ v5 style

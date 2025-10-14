@@ -19,20 +19,20 @@ export function useCPMK(mataKuliahId) {
   const createMutation = useMutation({
     mutationFn: createCPMK,
     onSuccess: () => {
-      toast.success('✅ CPMK berhasil ditambahkan')
+      toast.success('CPMK berhasil ditambahkan')
       queryClient.invalidateQueries(['cpmk-matkul', mataKuliahId])
     },
-    onError: (err) => toast.error(err.response?.data?.message || '❌ Gagal menambahkan CPMK'),
+    onError: (err) => toast.error(err.response?.data?.message || 'Gagal menambahkan CPMK'),
   })
 
   // Update CPMK
   const updateMutation = useMutation({
     mutationFn: updateCPMK,
     onSuccess: () => {
-      toast.success('✅ CPMK berhasil diperbarui')
+      toast.success('CPMK berhasil diperbarui')
       queryClient.invalidateQueries(['cpmk-matkul', mataKuliahId])
     },
-    onError: (err) => toast.error(err.response?.data?.message || '❌ Gagal memperbarui CPMK'),
+    onError: (err) => toast.error(err.response?.data?.message || 'Gagal memperbarui CPMK'),
   })
 
   // Hapus CPMK
@@ -41,7 +41,7 @@ export function useCPMK(mataKuliahId) {
     onSuccess: () => {
       queryClient.invalidateQueries(['cpmk-matkul', mataKuliahId])
     },
-    onError: (err) => toast.error(err.response?.data?.message || '❌ Gagal menghapus CPMK'),
+    onError: (err) => toast.error(err.response?.data?.message || 'Gagal menghapus CPMK'),
   })
 
   return { cpmkQuery, createMutation, updateMutation, deleteMutation }

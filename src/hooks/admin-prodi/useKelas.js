@@ -18,8 +18,8 @@ export const useKelas = ({ kelas_id = null, mata_kuliah_id = null } = {}) => {
       toast.success('Kelas berhasil ditambahkan')
       queryClient.invalidateQueries(['kelas'])
     },
-    onError: (error) => {
-      toast.error(error.message || 'Gagal menambahkan kelas')
+    onError: () => {
+      toast.error('Gagal menambahkan kelas')
     },
   })
 
@@ -30,8 +30,8 @@ export const useKelas = ({ kelas_id = null, mata_kuliah_id = null } = {}) => {
       toast.success('Data kelas berhasil diperbarui')
       queryClient.invalidateQueries(['kelas'])
     },
-    onError: (error) => {
-      toast.error(error.message || 'Gagal memperbarui kelas')
+    onError: () => {
+      toast.error( 'Gagal memperbarui kelas')
     },
   })
 
@@ -42,8 +42,8 @@ export const useKelas = ({ kelas_id = null, mata_kuliah_id = null } = {}) => {
       toast.success('Data kelas berhasil dihapus')
       queryClient.invalidateQueries(['kelas'])
     },
-    onError: (error) => {
-      toast.error(error.message || 'Gagal menghapus kelas')
+    onError: () => {
+      toast.error('Gagal menghapus kelas')
     },
   })
 

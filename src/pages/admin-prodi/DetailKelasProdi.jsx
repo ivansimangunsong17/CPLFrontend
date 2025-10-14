@@ -11,6 +11,7 @@ import { FiDownloadCloud, FiUploadCloud } from "react-icons/fi";
 import ConfirmModal from "../../components/Modal/ConfModal";
 import FormBox from "../../components/Form/FormBox";
 import LoadingScreen from "../../components/LoadingScreen";
+import CardSkeleton from "../../components/CardSkeleton";
 import TableSkeleton from "../../components/TableSkeleton";
 import * as XLSX from "xlsx";
 
@@ -70,8 +71,9 @@ const DetailKelasProdi = () => {
             )
         } else {
             // store (tambah mahasiswa baru)
+
             createMutation.mutate(
-                { mahasiswas: [values] }, // bisa array
+                [values], // HANYA KIRIM ARRAY-NYA
                 {
                     onSuccess: () => {
                         setShowForm(false)
@@ -201,98 +203,109 @@ const DetailKelasProdi = () => {
 
 
             {/* Header */}
-            <div className="flex justify-between items-center mb-6">
+            {kelasQuery.isLoading ? (
+                <CardSkeleton className="h-24 w-full" />
+            ) : kelasQuery.error ? (
+                <p className="p-6 text-red-500">
+                    Gagal memuat detail kelas: {kelasQuery.error.message}
+                </p>
+            ) : (
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Detail Kelas</h1>
-                    <p className="text-sm text-gray-500">
-                        Informasi dan daftar peserta kelas
-                    </p>
+                    <div className="flex justify-between items-center mb-6">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-800">Detail Kelas</h1>
+                            <p className="text-sm text-gray-500">
+                                Informasi dan daftar peserta kelas
+                            </p>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => handleExportExcel(mahasiswaQuery.data)}
+                                className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-gray-700 rounded-lg hover:bg-yellow-200 transition"
+                            >
+                                <FiUploadCloud size={18} />
+                                <span>Export</span>
+                            </button>
+
+
+                            <button
+                                onClick={handleDownloadTemplate}
+                                className="flex items-center gap-2 px-4 py-2 bg-green-100 text-gray-700 rounded-lg hover:bg-green-200 transition">
+                                <FiDownloadCloud size={18} />
+                                <span>Template</span>
+                            </button>
+
+                            <label className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-gray-700 rounded-lg hover:bg-blue-200 transition cursor-pointer">
+                                <FiDownloadCloud size={18} />
+                                <span>Import</span>
+                                <input
+                                    type="file"
+                                    accept=".xlsx,.xls"
+                                    className="hidden"
+                                    onChange={(e) =>
+                                        handleImportExcel(e, (rows) => {
+                                            // 🚀 kirim semua sekaligus
+                                            createMutation.mutate(
+                                                rows // HANYA KIRIM ARRAY-NYA
+                                            );
+                                        })
+                                    }
+                                />
+
+                            </label>
+
+
+                            <button
+                                onClick={() => setShowConfirm(true)}
+                                disabled={selectedIds.length === 0}
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                            >
+                                <AiFillDelete size={18} />
+                                <span>Hapus</span>
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    setEditing(null);
+                                    setShowForm(true);
+                                }}
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                            >
+                                <AiOutlinePlus size={18} />
+                                <span>Tambah</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Kelas info */}
+                    <div className="grid grid-cols-3 gap-4 bg-white rounded-xl shadow p-6">
+                        <div>
+                            <p className="text-gray-500 text-sm">Kode Kelas</p>
+                            <p className="font-semibold">{kelas?.kode_kelas || "-"}</p>
+                        </div>
+                        <div>
+                            <p className="text-gray-500 text-sm">Nama Kelas</p>
+                            <p className="font-semibold">{kelas?.nama_kelas || "-"}</p>
+                        </div>
+                    </div>
+
+                    {/* Toolbar + Search */}
+                    <div className="flex items-center gap-4 pt-4">
+                        <div className="flex items-center border rounded-lg px-3 py-2 w-64">
+                            <AiOutlineSearch className="text-gray-400 mr-3" />
+                            <input
+                                type="text"
+                                placeholder="Cari Mahasiswa..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="flex-grow outline-none text-sm"
+                            />
+                        </div>
+                    </div>
                 </div>
+            )}
 
-                <div className="flex gap-3">
-                    <button
-                        onClick={() => handleExportExcel(mahasiswaQuery.data)}
-                        className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-gray-700 rounded-lg hover:bg-yellow-200 transition"
-                    >
-                        <FiUploadCloud size={18} />
-                        <span>Export</span>
-                    </button>
-
-
-                    <button
-                        onClick={handleDownloadTemplate}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-100 text-gray-700 rounded-lg hover:bg-green-200 transition">
-                        <FiDownloadCloud size={18} />
-                        <span>Template</span>
-                    </button>
-
-                    <label className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-gray-700 rounded-lg hover:bg-blue-200 transition cursor-pointer">
-                        <FiDownloadCloud size={18} />
-                        <span>Import</span>
-                        <input
-                            type="file"
-                            accept=".xlsx,.xls"
-                            className="hidden"
-                            onChange={(e) =>
-                                handleImportExcel(e, (rows) => {
-                                    // 🚀 kirim semua sekaligus
-                                    createMutation.mutate(
-                                        { mahasiswas: rows }
-                                    );
-                                })
-                            }
-                        />
-
-                    </label>
-
-
-                    <button
-                        onClick={() => setShowConfirm(true)}
-                        disabled={selectedIds.length === 0}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
-                    >
-                        <AiFillDelete size={18} />
-                        <span>Hapus</span>
-                    </button>
-
-                    <button
-                        onClick={() => {
-                            setEditing(null);
-                            setShowForm(true);
-                        }}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                        <AiOutlinePlus size={18} />
-                        <span>Tambah</span>
-                    </button>
-                </div>
-            </div>
-
-            {/* Kelas info */}
-            <div className="grid grid-cols-3 gap-4 bg-white rounded-xl shadow p-6">
-                <div>
-                    <p className="text-gray-500 text-sm">Kode Kelas</p>
-                    <p className="font-semibold">{kelas?.kode_kelas || "-"}</p>
-                </div>
-                <div>
-                    <p className="text-gray-500 text-sm">Nama Kelas</p>
-                    <p className="font-semibold">{kelas?.nama_kelas || "-"}</p>
-                </div>
-            </div>
-
-            {/* Toolbar + Search */}
-            <div className="flex items-center gap-4">
-                <div className="flex items-center border rounded-lg px-3 py-2 w-64">
-                    <AiOutlineSearch className="text-gray-400 mr-3" />
-                    <input
-                        type="text"
-                        placeholder="Cari Mahasiswa..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="flex-grow outline-none text-sm"
-                    />
-                </div>
-            </div>
 
             {/* Tabel Mahasiswa */}
             <div className="bg-white rounded-lg shadow overflow-hidden">

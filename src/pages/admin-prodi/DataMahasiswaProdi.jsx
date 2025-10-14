@@ -80,7 +80,7 @@ const DataMahasiswaProdi = () => {
       return;
     }
 
- 
+
 
     // Validasi NPM (asumsi harus berupa angka dan minimal 8 karakter)
     if (!/^\d{8,}$/.test(formData.npm)) {
@@ -188,7 +188,6 @@ const DataMahasiswaProdi = () => {
         { wch: 5 },   // No
         { wch: 20 },  // Nama
         { wch: 15 },  // NPM
-        { wch: 25 },  // Email
         { wch: 10 }   // Angkatan
       ];
 
@@ -276,11 +275,11 @@ const DataMahasiswaProdi = () => {
           const rowNum = index + 2; // +2 karena header di row 1 dan index dimulai dari 0
 
           // Validasi required fields
-          if (!row['Nama'] || !row['NPM'] || !row['Email'] || !row['Angkatan']) {
-            throw new Error(`Baris ${rowNum}: Nama, NPM, Email, dan Angkatan wajib diisi`);
+          if (!row['Nama'] || !row['NPM'] || !row['Angkatan']) {
+            throw new Error(`Baris ${rowNum}: Nama, NPM, dan Angkatan wajib diisi`);
           }
 
-        
+
           // Validasi NPM (harus berupa angka dan minimal 8 karakter)
           if (!/^\d{8,}$/.test(row['NPM'])) {
             throw new Error(`Baris ${rowNum}: NPM harus berupa angka minimal 8 digit`);
@@ -296,7 +295,7 @@ const DataMahasiswaProdi = () => {
           return {
             name: row['Nama']?.toString().trim(),
             npm: row['NPM']?.toString().trim(),
-          
+
             angkatan: angkatan,
             prodi_id: user.prodi_id // Otomatis menambahkan prodi_id dari user yang login
           };
