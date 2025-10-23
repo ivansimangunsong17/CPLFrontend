@@ -91,11 +91,11 @@ const DataCPL = () => {
       return;
     }
 
-    // Validasi format kode CPL (contoh: CPL-1, CPL-2, dll)
-    if (!/^CPL-\d+$/.test(formData.kode_cpl)) {
-      toast.error('Format kode CPL harus: CPL-[angka] (contoh: CPL-1)');
-      return;
-    }
+    // // Validasi format kode CPL (contoh: CPL-1, CPL-2, dll)
+    // if (!/^CPL-\d+$/.test(formData.kode_cpl)) {
+    //   toast.error('Format kode CPL harus: CPL-[angka] (contoh: CPL-1)');
+    //   return;
+    // }
 
     // Validasi panjang deskripsi
     if (formData.deskripsi.length < 20) {
@@ -400,7 +400,7 @@ const DataCPL = () => {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {isLoading ? (
-                <TableSkeleton rows={5} columns={5} />
+                <TableSkeleton rows={5} columns={4} />
               ) : filteredData.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="p-8 text-center text-gray-500">

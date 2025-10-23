@@ -40,13 +40,13 @@ const DetailPenilaianProdi = () => {
     };
 
     return (
-        <div className="p-4 bg-gray-50 h-full flex flex-col space-y-4">
+        <div className=" bg-gray-50 h-full flex flex-col space-y-4">
             <h1 className="text-2xl font-bold text-gray-800 flex-shrink-0">
                 Tabel Penilaian Prodi
             </h1>
 
             <div className="flex-1 grid grid-cols-[minmax(0,1fr)]">
-                <div className="overflow-auto rounded-xl shadow-md border scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 hover:scrollbar-thumb-gray-500">
+                <div className="overflow-auto rounded-xl shadow-md  scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 hover:scrollbar-thumb-gray-500">
                     <table className="border-collapse text-sm">
                         <thead className="sticky top-0 z-20">
                             <tr className="bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm">

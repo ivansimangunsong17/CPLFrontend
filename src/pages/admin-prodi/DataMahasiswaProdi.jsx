@@ -428,7 +428,7 @@ const DataMahasiswaProdi = () => {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {isLoading ? (
-                <TableSkeleton rows={5} columns={6} />
+                <TableSkeleton rows={5} columns={5} />
               ) : filteredData.length > 0 ? (
                 filteredData.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50">

@@ -60,39 +60,87 @@ const DetailMatakuliahProdi = () => {
     const dataKelas = useMemo(() => (Array.isArray(kelasQuery.data) ? kelasQuery.data : []), [kelasQuery.data]);
     const isLoadingKelas = kelasQuery.isPending;
 
+
     // Base form fields kelas
     const formFieldsKelas = [
         { name: "kode_kelas", label: "Kode Kelas", type: "text", required: true },
         { name: "nama_kelas", label: "Nama Kelas", type: "text", required: true },
         { name: "semester", label: "Semester", type: "number", required: true },
         { name: "tahun_ajaran", label: "Tahun Ajaran", type: "text", required: true },
-        { name: "dosen_id", label: "Dosen", type: "select", required: true, options: [] },
-
+        { name: "dosen_utama_id", label: "Dosen Utama", type: "select", required: true, options: [] },
+        // PERBAIKAN: Jadikan opsional
+        { name: "dosen_pendamping_1_id", label: "Dosen Pendamping 1 (Opsional)", type: "select", required: false, options: [] },
+        { name: "dosen_pendamping_2_id", label: "Dosen Pendamping 2 (Opsional)", type: "select", required: false, options: [] },
     ];
-
     // Inject dosenOptions ke field kelas
     const dynamicFormFieldsKelas = useMemo(() => {
+        // PERBAIKAN: Tentukan field mana saja yang perlu diisi options dosen
+        const dosenFieldNames = ["dosen_utama_id", "dosen_pendamping_1_id", "dosen_pendamping_2_id"];
         return formFieldsKelas.map((field) =>
-            field.name === "dosen_id" ? { ...field, options: dosenOptions } : field
+            dosenFieldNames.includes(field.name)
+                ? { ...field, options: dosenOptions }
+                : field
         );
     }, [formFieldsKelas, dosenOptions]);
 
     // Submit kelas
+    // Submit kelas
+    // Submit kelas
     const handleSubmitKelas = (formData) => {
+        // 1. Ambil semua ID dosen dari form
+        const {
+            dosen_utama_id,
+            dosen_pendamping_1_id,
+            dosen_pendamping_2_id
+        } = formData;
+
+        // 2. Filter ID yang tidak kosong (membuang string kosong "")
+        const selectedDosenIds = [
+            dosen_utama_id,
+            dosen_pendamping_1_id,
+            dosen_pendamping_2_id
+        ].filter(id => id); // filter(id => id) akan menghapus string kosong atau null
+
+        // 3. Validasi duplikat HANYA pada ID yang dipilih
+        const uniqueDosenIds = new Set(selectedDosenIds);
+        if (uniqueDosenIds.size !== selectedDosenIds.length) {
+            toast.error("Dosen yang sama tidak boleh dipilih untuk jabatan yang berbeda.");
+            return;
+        }
+
+        // 4. Buat array 'dosens' secara dinamis
+        // 4. Buat array 'dosens' secara dinamis
+        const dosensPayload = [];
+
+        // Selalu tambahkan dosen utama (karena 'required: true')
+        dosensPayload.push({
+            dosen_id: Number(dosen_utama_id),
+            jabatan: "Dosen Utama", // Ini sudah benar
+        });
+
+        // Hanya tambahkan dosen pendamping JIKA dipilih
+        if (dosen_pendamping_1_id) {
+            dosensPayload.push({
+                dosen_id: Number(dosen_pendamping_1_id),
+                jabatan: "Pendamping Dosen 1", // PERBAIKAN: Sesuai Enum
+            });
+        }
+        if (dosen_pendamping_2_id) {
+            dosensPayload.push({
+                dosen_id: Number(dosen_pendamping_2_id),
+                jabatan: "Pendamping Dosen 2", // PERBAIKAN: Sesuai Enum
+            });
+        }
+
         const payload = {
-            action: editKelas ? "update" : "store",   // ✅ pakai store saat create
-            kelas_id: editKelas ? editKelas.kelas_id : undefined, // ✅ hanya saat edit
+            action: editKelas ? "update" : "store",
+            kelas_id: editKelas ? editKelas.kelas_id : undefined,
             kode_kelas: formData.kode_kelas,
             nama_kelas: formData.nama_kelas,
             semester: Number(formData.semester),
             tahun_ajaran: formData.tahun_ajaran,
             mata_kuliah_id: Number(mataKuliahId),
-            dosens: [
-                {
-                    dosen_id: Number(formData.dosen_id), // ambil dari dropdown
-                    jabatan: "Dosen Utama",              // default value
-                },
-            ],
+            dosens: dosensPayload, // Gunakan payload dinamis yang baru
         };
 
         if (editKelas) {
@@ -442,15 +490,35 @@ const DetailMatakuliahProdi = () => {
                 title={editData ? 'Edit CPMK' : 'Tambah CPMK Baru'}
                 subtitle={editData ? 'Perbarui informasi CPMK' : 'Lengkapi data CPMK baru'}
                 fields={formFields}
-                initialData={
-                    editData
-                        ? {
-                            kode_cpmk: editData.kode_cpmk,
-                            nama_cpmk: editData.nama_cpmk,
-                            deskripsi: editData.deskripsi,
-                        }
-                        : {}
-                }
+                initialData={(() => {
+                    // Default untuk mode 'Tambah'
+                    if (!editKelas) return {
+                        kode_kelas: "",
+                        nama_kelas: "",
+                        semester: "",
+                        tahun_ajaran: "",
+                        dosen_utama_id: "",
+                        dosen_pendamping_1_id: "",
+                        dosen_pendamping_2_id: "",
+                    };
+
+                    // Helper untuk mencari ID dosen berdasarkan jabatan
+                    const findDosenIdByJabatan = (jabatan) => {
+                        const dosen = editKelas.dosens?.find(d => d.pivot?.jabatan === jabatan);
+                        return dosen ? dosen.id : ""; // API Anda mungkin mengembalikan ID di `dosen.id`
+                    };
+
+                    // Data untuk mode 'Edit'
+                    return {
+                        kode_kelas: editKelas.kode_kelas,
+                        nama_kelas: editKelas.nama_kelas,
+                        semester: editKelas.semester,
+                        tahun_ajaran: editKelas.tahun_ajaran,
+                        dosen_utama_id: findDosenIdByJabatan("Dosen Utama"),
+                        dosen_pendamping_1_id: findDosenIdByJabatan("Dosen Pendamping 1"),
+                        dosen_pendamping_2_id: findDosenIdByJabatan("Dosen Pendamping 2"),
+                    };
+                })()}
                 onSubmit={handleSubmit}
                 submitText={editData ? 'Perbarui' : 'Tambah'}
                 isLoading={editData ? updateMutation.isLoading : createMutation.isLoading}

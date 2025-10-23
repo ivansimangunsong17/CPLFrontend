@@ -91,7 +91,7 @@ const router = createBrowserRouter([
               { path: "detail_kelas/:kelasId", element: <DetailKelasProdi /> },
               { path: "hasil_perhitungan", element: <HasilPerhitunganProdi /> },
               { path: "atur_penilaian", element: <AturPenilaianProdi /> },
-              { path: "atur_penilaian/:mataKuliahId", element: <DetailAturPenilaianProdi/> },
+              { path: "atur_penilaian/:kelasId", element: <DetailAturPenilaianProdi /> },
               { path: "detail_penilaian/:mataKuliahId", element: <DetailPenilaianProdi /> },
               { path: "detail_hasil_perhitungan/:mataKuliahId", element: <DetailHasilPerhitungan /> },
             ]

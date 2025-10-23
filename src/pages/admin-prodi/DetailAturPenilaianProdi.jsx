@@ -1,110 +1,151 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaPlus, FaTrash, FaRegEdit } from "react-icons/fa";
+import { FaPlus, FaTrash } from "react-icons/fa";
+import { toast } from 'react-toastify';
 import FormBox from "../../components/Form/FormBox";
-
 import { useKelas } from "../../hooks/admin-prodi/useKelas";
-import { useMataKuliah } from "../../hooks/admin-prodi/useMataKuliah";
-
+import { useJenisPenilaian } from "../../hooks/admin-prodi/useJenisPenilaian";
+import { usePemetaanCPMK } from "../../hooks/admin-prodi/usePemetaanCPMK";
+import { useSubPenilaian } from "../../hooks/admin-prodi/useSubPenilaian";
 import TableSkeleton from "../../components/TableSkeleton";
+import ConfModal from "../../components/Modal/ConfModal";
 import CardSkeleton from "../../components/CardSkeleton";
 import { AiOutlineArrowLeft } from "react-icons/ai";
+import LoadingScreen from "../../components/LoadingScreen";
 
 const DetailAturPenilaianProdi = () => {
+    // --- 1. Panggil Semua Hook ---
     const navigate = useNavigate();
-    const { kelasQuery } = useKelas();
-    const handleBack = () => navigate("/dashboard/admin_prodi/atur_penilaian");
-    const { mataKuliahQuery } = useMataKuliah();
-    const { mataKuliahId } = useParams();
+    const { kelasId } = useParams();
 
-    const mataKuliah = useMemo(() => {
-        const data = mataKuliahQuery.data || [];
-        return data.find(
-            (mk) => mk.id == mataKuliahId || mk.mata_kuliah_id == mataKuliahId
-        );
-    }, [mataKuliahQuery.data, mataKuliahId]);
-    const [assessments, setAssessments] = useState([
-        { jenis: "Tugas", subs: ["Tugas 1", "Tugas 2"] },
-        { jenis: "Kuis", subs: ["Kuis 1"] },
-        { jenis: "Hasil Projek", subs: [] },
-        { jenis: "Ujian Tengah Semester", subs: [] },
-        { jenis: "Ujian Akhir Semester", subs: [] },
-    ]);
+    const { kelasQuery } = useKelas({ kelas_id: kelasId });
+    const { jenisPenilaianQuery } = useJenisPenilaian();
+    const {
+        subPenilaianQuery,
+        createMutation: createSubPenilaianMutation,
+        deleteMutation: deleteSubPenilaianMutation
+    } = useSubPenilaian(kelasId);
 
-    const [isFormOpen, setIsFormOpen] = useState(false);
-    const [isSubFormOpen, setIsSubFormOpen] = useState(false);
-    const [selectedAssessmentIndex, setSelectedAssessmentIndex] = useState(null);
+    const mataKuliahId = useMemo(() => kelasQuery.data?.[0]?.mata_kuliah?.mata_kuliah_id, [kelasQuery.data]);
+    const { pemetaanCPMKQuery } = usePemetaanCPMK(mataKuliahId);
 
-    // Form field
-    const fieldsJenisPenilaian = [
-        { name: "jenis", label: "Jenis Penilaian", type: "text", required: true },
-    ];
+    // --- 2. Proses Data Hasil Query ---
+    const kelasData = useMemo(() => kelasQuery.data?.[0], [kelasQuery.data]);
+    const isKelasLoading = kelasQuery.isLoading; // Loading awal untuk info kelas
 
-    const fieldsSubPenilaian = [
-        { name: "sub", label: "Nama Sub Penilaian", type: "text", required: true },
-    ];
-
-    // Tambah jenis penilaian
-    const handleAddAssessment = (data) => {
-        setAssessments([...assessments, { jenis: data.jenis, subs: [] }]);
-        setIsFormOpen(false);
-    };
-
-    // Tambah sub penilaian
-    const handleAddSubAssessment = (data) => {
-        const updated = [...assessments];
-        updated[selectedAssessmentIndex].subs.push(data.sub);
-        setAssessments(updated);
-        setIsSubFormOpen(false);
-        setSelectedAssessmentIndex(null);
-    };
-
-    // Hapus sub penilaian
-    const removeSub = (i, subIndex) => {
-        const updated = [...assessments];
-        updated[i].subs.splice(subIndex, 1);
-        setAssessments(updated);
-    };
-
-    // Data mata kuliah dari API
-    const data = useMemo(() => kelasQuery.data || [], [kelasQuery.data]);
-    const isLoading = kelasQuery.isLoading;
-    const isMataKuliahLoading = mataKuliahQuery.isLoading;
-
-    const handleClick = (KelasId) => {
-        navigate(`/dashboard/admin_prodi/detail_penilaian/${KelasId}`);
-    };
-
+    const assessments = useMemo(() => jenisPenilaianQuery.data || [], [jenisPenilaianQuery.data]);
+const subAssessments = useMemo(() => subPenilaianQuery.data || [], [subPenilaianQuery.data]);
    
-    if (isMataKuliahLoading) {
+
+    // Untuk Skeleton (hanya true saat data belum ada/cache)
+    const isInitialDataLoading =
+        jenisPenilaianQuery.isLoading ||
+        subPenilaianQuery.isLoading;
+
+    // Untuk LoadingScreen
+    const isMutating =
+        createSubPenilaianMutation.isPending ||
+        deleteSubPenilaianMutation.isPending;
+
+    // Struktur Data Gabungan (Logika ini sudah benar)
+    const combinedAssessments = useMemo(() => {
+        if (jenisPenilaianQuery.isLoading || subPenilaianQuery.isLoading) return [];
+
+        const subMap = new Map();
+        subAssessments.forEach(sub => {
+            const parentId = sub.penilaian_id; // Asumsi FK
+            if (!subMap.has(parentId)) {
+                subMap.set(parentId, []);
+            }
+            subMap.get(parentId).push(sub);
+        });
+
+        return assessments.map(assessment => ({
+            ...assessment,
+            subs: subMap.get(assessment.penilaian_id) || []
+        }));
+    }, [assessments, subAssessments, jenisPenilaianQuery.isLoading, subPenilaianQuery.isLoading]);
+
+    // --- 3. State dan Handler ---
+    const handleBack = () => navigate("/dashboard/admin_prodi/atur_penilaian");
+    const [isSubFormOpen, setIsSubFormOpen] = useState(false);
+    const [selectedAssessmentId, setSelectedAssessmentId] = useState(null);
+    const [newSubName, setNewSubName] = useState("");
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [subToDelete, setSubToDelete] = useState(null);
+
+    const fieldsSubPenilaian = [{ name: "sub", label: "Nama Sub Penilaian", type: "text", required: true }];
+
+    // Handler untuk 'onSubmit' dari FormBox (setelah konfirmasi)
+    const handleAddSubAssessment = () => {
+        // PERBAIKAN: Hapus pengecekan loading, karena tombol sudah di-disable
+        if (selectedAssessmentId === null || !kelasId || !newSubName) {
+            toast.error("Terjadi kesalahan, ID penilaian atau nama baru tidak ditemukan.");
+            return;
+        }
+
+        const payload = {
+            penilaian_id: selectedAssessmentId,
+            kelas_id: Number(kelasId),
+            nama_sub_penilaian: newSubName,
+        };
+
+        createSubPenilaianMutation.mutate(payload, {
+            onSuccess: () => {
+                setIsSubFormOpen(false);
+                setSelectedAssessmentId(null);
+                setNewSubName("");
+            },
+        });
+    };
+
+    const removeAssessment = (assessmentId) => {
+        if (!window.confirm("Yakin ingin menghapus jenis penilaian ini?")) return;
+        console.log("Menghapus penilaian (API Call needed), ID:", assessmentId);
+        // TODO: Panggil mutasi hapus jenis penilaian
+    };
+
+    const removeSub = (subPenilaianId) => {
+        setSubToDelete(subPenilaianId);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDeleteSub = () => {
+        if (subToDelete) {
+            deleteSubPenilaianMutation.mutate({ sub_penilaian_id: subToDelete });
+            setIsDeleteModalOpen(false);
+            setSubToDelete(null);
+        }
+    };
+
+    const cancelDeleteSub = () => {
+        setIsDeleteModalOpen(false);
+        setSubToDelete(null);
+    };
+
+    const handleSave = () => {
+        console.log("Menyimpan semua perubahan (API Call needed):", assessments);
+        alert("Fungsi simpan belum terhubung ke API.");
+    };
+
+    // --- 4. Render Komponen ---
+    if (isKelasLoading) {
         return (
             <div className="p-6 max-w-7xl mx-auto space-y-6">
                 <CardSkeleton />
-                <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                    <table className="w-full">
-                        <tbody>
-                            <TableSkeleton columns={3} rows={3} />
-                        </tbody>
-                    </table>
+                <div className="bg-white rounded-xl shadow-md overflow-hidden mt-8">
+                    <table className="w-full"><tbody><TableSkeleton columns={3} rows={5} /></tbody></table>
                 </div>
             </div>
         );
     }
 
-    // 2. Tampilkan pesan error jika data sudah dimuat tapi mata kuliah tidak ditemukan
-    if (!mataKuliah) {
+    if (!kelasData) {
         return (
             <div className="p-8 text-center">
-                <h3 className="text-lg font-medium text-red-600 mb-2">
-                    Mata Kuliah Tidak Ditemukan
-                </h3>
-                <p className="text-gray-500">
-                    Pastikan ID mata kuliah pada URL sudah benar.
-                </p>
-                <button
-                    onClick={handleBack}
-                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                >
+                <h3 className="text-lg font-medium text-red-600 mb-2">Data Kelas Tidak Ditemukan</h3>
+                <p className="text-gray-500">Pastikan ID kelas pada URL sudah benar.</p>
+                <button onClick={handleBack} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
                     Kembali
                 </button>
             </div>
@@ -113,179 +154,182 @@ const DetailAturPenilaianProdi = () => {
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
-
+            {isMutating && <LoadingScreen />}
 
             <div className="mb-6 flex items-center justify-between">
-                <button
-                    onClick={handleBack}
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
-                >
+                <button onClick={handleBack} className="flex items-center gap-2 text-blue-600 hover:text-blue-800">
                     <AiOutlineArrowLeft size={20} />
                     <span>Kembali</span>
                 </button>
                 <h2 className="text-xl font-semibold text-gray-800 text-right">
-                    Pemetaan CPL - {mataKuliah.nama_mata_kuliah}
+                    Atur Penilaian - {kelasData.mata_kuliah?.nama_mata_kuliah} ({kelasData.nama_kelas})
                 </h2>
             </div>
 
-            {/* Info Mata Kuliah */}
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-3 border rounded-lg text-center bg-gray-50">
-                        <p className="text-sm text-gray-500">Kode Mata Kuliah</p>
-                        <p className="font-semibold">{mataKuliah.kode_mata_kuliah}</p>
+            <div className="bg-white rounded-lg shadow p-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-3 border rounded-lg bg-gray-50">
+                        <p className="text-sm text-gray-500">Mata Kuliah</p>
+                        <p className="font-semibold">{kelasData.mata_kuliah?.nama_mata_kuliah || "-"}</p>
                     </div>
-                    <div className="p-3 border rounded-lg text-center bg-gray-50">
-                        <p className="text-sm text-gray-500">Nama Mata Kuliah</p>
-                        <p className="font-semibold">{mataKuliah.nama_mata_kuliah}</p>
+                    <div className="p-3 border rounded-lg bg-gray-50">
+                        <p className="text-sm text-gray-500">Kode Kelas</p>
+                        <p className="font-semibold">{kelasData.kode_kelas || "-"}</p>
+                    </div>
+                    <div className="p-3 border rounded-lg bg-gray-50">
+                        <p className="text-sm text-gray-500">Nama Kelas</p>
+                        <p className="font-semibold">{kelasData.nama_kelas || "-"}</p>
                     </div>
                 </div>
             </div>
-            {/* Header */}
+
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold text-gray-700">Jenis Penilaian</h2>
-                <button
-                    onClick={() => setIsFormOpen(true)}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg  hover:bg-blue-700 transition"
-                >
-                    <FaPlus size={14} /> Tambah Penilaian
-                </button>
+                <div className="flex gap-3">
+                    <button
+                        onClick={handleSave}
+                        disabled
+                        className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-300"
+                    >
+                        Simpan Perubahan
+                    </button>
+                </div>
             </div>
 
-            {/* Table Penilaian */}
             <div className="bg-white rounded-xl shadow-md overflow-hidden">
                 <table className="w-full text-gray-700">
                     <thead>
                         <tr className="bg-blue-600 text-white text-sm uppercase">
-                            {/* PERBAIKAN: Padding diubah agar lebih lega */}
                             <th className="px-6 py-3 text-left">Penilaian</th>
                             <th className="px-6 py-3 text-left">Sub - Penilaian</th>
                             <th className="px-6 py-3 text-center">Aksi</th>
                         </tr>
                     </thead>
-                    {/* PERBAIKAN: Menggunakan `divide-y` untuk garis horizontal yang rapi */}
                     <tbody className="divide-y divide-gray-200">
-                        {assessments.map((a, i) => {
-                            const rowSpan = Math.max(1, a.subs.length);
-                            return (
-                                <React.Fragment key={i}>
-                                    <tr className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 font-medium align-top" rowSpan={rowSpan}>
-                                            <div className="flex justify-between items-center">
-                                                {a.jenis}
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedAssessmentIndex(i);
-                                                        setIsSubFormOpen(true);
-                                                    }}
-                                                    className="bg-blue-500 text-white p-1.5 rounded-full hover:bg-blue-600 transition"
-                                                >
-                                                    <FaPlus size={12} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                        {/* PERBAIKAN: `border` dihapus, padding diubah */}
-                                        <td className="px-6 py-4">{a.subs[0] || "-"}</td>
-                                        <td className="px-6 py-4 text-center">
-                                            {a.subs[0] && (
-                                                <button
-                                                    onClick={() => removeSub(i, 0)}
-                                                    className="text-red-500 hover:text-red-700 transition"
-                                                >
-                                                    <FaTrash />
-                                                </button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                    {a.subs.slice(1).map((sub, subIndex) => (
-                                        <tr key={subIndex} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4">{sub}</td>
-                                            <td className="px-6 py-4 text-center">
-                                                <button
-                                                    onClick={() => removeSub(i, subIndex + 1)}
-                                                    className="text-red-500 hover:text-red-700 transition"
-                                                >
-                                                    <FaTrash />
-                                                </button>
+                        {/* PERBAIKAN: Gunakan `isInitialDataLoading` untuk Skeleton */}
+                        {isInitialDataLoading ? (
+                            <TableSkeleton rows={5} columns={3} />
+                        ) : (
+                            combinedAssessments.map((assessment) => {
+                                const subs = assessment.subs || [];
+                                const rowSpan = Math.max(1, subs.length);
+                                // PERBAIKAN: Tombol nonaktif hanya saat mutasi
+                                const isButtonDisabled = isMutating;
+
+                                return (
+                                    <React.Fragment key={assessment.penilaian_id}>
+                                        <tr className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 font-medium align-top" rowSpan={rowSpan}>
+                                                <div className="flex justify-between items-center">
+                                                    {assessment.nama_penilaian}
+                                                    <button
+                                                        onClick={() => {
+                                                            const parentName = assessment.nama_penilaian;
+                                                            const existingSubs = assessment.subs;
+                                                            let nextNumber = 1;
+                                                            if (existingSubs.length > 0) {
+                                                                const lastSubName = existingSubs[existingSubs.length - 1]?.nama_sub_penilaian || "";
+                                                                const match = lastSubName.match(/\d+$/);
+                                                                if (match) {
+                                                                    nextNumber = parseInt(match[0], 10) + 1;
+                                                                } else {
+                                                                    nextNumber = existingSubs.length + 1;
+                                                                }
+                                                            }
+                                                            const generatedName = `${parentName} ${nextNumber}`;
+
+                                                            setSelectedAssessmentId(assessment.penilaian_id);
+                                                            setNewSubName(generatedName);
+                                                            setIsSubFormOpen(true);
+                                                        }}
+                                                        disabled={isButtonDisabled}
+                                                        className="bg-blue-500 text-white p-1.5 rounded-full hover:bg-blue-600 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                                        title="Tambah Sub-Penilaian Berikutnya"
+                                                    >
+                                                        {createSubPenilaianMutation.isPending && selectedAssessmentId === assessment.penilaian_id ? (
+                                                            <svg className="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                            </svg>
+                                                        ) : (
+                                                            <FaPlus size={12} />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td className={`px-6 py-4 text-sm font-semibold ${subs.length === 0 ? 'italic text-gray-400' : ''}`}>
+                                                {subs[0]?.nama_sub_penilaian || "-"}
+                                            </td>
+                                            <td className="px-6 py-4 text-center align-top">
+                                                {subs[0] ? (
+                                                    <button
+                                                        onClick={() => removeSub(subs[0].sub_penilaian_id)}
+                                                        disabled={isButtonDisabled}
+                                                        className="text-red-500 hover:text-red-700 transition disabled:text-gray-300"
+                                                    >
+                                                        <FaTrash />
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => removeAssessment(assessment.penilaian_id)}
+                                                        disabled={isButtonDisabled}
+                                                        className="text-red-500 hover:text-red-700 transition disabled:text-gray-300"
+                                                        title="Hapus Penilaian"
+                                                    >
+                                                        <FaTrash />
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
-                                    ))}
-                                </React.Fragment>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Table Mata Kuliah */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden mt-10">
-                <table className="w-full text-gray-700">
-                    <thead>
-                        <tr className="bg-blue-600 text-white text-sm uppercase">
-                            {/* PERUBAHAN: Padding diubah menjadi px-6 py-3 */}
-                            <th className="px-6 py-3 text-left">Kode Mata Kuliah</th>
-                            <th className="px-6 py-3 text-left">Nama Mata Kuliah</th>
-                            <th className="px-6 py-3 text-left">Kelas</th>
-                            {/* PERUBAHAN: Aksi dibuat rata kanan */}
-                            <th className="px-6 py-3 text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    {/* PERUBAHAN: Tambahkan `divide-y` untuk garis horizontal yang rapi */}
-                    <tbody className="divide-y divide-gray-200">
-                        {isLoading ? (
-                            <TableSkeleton rows={5} columns={4} />
-                        ) : data.length === 0 ? (
-                            <tr>
-                                <td colSpan="4" className="p-8 text-center text-gray-500">
-                                    Belum ada data kelas
-                                </td>
-                            </tr>
-                        ) : (
-                            data.map((k, i) => (
-                                <tr key={k.kelas_id || i} className="hover:bg-gray-50 transition-colors duration-200">
-                                    {/* PERUBAHAN: `border` dihapus, `p-4` diubah, dan ditambahkan hierarki visual */}
-                                    <td className="px-6 py-4 font-medium text-gray-800">{k.mata_kuliah?.kode_mata_kuliah || k.kode_kelas}</td>
-                                    <td className="px-6 py-4 text-gray-500">{k.mata_kuliah?.nama_mata_kuliah}</td>
-                                    <td className="px-6 py-4 font-semibold text-gray-900">{k.nama_kelas}</td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button
-                                            onClick={() => handleClick(k.kelas_id)}
-                                            className="flex items-center gap-2 ml-auto text-blue-600 hover:text-blue-800 font-medium transition"
-                                        >
-                                            Atur <FaRegEdit size={14} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
+                                        {subs.slice(1).map((sub) => (
+                                            <tr key={sub.sub_penilaian_id} className="hover:bg-gray-50">
+                                                <td className="px-6 text-sm font-semibold py-4">{sub.nama_sub_penilaian}</td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <button
+                                                        onClick={() => removeSub(sub.sub_penilaian_id)}
+                                                        disabled={isButtonDisabled}
+                                                        className="text-red-500 hover:text-red-700 transition disabled:text-gray-300"
+                                                    >
+                                                        <FaTrash />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </React.Fragment>
+                                );
+                            })
                         )}
                     </tbody>
                 </table>
             </div>
 
-            {/* Modal Tambah Jenis Penilaian */}
+            {/* Modal Konfirmasi Tambah Sub Penilaian */}
             <FormBox
-                title="Tambah Jenis Penilaian"
-                subtitle="Lengkapi informasi jenis penilaian"
-                fields={fieldsJenisPenilaian}
-                initialData={{ jenis: "" }}
-                onSubmit={handleAddAssessment}
-                onCancel={() => setIsFormOpen(false)}
-                isOpen={isFormOpen}
+                title="Konfirmasi Tambah Sub Penilaian"
+                subtitle={`Anda akan menambahkan sub-penilaian baru dengan nama: "${newSubName}". Lanjutkan?`}
+                fields={[]}
+                initialData={{}}
+                onSubmit={handleAddSubAssessment}
+                onCancel={() => {
+                    setIsSubFormOpen(false);
+                    setSelectedAssessmentId(null);
+                    setNewSubName("");
+                }}
+                isOpen={isSubFormOpen}
+                submitText="Ya, Tambahkan"
+                isLoading={createSubPenilaianMutation.isPending}
             />
 
-            {/* Modal Tambah Sub Penilaian */}
-            <FormBox
-                title="Tambah Sub Penilaian"
-                subtitle={`Untuk ${selectedAssessmentIndex !== null ? assessments[selectedAssessmentIndex].jenis : ""
-                    }`}
-                fields={fieldsSubPenilaian}
-                initialData={{ sub: "" }}
-                onSubmit={handleAddSubAssessment}
-                onCancel={() => setIsSubFormOpen(false)}
-                isOpen={isSubFormOpen}
+            {/* Modal Konfirmasi Hapus Sub Penilaian */}
+            <ConfModal
+                isOpen={isDeleteModalOpen}
+                onClose={cancelDeleteSub}
+                onConfirm={confirmDeleteSub}
+                message="Apakah Anda yakin ingin menghapus sub-penilaian ini?"
             />
         </div>
     );
 };
 
 export default DetailAturPenilaianProdi;
+
