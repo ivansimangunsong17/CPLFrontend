@@ -28,7 +28,7 @@ export const useMahasiswaKelas = ({ kelas_id }) => {
   const updateMutation = useMutation({
     mutationFn: (payload) => updateMahasiswaKelas(payload),
     onSuccess: () => {
-      toast.success('Data mahasiswa berhasil diperbarui')
+
       queryClient.invalidateQueries({ queryKey: ['mahasiswaKelas', kelas_id] })
     },
     onError: (error) => {

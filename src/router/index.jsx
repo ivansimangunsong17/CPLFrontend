@@ -43,6 +43,7 @@ import PemetaanCPLKaprodi from '../pages/kaprodi/PemetaanCPLKaprodi';
 //Dosen
 import DashboardDosen from '../pages/dosen/DashboardDosen';
 import AturPenilaianDosen from '../pages/dosen/AturPenilaianDosen';
+import DetailAturPenilaianDosen from '../pages/dosen/DetailAturPenilaianDosen';
 import PenilaianDosen from '../pages/dosen/PenilaianDosen';
 import HasilPerhitunganDosen from '../pages/dosen/HasilPerhitunganDosen';
 
@@ -87,6 +88,7 @@ export {
 
     DashboardDosen,
     AturPenilaianDosen,
+    DetailAturPenilaianDosen,
     PenilaianDosen,
     HasilPerhitunganDosen
 

@@ -43,7 +43,8 @@ import {
   PenilaianDosen,
   DetailPenilaianProdi,
   DetailHasilPerhitungan,
-  AturPenilaianDosen
+  AturPenilaianDosen,
+  DetailAturPenilaianDosen
 } from './index';
 import DetailPenilaianDosen from '../pages/dosen/DetailPenilaianDosen';
 
@@ -122,6 +123,7 @@ const router = createBrowserRouter([
             path: "", element: <DashboardLayout />, children: [
               { path: "", element: <DashboardDosen /> },
               { path: "atur_penilaian", element: <AturPenilaianDosen /> },
+              { path: "atur_penilaian/:kelasId", element: <DetailAturPenilaianDosen /> },
               { path: "detail_penilaian/:mataKuliahId", element: <DetailPenilaianDosen /> },
               { path: "penilaian", element: <PenilaianDosen /> },
               { path: "hasil_perhitungan", element: <HasilPerhitunganDosen /> },

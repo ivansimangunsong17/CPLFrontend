@@ -1,5 +1,4 @@
-import React, { useState, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useMemo, useEffect, useCallback, useContext } from 'react'; import { useParams, useNavigate } from "react-router-dom";
 import { AiFillDelete, AiOutlineArrowLeft, AiOutlinePlus } from "react-icons/ai";
 import { FiEdit2 } from "react-icons/fi";
 import { toast } from "react-toastify";
@@ -74,6 +73,9 @@ const DetailPemetaanProdi = () => {
         updateCPMKMutation.isPending ||
         deleteCPMKMutation.isPending;
 
+    const isCPLModalLoading = createMutation.isPending || updateMutation.isPending;
+    const isCPMKModalLoading = createCPMKMutation.isPending || updateCPMKMutation.isPending;
+
     const pemetaanData = pemetaanQuery.data;
 
     // Navigasi kembali
@@ -135,8 +137,41 @@ const DetailPemetaanProdi = () => {
 
         }
     };
+    // FUNGSI BARU: Untuk me-reset bobot CPMK terkait jika CPL di-edit
+    const handleResetCPMKs = useCallback((cplIdToReset) => {
+        if (!pemetaanCPMKQuery.data) {
+            toast.warn("Data CPMK tidak ditemukan, tidak dapat me-reset.");
+            return;
+        }
 
+        // 1. Cari semua CPMK yang terhubung ke CPL yang di-reset
+        const cpmksToReset = pemetaanCPMKQuery.data.filter(
+            cpmk => cpmk.cpl_id === cplIdToReset
+        );
 
+        if (cpmksToReset.length === 0) return; // Tidak ada yang perlu di-reset
+
+        // 2. Buat payload untuk meng-update semua CPMK tersebut menjadi 0
+        const payload = {
+            action: 'update', // Pastikan 'action' ini sesuai dengan API Anda
+            mata_kuliah_id: parseInt(mataKuliahId),
+            cpmks: cpmksToReset.map(cpmk => ({
+                cpmk_id: cpmk.cpmk_id,
+                cpl_id: cpmk.cpl_id,
+                bobot: 0 // Set bobot ke 0
+            }))
+        };
+
+        // 3. Panggil mutasi update CPMK
+        updateCPMKMutation.mutate(payload, {
+            onSuccess: () => {
+                toast.success('Bobot CPMK terkait telah di-reset ke 0.');
+            },
+            onError: (err) => {
+                toast.error(err.response?.data?.message || 'Gagal me-reset bobot CPMK.');
+            }
+        });
+    }, [pemetaanCPMKQuery.data, mataKuliahId, updateCPMKMutation]);
 
     const handleConfirmDelete = async () => {
         if (!confirmDelete.id) {
@@ -163,9 +198,6 @@ const DetailPemetaanProdi = () => {
             toast.error("Gagal menghapus pemetaan");
         }
     };
-
-
-
 
 
 
@@ -501,12 +533,19 @@ const DetailPemetaanProdi = () => {
             {isFormOpen && (
                 <FormPemetaanCPL
                     isOpen={isFormOpen}
-                    onClose={() => setIsFormOpen(false)}
+                    onClose={() => {
+                        setIsFormOpen(false);
+                        setEditData(null); // Perbaikan: Reset editData saat ditutup
+                    }}
                     onSubmit={handleSubmitPemetaan}
                     cplOptions={cplData}
                     initialData={editData}
-                    isLoading={isMutating}
+                    isLoading={isCPLModalLoading} // Perbaikan: Gunakan loading spesifik
                     pemetaanData={pemetaanData}
+                    // ▼▼▼ TAMBAHKAN DUA PROPS BARU INI ▼▼▼
+                    pemetaanCPMKData={pemetaanCPMKQuery.data}
+                    onResetCPMKs={handleResetCPMKs}
+                // ▲▲▲ BATAS TAMBAHAN ▲▲▲
                 />
             )}
 

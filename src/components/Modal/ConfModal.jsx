@@ -1,21 +1,25 @@
 import React, { useEffect, useState } from "react";
+import { FaSpinner } from "react-icons/fa"; // Impor spinner
 
 const ConfirmModal = ({
     isOpen,
     onClose,
     onConfirm,
-    message = "Apakah Anda yakin ingin menghapus?",
+    // PERBAIKAN: Terima props baru yang lebih deskriptif
+    title = "Konfirmasi Tindakan",
+    description = "Apakah Anda yakin ingin melanjutkan?",
+    confirmText = "Konfirmasi",
+    isLoading = false, // Tambahkan prop isLoading
 }) => {
-    const [isVisible, setIsVisible] = useState(false);  // untuk animasi
-    const [shouldRender, setShouldRender] = useState(isOpen); // untuk render
+    const [isVisible, setIsVisible] = useState(false);
+    const [shouldRender, setShouldRender] = useState(isOpen);
 
     useEffect(() => {
         if (isOpen) {
             setShouldRender(true);
-            setTimeout(() => setIsVisible(true), 10); // animasi masuk
+            setTimeout(() => setIsVisible(true), 10);
         } else {
-            setIsVisible(false); // animasi keluar
-            // tunggu transisi selesai sebelum unmount
+            setIsVisible(false);
             setTimeout(() => setShouldRender(false), 300);
         }
     }, [isOpen]);
@@ -24,75 +28,60 @@ const ConfirmModal = ({
 
     return (
         <div
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center"
-            style={{
-                backgroundColor: "rgba(0, 0, 0, 0.5)",
-                transition: "opacity 300ms ease",
-                opacity: isVisible ? 1 : 0,
-            }}
+            // PERBAIKAN: Gunakan Tailwind CSS untuk styling
+            className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0"
+                }`}
+            onClick={onClose} // Tutup saat klik backdrop
         >
             <div
-                className="bg-white rounded-lg p-6 shadow-lg w-full max-w-sm relative"
-                style={{
-                    transform: isVisible ? "scale(1)" : "scale(0.9)",
-                    opacity: isVisible ? 1 : 0,
-                    transition: "transform 300ms ease, opacity 300ms ease",
-                    background: "white",
-                }}
+                // PERBAIKAN: Gunakan Tailwind CSS untuk styling dan animasi
+                className={`relative w-full max-w-lg rounded-xl bg-white p-6 shadow-lg transition-all duration-300 ${isVisible ? "scale-100 opacity-100" : "scale-90 opacity-0"
+                    }`}
+                onClick={(e) => e.stopPropagation()} // Cegah klik di modal menutup modal
             >
                 {/* Tombol Close */}
                 <button
                     onClick={onClose}
-                    style={{
-                        position: "absolute",
-                        top: 8,
-                        right: 12,
-                        fontSize: "1.25rem",
-                        color: "#555",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                    }}
+                    className="absolute top-3 right-3 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition"
                 >
-                    ×
+                    &times; {/* Karakter 'x' */}
                 </button>
 
                 {/* Header */}
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                    <span style={{ color: "#e53e3e", fontSize: 24 }}>⚠️</span>
-                    <h2 style={{ fontSize: 18, fontWeight: 600, color: "#2d3748" }}>Konfirmasi Hapus</h2>
+                <div className="mb-4 flex items-center gap-3">
+                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-red-100 text-2xl text-red-500">
+                        ⚠️
+                    </span>
+                    {/* PERBAIKAN: Gunakan prop 'title' */}
+                    <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
                 </div>
 
                 {/* Isi Pesan */}
-                <p style={{ color: "#4a5568", marginBottom: 24 }}>{message}</p>
+                {/* PERBAIKAN: Gunakan prop 'description' */}
+                <p className="mb-6 text-x text-gray-600">{description}</p>
 
                 {/* Tombol Aksi */}
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                <div className="flex justify-end gap-3">
                     <button
                         onClick={onClose}
-                        style={{
-                            padding: "8px 16px",
-                            border: "1px solid #cbd5e0",
-                            borderRadius: 6,
-                            background: "#fff",
-                            color: "#2d3748",
-                            cursor: "pointer",
-                        }}
+                        // PERBAIKAN: Styling dengan Tailwind
+                        className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                        disabled={isLoading}
                     >
                         Batal
                     </button>
                     <button
                         onClick={onConfirm}
-                        style={{
-                            padding: "8px 16px",
-                            borderRadius: 6,
-                            backgroundColor: "#e53e3e",
-                            color: "#fff",
-                            cursor: "pointer",
-                            border: "none",
-                        }}
+                        // PERBAIKAN: Styling dengan Tailwind
+                        className="flex w-32 justify-center rounded-lg border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:bg-red-300"
+                        disabled={isLoading}
                     >
-                        Hapus
+                        {/* PERBAIKAN: Tampilkan spinner saat isLoading */}
+                        {isLoading ? (
+                            <FaSpinner className="animate-spin" />
+                        ) : (
+                            confirmText // Gunakan prop confirmText
+                        )}
                     </button>
                 </div>
             </div>

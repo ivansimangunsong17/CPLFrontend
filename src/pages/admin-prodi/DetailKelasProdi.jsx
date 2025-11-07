@@ -7,7 +7,7 @@ import {
     AiFillEdit,
 } from "react-icons/ai";
 import { FiDownloadCloud, FiUploadCloud } from "react-icons/fi";
-
+import { toast } from 'react-toastify';
 import ConfirmModal from "../../components/Modal/ConfModal";
 import FormBox from "../../components/Form/FormBox";
 import LoadingScreen from "../../components/LoadingScreen";
@@ -53,24 +53,36 @@ const DetailKelasProdi = () => {
     )
 
 
-    // Tambah / edit (store)
     const handleSubmit = (values) => {
         if (editing) {
             // update
             updateMutation.mutate(
-                { id: editing.id, ...values },
+                { id: editing.mahasiswa_id, ...values }, // <--- PERBAIKAN DI SINI
                 {
                     onSuccess: () => {
                         setShowForm(false)
                         setEditing(null)
+                        // Ganti alert dengan toast agar konsisten
+                        toast.success("Mahasiswa berhasil diperbarui");
                     },
                     onError: (error) => {
-                        alert(error.message || 'Gagal memperbarui mahasiswa')
+                        toast.error(error.message || 'Gagal memperbarui mahasiswa'); // Ganti alert
                     },
                 }
             )
         } else {
-            // store (tambah mahasiswa baru)
+            
+
+            // ▼▼▼ TAMBAHKAN VALIDASI DUPLIKAT DI SINI ▼▼▼
+            const isDuplicate = (mahasiswaQuery.data || []).some(
+                (mhs) => mhs.npm === values.npm
+            );
+
+            if (isDuplicate) {
+                toast.warn(`Mahasiswa dengan NPM ${values.npm} sudah terdaftar di kelas ini`);
+                return; // Hentikan fungsi
+            }
+            // ▲▲▲ BATAS TAMBAHAN ▲▲▲
 
             createMutation.mutate(
                 [values], // HANYA KIRIM ARRAY-NYA
@@ -125,7 +137,7 @@ const DetailKelasProdi = () => {
             const fileName = `data-mahasiswa-${new Date().toISOString().slice(0, 10)}.xlsx`;
             XLSX.writeFile(wb, fileName);
 
-            toast.success("✅ Data berhasil diekspor");
+            toast.success("Data berhasil diekspor");
         } catch (err) {
             console.error("Export gagal", err);
             toast.error("Gagal mengekspor data");
@@ -159,7 +171,6 @@ const DetailKelasProdi = () => {
                     onImport(mapped); // ✅ sekali request array
                 }
 
-                toast.success(`📥 Berhasil import ${mapped.length} mahasiswa`);
             } catch (err) {
                 console.error("Import gagal", err);
                 toast.error("Gagal mengimpor file");
@@ -172,16 +183,24 @@ const DetailKelasProdi = () => {
 
 
 
+
     // ✅ Download template kosong
     const handleDownloadTemplate = () => {
         try {
-            const template = [{ NPM: "", Nama: "", Angkatan: "" }];
-            const ws = XLSX.utils.json_to_sheet(template);
+            // PERBAIKAN 1: Tambahkan "No" pada data template
+            const template = [{ No: "", NPM: "", Nama: "", Angkatan: "" }];
+
+            // PERBAIKAN 2: Tentukan urutan header secara eksplisit
+            const headers = ["No", "NPM", "Nama", "Angkatan"];
+
+            // PERBAIKAN 3: Gunakan 'headers' untuk memastikan urutan kolom
+            const ws = XLSX.utils.json_to_sheet(template, { header: headers });
+
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Template");
 
             XLSX.writeFile(wb, "template-mahasiswa.xlsx");
-            toast.success("📄 Template berhasil diunduh");
+            toast.success("Template berhasil diunduh");
         } catch (err) {
             console.error("Template gagal dibuat", err);
             toast.error("Gagal mengunduh template");

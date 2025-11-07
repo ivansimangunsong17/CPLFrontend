@@ -416,7 +416,7 @@ const DetailMatakuliahProdi = () => {
                         </thead>
                         <tbody>
                             {isLoadingKelas ? (
-                                <TableSkeleton rows={5} columns={5} />
+                                <TableSkeleton rows={5} columns={6} />
                             ) : dataKelas.length === 0 ? (
                                 <tr>
                                     <td colSpan="5" className="p-8 text-center text-gray-500">
