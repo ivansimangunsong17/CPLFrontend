@@ -53,7 +53,9 @@ const HasilPerhitunganDosen = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          {kelasQuery.isLoading ? (
+            <TableSkeleton rows={4} columns={5} />
+          ) : <table className="w-full text-sm">
             <thead>
               <tr className="bg-blue-600 text-white">
                 <th className="px-6 py-3 text-left">Kode MK</th>
@@ -64,10 +66,7 @@ const HasilPerhitunganDosen = () => {
               </tr>
             </thead>
             <tbody>
-              {/* ✅ Skeleton state */}
-              {kelasQuery.isLoading ? (
-                <TableSkeleton rows={5} columns={5} />
-              ) : dataKelas.length > 0 ? (
+              {dataKelas.length > 0 ? (
                 dataKelas.map((kelas) => (
                   <tr key={kelas.kelas_id} className="border-b hover:bg-gray-50">
                     <td className="px-6 py-4">
@@ -98,7 +97,8 @@ const HasilPerhitunganDosen = () => {
                 </tr>
               )}
             </tbody>
-          </table>
+          </table>}
+
         </div>
       </div>
     </div >

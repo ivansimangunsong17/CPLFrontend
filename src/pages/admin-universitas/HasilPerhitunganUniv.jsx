@@ -1,12 +1,14 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AiOutlineArrowDown } from "react-icons/ai";
 import { FaSearch } from "react-icons/fa";
 import { useProdiList } from "../../hooks/admin-universitas/useDataProdi";
 import TableSkeleton from "../../components/TableSkeleton";
 
+
 const HasilPerhitunganUniv = () => {
   const { data: prodiList, isLoading, isError } = useProdiList();
-
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -77,7 +79,7 @@ const HasilPerhitunganUniv = () => {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {isLoading ? (
-                <TableSkeleton rows={3} columns={4} />
+                <TableSkeleton rows={5} columns={4} />
               ) : currentData.length > 0 ? (
                 currentData.map((item) => (
                   <tr
@@ -94,9 +96,13 @@ const HasilPerhitunganUniv = () => {
                       </span>
                     </td>
                     <td className="p-4">
-                      <button className="text-blue-600 hover:text-blue-800">
+                      <button
+                        className="text-blue-600 hover:text-blue-800"
+                        onClick={() => navigate(`/dashboard/admin_universitas/hasil_perhitungan/${item.prodi_id}`)}
+                      >
                         Lihat Detail
                       </button>
+
                     </td>
                   </tr>
                 ))
@@ -115,49 +121,52 @@ const HasilPerhitunganUniv = () => {
         </div>
 
         {/* 📌 Pagination */}
-        <div className="flex justify-center items-center space-x-2 p-4">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-2 py-1 text-gray-500 hover:text-blue-600 disabled:opacity-40"
-          >
-            ‹
-          </button>
+        {!isLoading && (
+          <div className="flex justify-center items-center space-x-2 p-4">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-2 py-1 text-gray-500 hover:text-blue-600 disabled:opacity-40"
+            >
+              ‹
+            </button>
 
-          {Array.from({ length: totalPages }, (_, i) => i + 1)
-            .filter((page) => {
-              if (page === 1 || page === totalPages) return true;
-              if (page >= currentPage - 1 && page <= currentPage + 1) return true;
-              return false;
-            })
-            .map((page, idx, arr) => {
-              const prevPage = arr[idx - 1];
-              return (
-                <React.Fragment key={page}>
-                  {prevPage && page - prevPage > 1 && (
-                    <span className="px-2 text-gray-400">...</span>
-                  )}
-                  <button
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1 rounded-lg transition ${currentPage === page
-                      ? "bg-blue-100 text-blue-600 font-semibold"
-                      : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                  >
-                    {page}
-                  </button>
-                </React.Fragment>
-              );
-            })}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((page) => {
+                if (page === 1 || page === totalPages) return true;
+                if (page >= currentPage - 1 && page <= currentPage + 1) return true;
+                return false;
+              })
+              .map((page, idx, arr) => {
+                const prevPage = arr[idx - 1];
+                return (
+                  <React.Fragment key={page}>
+                    {prevPage && page - prevPage > 1 && (
+                      <span className="px-2 text-gray-400">...</span>
+                    )}
+                    <button
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 rounded-lg transition ${currentPage === page
+                          ? "bg-blue-100 text-blue-600 font-semibold"
+                          : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                    >
+                      {page}
+                    </button>
+                  </React.Fragment>
+                );
+              })}
 
-          <button
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-2 py-1 text-gray-500 hover:text-blue-600 disabled:opacity-40"
-          >
-            ›
-          </button>
-        </div>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-2 py-1 text-gray-500 hover:text-blue-600 disabled:opacity-40"
+            >
+              ›
+            </button>
+          </div>
+        )}
+
       </div>
     </div>
   );

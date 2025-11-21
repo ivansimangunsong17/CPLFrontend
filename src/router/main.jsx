@@ -18,8 +18,9 @@ import {
   DashboardUniversitas,
   AkunUniversitas,
   HasilPerhitunganUniv,
+  DetailHasilPerhitunganUniv,
+  DetailHasilPerhitunganKelasUniv,
   DataProdiUniv,
-  DetailProdiUniv,
   DashboardProdi,
   AkunProdi,
   HasilPerhitunganProdi,
@@ -69,7 +70,10 @@ const router = createBrowserRouter([
               { path: "data_akun", element: <AkunUniversitas /> },
               { path: "data_prodi", element: <DataProdiUniv /> },
               { path: "hasil_perhitungan", element: <HasilPerhitunganUniv /> },
-              { path: "detail_prodi/:prodiId", element: <DetailProdiUniv /> },
+              { path: "hasil_perhitungan/:prodiId", element: <DetailHasilPerhitunganUniv /> },
+              {
+                path: "hasil_perhitungan/:prodiId/:kelasId", element: <DetailHasilPerhitunganKelasUniv />
+              },
             ]
           },
         ],

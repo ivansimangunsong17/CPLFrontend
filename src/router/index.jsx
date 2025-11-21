@@ -12,7 +12,8 @@ import DashboardUniversitas from '../pages/admin-universitas/DashboardUniversita
 import AkunUniversitas from '../pages/admin-universitas/AkunUniversitas';
 import HasilPerhitunganUniv from '../pages/admin-universitas/HasilPerhitunganUniv';
 import DataProdiUniv from '../pages/admin-universitas/DataProdiUniv';
-import DetailProdiUniv from '../pages/admin-universitas/DetailProdiUniv';
+import DetailHasilPerhitunganUniv from '../pages/admin-universitas/DetailHasilPerhitunganUniv';
+import DetailHasilPerhitunganKelasUniv from '../pages/admin-universitas/DetailHasilPerhitunganKelasUniv';
 
 //Admin Prodi
 import DashboardProdi from '../pages/admin-prodi/DashboardProdi';
@@ -29,6 +30,7 @@ import DetailKelasProdi from '../pages/admin-prodi/DetailKelasProdi';
 import DetailPenilaianProdi from '../pages/admin-prodi/DetailPenilaianProdi';
 import DetailHasilPerhitungan from '../pages/admin-prodi/DetailHasilPerhitungan';
 import DetailAturPenilaianProdi from '../pages/admin-prodi/DetailAturPenilaianProdi';
+
 
 
 //Kaprodi
@@ -61,7 +63,8 @@ export {
     AkunUniversitas,
     HasilPerhitunganUniv,
     DataProdiUniv,
-    DetailProdiUniv,
+    DetailHasilPerhitunganUniv,
+    DetailHasilPerhitunganKelasUniv,
 
     DashboardProdi,
     AkunProdi,

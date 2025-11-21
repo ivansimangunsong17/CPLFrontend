@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaFilePdf } from "react-icons/fa";
 import { FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import LogoCPLLogin from "../../assets/LogoCPLLogin.png";
 
 const DashboardUniversitas = () => {
   const [search, setSearch] = useState("");
 
-  // Sample data updated to match the new design
   const dataCPL = [
     { id: 1, kode: "IF3873833", programStudi: "Teknik Informatika", fakultas: "Teknik", status: "Selesai" },
     { id: 2, kode: "PK847834", programStudi: "Perikanan dan Kelautan", fakultas: "Pertanian", status: "Selesai" },
@@ -19,8 +19,7 @@ const DashboardUniversitas = () => {
     { id: 10, kode: "IK85858", programStudi: "Ilmu Komputer", fakultas: "MIPA", status: "Belum Selesai" },
   ];
 
-  // Filter data based on search
-  const filteredData = dataCPL.filter(item =>
+  const filteredData = dataCPL.filter((item) =>
     item.programStudi.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -40,7 +39,36 @@ const DashboardUniversitas = () => {
   return (
     <div className="p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen font-sans">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+
+        {/* Header Card */}
+        <div className="bg-white shadow-lg rounded-xl p-6 mb-8 border border-gray-200">
+          <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+            Selamat Datang di Dashboard
+            <img src={LogoCPLLogin} alt="Logo CPL" className="w-10 h-10" />
+            SIP-CPL
+          </h1>
+          <p className="text-gray-700 mt-4 leading-relaxed max-w-4xl">
+            SIP-CPL adalah sistem yang dirancang untuk mempermudah pengelolaan kurikulum berbasis Outcome-Based Education (OBE). Fungsinya mencakup pengelolaan data dosen, data mahasiswa, serta data kurikulum yang meliputi Capaian Pembelajaran Lulusan (CPL), data mata kuliah, pemetaan CPL, hingga proses penilaian pembelajaran.
+            Untuk memudahkan penggunaan, tersedia file panduan tata cara pemakaian website yang dapat Anda unduh di bawah ini.
+          </p>
+
+          <div className="flex items-center gap-4 mt-6 font-bold">
+            <p
+              href="#"
+              className="flex text-xs items-center gap-3 px-4 py-2   text-black rounded-lg shadow-md "
+            >
+              <FaFilePdf className="w-5 h-5 text-red-600" />
+              <span>Panduan Tata Cara <br /> Pemakaian Website</span>
+              <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md transition-all">
+                Download PDF
+              </button>
+            </p>
+
+
+          </div>
+        </div>
+
+        {/* Filter + Title */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Status Pengisian Nilai CPL Program Studi</h1>
           <div className="relative mt-4 sm:mt-0 w-full sm:w-auto sm:max-w-xs">
@@ -64,7 +92,10 @@ const DashboardUniversitas = () => {
               <thead className="bg-blue-600 text-white">
                 <tr>
                   {["Kode Program Studi", "Program Studi", "Fakultas", "Status"].map((header) => (
-                    <th key={header} className="px-6 py-4 text-left font-semibold text-sm">
+                    <th
+                      key={header}
+                      className="px-6 py-4 text-left font-semibold text-sm"
+                    >
                       <div className="flex items-center gap-2 cursor-pointer">
                         {header}
                         <FiChevronDown className="w-4 h-4" />
@@ -75,7 +106,10 @@ const DashboardUniversitas = () => {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredData.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50 transition-colors duration-200">
+                  <tr
+                    key={item.id}
+                    className="hover:bg-gray-50 transition-colors duration-200"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{item.kode}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.programStudi}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{item.fakultas}</td>
@@ -88,7 +122,6 @@ const DashboardUniversitas = () => {
             </table>
           </div>
 
-          {/* Empty State */}
           {filteredData.length === 0 && (
             <div className="text-center py-16">
               <FaSearch size={40} className="mx-auto text-gray-300" />
@@ -97,7 +130,6 @@ const DashboardUniversitas = () => {
             </div>
           )}
 
-          {/* Pagination */}
           {filteredData.length > 0 && (
             <div className="flex items-center justify-center px-4 py-4 border-t border-gray-200">
               <nav className="flex items-center gap-1">
