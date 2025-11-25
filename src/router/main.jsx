@@ -45,7 +45,10 @@ import {
   DetailPenilaianProdi,
   DetailHasilPerhitungan,
   AturPenilaianDosen,
-  DetailAturPenilaianDosen
+  DetailAturPenilaianDosen,
+  DetailDistribusiMatakuliah,
+  DetailDistribusiKelas,
+  DetailDistribusiMahasiswa
 } from './index';
 import DetailPenilaianDosen from '../pages/dosen/DetailPenilaianDosen';
 
@@ -99,6 +102,10 @@ const router = createBrowserRouter([
               { path: "atur_penilaian/:kelasId", element: <DetailAturPenilaianProdi /> },
               { path: "detail_penilaian/:mataKuliahId", element: <DetailPenilaianProdi /> },
               { path: "detail_hasil_perhitungan/:mataKuliahId", element: <DetailHasilPerhitungan /> },
+              { path: "detail_distribusi_matakuliah/:mataKuliahId", element: <DetailDistribusiMatakuliah /> },
+              { path: "detail_distribusi_matakuliah/:mataKuliahId/:kelasId", element: <DetailDistribusiKelas /> },
+              { path: "detail_distribusi_matakuliah/:mataKuliahId/:kelasId/:mahasiswaId", element: <DetailDistribusiMahasiswa /> },
+
             ]
           },
         ],

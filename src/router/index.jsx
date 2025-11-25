@@ -30,7 +30,9 @@ import DetailKelasProdi from '../pages/admin-prodi/DetailKelasProdi';
 import DetailPenilaianProdi from '../pages/admin-prodi/DetailPenilaianProdi';
 import DetailHasilPerhitungan from '../pages/admin-prodi/DetailHasilPerhitungan';
 import DetailAturPenilaianProdi from '../pages/admin-prodi/DetailAturPenilaianProdi';
-
+import DetailDistribusiMatakuliah from '../pages/admin-prodi/DetailDistribusiMatakuliah';
+import DetailDistribusiKelas from '../pages/admin-prodi/DetailDistribusiKelas';
+import DetailDistribusiMahasiswa from '../pages/admin-prodi/DetailDistribusiMahasiswa';
 
 
 //Kaprodi
@@ -80,6 +82,9 @@ export {
     DetailPenilaianProdi,
     DetailHasilPerhitungan,
     DetailAturPenilaianProdi,
+    DetailDistribusiMatakuliah,
+    DetailDistribusiKelas,
+    DetailDistribusiMahasiswa,
 
     DashboardKaprodi,
     DataMahasiswaKaprodi,
