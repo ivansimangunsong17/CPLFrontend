@@ -33,6 +33,8 @@ import DetailAturPenilaianProdi from '../pages/admin-prodi/DetailAturPenilaianPr
 import DetailDistribusiMatakuliah from '../pages/admin-prodi/DetailDistribusiMatakuliah';
 import DetailDistribusiKelas from '../pages/admin-prodi/DetailDistribusiKelas';
 import DetailDistribusiMahasiswa from '../pages/admin-prodi/DetailDistribusiMahasiswa';
+import DetailMonitoringMahasiswa from '../pages/admin-prodi/DetailMonitoringMahasiswa';
+import DetailMonitoringMatakuliahMahasiswa from '../pages/admin-prodi/DetailMonitoringMatakuliahMahasiswa';
 
 
 //Kaprodi
@@ -50,7 +52,7 @@ import AturPenilaianDosen from '../pages/dosen/AturPenilaianDosen';
 import DetailAturPenilaianDosen from '../pages/dosen/DetailAturPenilaianDosen';
 import PenilaianDosen from '../pages/dosen/PenilaianDosen';
 import HasilPerhitunganDosen from '../pages/dosen/HasilPerhitunganDosen';
-
+import DetailDistribusiDosen from '../pages/dosen/DetailDistribusiDosen';
 
 
 
@@ -85,6 +87,8 @@ export {
     DetailDistribusiMatakuliah,
     DetailDistribusiKelas,
     DetailDistribusiMahasiswa,
+    DetailMonitoringMahasiswa,
+    DetailMonitoringMatakuliahMahasiswa,
 
     DashboardKaprodi,
     DataMahasiswaKaprodi,
@@ -95,6 +99,7 @@ export {
 
 
     DashboardDosen,
+    DetailDistribusiDosen,
     AturPenilaianDosen,
     DetailAturPenilaianDosen,
     PenilaianDosen,

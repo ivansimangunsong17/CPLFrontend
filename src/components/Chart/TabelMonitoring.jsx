@@ -1,17 +1,19 @@
 import React, { useState, useMemo, useContext } from "react";
-import { AiOutlineSearch, AiOutlineEye, AiOutlineLeft, AiOutlineRight, AiOutlineFilter } from "react-icons/ai"; // Tambahkan ikon Filter
+import { useNavigate } from "react-router-dom"; // 1. Import useNavigate
+import { AiOutlineSearch, AiOutlineEye, AiOutlineLeft, AiOutlineRight, AiOutlineFilter } from "react-icons/ai";
 import { useMahasiswa } from "../../hooks/admin-prodi/useMahasiswa";
 import TableSkeleton from "../../components/TableSkeleton";
 import { AuthContext } from "../../context/AuthContext";
 
 const TabelMonitoring = () => {
     const { user } = useContext(AuthContext);
+    const navigate = useNavigate(); // 2. Inisialisasi hook navigasi
 
     // Hanya ambil query untuk read data
     const { mahasiswaQuery } = useMahasiswa();
 
     const [searchTerm, setSearchTerm] = useState("");
-    const [selectedAngkatan, setSelectedAngkatan] = useState("Semua"); // State untuk filter angkatan
+    const [selectedAngkatan, setSelectedAngkatan] = useState("Semua");
 
     // State untuk pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -24,8 +26,8 @@ const TabelMonitoring = () => {
 
     // Ambil daftar angkatan unik dari data untuk opsi dropdown
     const angkatanOptions = useMemo(() => {
-        const angkatans = data.map(item => item.angkatan).filter(Boolean); // Ambil semua angkatan
-        const uniqueAngkatans = [...new Set(angkatans)].sort((a, b) => b - a); // Hapus duplikat dan urutkan descending
+        const angkatans = data.map(item => item.angkatan).filter(Boolean);
+        const uniqueAngkatans = [...new Set(angkatans)].sort((a, b) => b - a);
         return ["Semua", ...uniqueAngkatans];
     }, [data]);
 
@@ -62,18 +64,23 @@ const TabelMonitoring = () => {
 
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
-        setCurrentPage(1); // Reset ke halaman 1 saat mencari
+        setCurrentPage(1);
     };
 
     const handleAngkatanChange = (e) => {
         setSelectedAngkatan(e.target.value);
-        setCurrentPage(1); // Reset ke halaman 1 saat filter berubah
+        setCurrentPage(1);
     };
 
+    // 3. Handler Navigasi ke Detail Mahasiswa
     const handleViewDetail = (mahasiswa) => {
-        // Logika untuk melihat detail mahasiswa
-        console.log("Lihat detail mahasiswa:", mahasiswa);
-        // Navigasi atau buka modal detail di sini
+        // Asumsi 'mahasiswa.id' adalah ID yang digunakan di URL
+        // Jika menggunakan npm, ganti mahasiswa.id menjadi mahasiswa.npm
+        if (mahasiswa && mahasiswa.id) {
+            navigate(`/dashboard/admin_prodi/detail_monitoring_mahasiswa/${mahasiswa.id}`);
+        } else {
+            console.error("ID Mahasiswa tidak ditemukan", mahasiswa);
+        }
     };
 
     if (error) return <div className="text-red-500 p-4">Error memuat data: {error.message}</div>;
@@ -169,7 +176,7 @@ const TabelMonitoring = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm font-medium text-gray-900">{item.nama}</div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 ">
+                                        <td className="px-6 py-4 whitespace-nowrap font-medium text-sm text-gray-600">
                                             {item.npm}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -180,7 +187,7 @@ const TabelMonitoring = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-center">
                                             <button
                                                 onClick={() => handleViewDetail(item)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-offset-2 focus:ring-blue-500 transition-all"
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
                                             >
                                                 Lihat <AiOutlineEye size={14} />
                                             </button>

@@ -86,8 +86,8 @@ const DashboardProdi = () => {
             <span role="img" aria-label="book">📖</span> SIP-CPL
           </h1>
           <p className="text-gray-600 leading-relaxed">
-            SIP-CPL adalah sistem yang dirancang untuk mempermudah pengelolaan
-            kurikulum berbasis Outcome-Based Education (OBE).
+            SIP-CPL adalah sistem yang dirancang untuk mempermudah pengelolaan kurikulum berbasis Outcome-Based Education (OBE). Fungsinya mencakup pengelolaan data dosen, data mahasiswa, serta data kurikulum yang meliputi Capaian Pembelajaran Lulusan (CPL), data mata kuliah, pemetaan CPL, hingga proses penilaian pembelajaran.
+            Untuk memudahkan penggunaan, tersedia file panduan tata cara pemakaian website yang dapat Anda unduh di bawah ini.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-4">
             <button className="flex items-center gap-2 bg-red-100 text-red-600 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-red-200 transition">

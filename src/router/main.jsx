@@ -48,7 +48,10 @@ import {
   DetailAturPenilaianDosen,
   DetailDistribusiMatakuliah,
   DetailDistribusiKelas,
-  DetailDistribusiMahasiswa
+  DetailDistribusiMahasiswa,
+  DetailMonitoringMahasiswa,
+  DetailMonitoringMatakuliahMahasiswa,
+  DetailDistribusiDosen
 } from './index';
 import DetailPenilaianDosen from '../pages/dosen/DetailPenilaianDosen';
 
@@ -105,6 +108,9 @@ const router = createBrowserRouter([
               { path: "detail_distribusi_matakuliah/:mataKuliahId", element: <DetailDistribusiMatakuliah /> },
               { path: "detail_distribusi_matakuliah/:mataKuliahId/:kelasId", element: <DetailDistribusiKelas /> },
               { path: "detail_distribusi_matakuliah/:mataKuliahId/:kelasId/:mahasiswaId", element: <DetailDistribusiMahasiswa /> },
+              { path: "detail_monitoring_mahasiswa/:mahasiswaId", element: <DetailMonitoringMahasiswa /> },
+              { path: "detail_monitoring_mahasiswa/:mahasiswaId/:matakuliahId", element: <DetailMonitoringMatakuliahMahasiswa /> },
+
 
             ]
           },
@@ -133,11 +139,13 @@ const router = createBrowserRouter([
           {
             path: "", element: <DashboardLayout />, children: [
               { path: "", element: <DashboardDosen /> },
+              { path: "detail_distribusi_kelas/:kelasId", element: <DetailDistribusiDosen /> },
               { path: "atur_penilaian", element: <AturPenilaianDosen /> },
               { path: "atur_penilaian/:kelasId", element: <DetailAturPenilaianDosen /> },
               { path: "detail_penilaian/:mataKuliahId", element: <DetailPenilaianDosen /> },
               { path: "penilaian", element: <PenilaianDosen /> },
               { path: "hasil_perhitungan", element: <HasilPerhitunganDosen /> },
+
             ]
           },
         ],

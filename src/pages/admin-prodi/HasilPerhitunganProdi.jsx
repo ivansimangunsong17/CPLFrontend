@@ -71,7 +71,7 @@ const HasilPerhitunganProdi = () => {
                 <TableSkeleton rows={5} columns={5} />
               ) : dataKelas.length > 0 ? (
                 dataKelas.map((kelas) => (
-                  <tr key={kelas.kelas_id} className="border-b hover:bg-gray-50">
+                  <tr key={kelas.kelas_id} className="border-b border-gray-200 hover:bg-gray-50">
                     <td className="px-6 py-4">
                       {kelas.mata_kuliah?.kode_mata_kuliah || "-"}
                     </td>
@@ -102,7 +102,7 @@ const HasilPerhitunganProdi = () => {
             </tbody>
           </table>
         </div>
-      </div>
+      </div>  
     </div >
   );
 };
