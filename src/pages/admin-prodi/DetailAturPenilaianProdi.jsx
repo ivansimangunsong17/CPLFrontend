@@ -12,6 +12,7 @@ import ConfModal from "../../components/Modal/ConfModal";
 import CardSkeleton from "../../components/CardSkeleton";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import LoadingScreen from "../../components/LoadingScreen";
+import DetailPenilaianProdi from "./DetailPenilaianProdi";
 
 const DetailAturPenilaianProdi = () => {
     // --- 1. Panggil Semua Hook ---
@@ -34,8 +35,8 @@ const DetailAturPenilaianProdi = () => {
     const isKelasLoading = kelasQuery.isLoading; // Loading awal untuk info kelas
 
     const assessments = useMemo(() => jenisPenilaianQuery.data || [], [jenisPenilaianQuery.data]);
-const subAssessments = useMemo(() => subPenilaianQuery.data || [], [subPenilaianQuery.data]);
-   
+    const subAssessments = useMemo(() => subPenilaianQuery.data || [], [subPenilaianQuery.data]);
+
 
     // Untuk Skeleton (hanya true saat data belum ada/cache)
     const isInitialDataLoading =
@@ -301,7 +302,14 @@ const subAssessments = useMemo(() => subPenilaianQuery.data || [], [subPenilaian
                         )}
                     </tbody>
                 </table>
+
             </div>
+            <div className="pt-10">
+                <DetailPenilaianProdi />
+            </div>
+
+
+
 
             {/* Modal Konfirmasi Tambah Sub Penilaian */}
             <FormBox

@@ -138,7 +138,7 @@ const DetailDistribusiMatakuliah = () => {
 
                 {/* --- 2. Grafik Rata-rata (Baris 1) --- */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <ChartCard title="Target vs Rata-rata CPL">
+                    <ChartCard title="Perbandingan Target Dengan Rata-rata CPL">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={dataCPLRataRata} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
@@ -153,7 +153,7 @@ const DetailDistribusiMatakuliah = () => {
                         </ResponsiveContainer>
                     </ChartCard>
 
-                    <ChartCard title="Target vs Rata-rata CPMK">
+                    <ChartCard title="Perbandingan Target Dengan Rata-rata CPMK">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={dataCPMKRataRata} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />

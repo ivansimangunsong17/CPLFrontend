@@ -6,17 +6,47 @@ export function useSubPenilaian(kelasId) {
   const queryClient = useQueryClient()
   const queryKey = ['subPenilaian', Number(kelasId)] // Query key spesifik untuk kelas ini
 
-  // Query untuk mengambil data sub-penilaian
+  // Query untuk mengambil data sub-penilaian (dummy implementation)
   const subPenilaianQuery = useQuery({
     queryKey: queryKey,
-    queryFn: () => getSubPenilaianByKelas(Number(kelasId)),
+    queryFn: () => {
+      // Dummy data for sub penilaian
+      const dummySubPenilaian = [
+        {
+          sub_penilaian_id: 1,
+          penilaian_id: 1,
+          kelas_id: Number(kelasId),
+          nama_sub_penilaian: 'UTS 1',
+        },
+        {
+          sub_penilaian_id: 2,
+          penilaian_id: 1,
+          kelas_id: Number(kelasId),
+          nama_sub_penilaian: 'UTS 2',
+        },
+        {
+          sub_penilaian_id: 3,
+          penilaian_id: 2,
+          kelas_id: Number(kelasId),
+          nama_sub_penilaian: 'UAS 1',
+        },
+      ]
+      return Promise.resolve(dummySubPenilaian)
+    },
     enabled: !!kelasId, // Hanya aktif jika kelasId ada
     staleTime: 1000 * 60 * 5, // Cache data selama 5 menit
   })
 
-  // Mutasi untuk menambah sub-penilaian baru
+  // Mutasi untuk menambah sub-penilaian baru (dummy implementation)
   const createMutation = useMutation({
-    mutationFn: createSubPenilaian, // Service menerima payload lengkap
+    mutationFn: (payload) => {
+      // Simulate API call with dummy data
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({ message: 'Sub-penilaian berhasil ditambahkan' })
+        }, 500)
+      })
+    },
     onSuccess: (data) => {
       toast.success(data?.message || 'Sub-penilaian berhasil ditambahkan')
       // Invalidate query untuk mengambil data terbaru
@@ -27,9 +57,16 @@ export function useSubPenilaian(kelasId) {
     },
   })
 
-  // Mutasi untuk memperbarui nama sub-penilaian
+  // Mutasi untuk memperbarui nama sub-penilaian (dummy implementation)
   const updateMutation = useMutation({
-    mutationFn: updateSubPenilaian,
+    mutationFn: (payload) => {
+      // Simulate API call with dummy data
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({ message: 'Sub-penilaian berhasil diperbarui' })
+        }, 500)
+      })
+    },
     onSuccess: (data) => {
       toast.success(data?.message || 'Sub-penilaian berhasil diperbarui')
       queryClient.invalidateQueries({ queryKey: queryKey })

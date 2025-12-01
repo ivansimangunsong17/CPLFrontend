@@ -143,25 +143,25 @@ const TabelDistribusiDosen = () => {
 
                     <tbody className="divide-y">
                         {paginatedData.length > 0 ? paginatedData.map(item => (
-                            <tr key={item.id} className="hover:bg-gray-50 transition">
-                                <td className="px-1 py-4 text-center text-sm  text-blue-700">
+                            <tr key={item.id} className="hover:bg-gray-50 transition ">
+                                <td className="px-1 py-4  text-center text-sm border-1 border-gray-200 font-medium text-gray-700">
                                     {item.mataKuliah}
                                 </td>
-                                <td className="px-1 py-4 font-sm text-center">{item.namaKelas}</td>
-                                <td className="px-1 py-4 text-sm text-center text-gray-600">{item.semester}</td>
+                                <td className="px-1 py-4 font-sm text-center border-1 border-gray-200">{item.namaKelas}</td>
+                                <td className="px-1 py-4 text-sm text-center text-gray-600 border-1 border-gray-200">{item.semester}</td>
 
                                 {[...Array(8)].map((_, i) => (
-                                    <td key={i} className="px-2 py-4 text-sm  text-center ">
-                                        {item.cpl[i + 1] ?? <span className="text-gray-400">-</span>}
+                                    <td key={i} className="px-2 py-4 text-sm  text-center border-1 border-gray-200">  
+                                        {item.cpl[i + 1] ?? <span className="text-gray-400 ">-</span>}
                                     </td>
                                 ))}
 
 
 
-                                <td className="px-2 py-4 text-center">
+                                <td className="px-2 py-4 text-center border-1 border-gray-200">
                                     <button
                                         onClick={() => navigate(`/dashboard/dosen/detail_distribusi_kelas/${item.id}`)}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-full text-xs font-medium transition"
+                                        className="inline-flex  items-center gap-1.5 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-full text-xs font-medium transition"
                                     >
                                         Lihat <FiEye size={13} />
                                     </button>

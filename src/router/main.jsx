@@ -34,11 +34,7 @@ import {
   DetailPemetaanProdi,
   AturPenilaianProdi,
   DashboardKaprodi,
-  DataMahasiswaKaprodi,
-  DataMataKuliahKaprodi,
-  DataProdiKaprodi,
   HasilPerhitunganKaprodi,
-  PemetaanCPLKaprodi,
   DashboardDosen,
   HasilPerhitunganDosen,
   PenilaianDosen,
@@ -51,9 +47,21 @@ import {
   DetailDistribusiMahasiswa,
   DetailMonitoringMahasiswa,
   DetailMonitoringMatakuliahMahasiswa,
-  DetailDistribusiDosen
+  DetailDistribusiDosen,
+  DetailDistribusiMahasiswaDosen,
+  DetailHasilPerhitunganDosen,
+  DetailMonitoringMahasiswaKaprodi,
+  DetailDistribusiMatakuliahKaprodi,
+  DetailDistribusiKelasKaprodi,
+  DetailDistribusiMahasiswaKaprodi,
+  PemetaanKaprodi,
+  DetailDataMasterKaprodi,
+  DetailPemetaanKaprodi,
+
 } from './index';
 import DetailPenilaianDosen from '../pages/dosen/DetailPenilaianDosen';
+import DataMasterKaprodi from '../pages/kaprodi/DataMasterKaprodi';
+import DetailHasilPerhitunganKaprodi from '../pages/kaprodi/DetailHasilPerhitunganKaprodi';
 
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
@@ -123,11 +131,17 @@ const router = createBrowserRouter([
           {
             path: "", element: <DashboardLayout />, children: [
               { path: "", element: <DashboardKaprodi /> },
-              { path: "data_prodi", element: <DataProdiKaprodi /> },
-              { path: "data_mahasiswa", element: <DataMahasiswaKaprodi /> },
-              { path: "data_matakuliah", element: <DataMataKuliahKaprodi /> },
-              { path: "pemetaan_cpl", element: <PemetaanCPLKaprodi /> },
+              { path: "detail_distribusi_matakuliah/:mataKuliahId", element: <DetailDistribusiMatakuliahKaprodi /> },
+              { path: "detail_distribusi_matakuliah/:mataKuliahId/:kelasId", element: <DetailDistribusiKelasKaprodi /> },
+              { path: "detail_monitoring_mahasiswa/:mahasiswaId", element: <DetailMonitoringMahasiswaKaprodi /> },
+              { path: "detail_monitoring_mahasiswa/:mahasiswaId/:matakuliahId", element: <DetailMonitoringMatakuliahMahasiswa /> },
+              { path: "detail_distribusi_matakuliah/:mataKuliahId/:kelasId/:mahasiswaId", element: <DetailDistribusiMahasiswaKaprodi /> },
+              { path: "data_master", element: <DataMasterKaprodi /> },
+              { path: "data_master/:mataKuliahId", element: <DetailDataMasterKaprodi /> },
+              { path: "pemetaan", element: <PemetaanKaprodi /> },
+              { path: "pemetaan/:mataKuliahId", element: <DetailPemetaanKaprodi /> },
               { path: "hasil_perhitungan", element: <HasilPerhitunganKaprodi /> },
+              { path: "hasil_perhitungan/:matakuliahId", element: <DetailHasilPerhitunganKaprodi /> },
             ]
           },
         ],
@@ -140,11 +154,13 @@ const router = createBrowserRouter([
             path: "", element: <DashboardLayout />, children: [
               { path: "", element: <DashboardDosen /> },
               { path: "detail_distribusi_kelas/:kelasId", element: <DetailDistribusiDosen /> },
+              { path: "detail_distribusi_kelas/:kelasId/:mahasiswaId", element: <DetailDistribusiMahasiswaDosen /> },
               { path: "atur_penilaian", element: <AturPenilaianDosen /> },
               { path: "atur_penilaian/:kelasId", element: <DetailAturPenilaianDosen /> },
               { path: "detail_penilaian/:mataKuliahId", element: <DetailPenilaianDosen /> },
               { path: "penilaian", element: <PenilaianDosen /> },
               { path: "hasil_perhitungan", element: <HasilPerhitunganDosen /> },
+              { path: "hasil_perhitungan/:kelasId", element: <DetailHasilPerhitunganDosen /> },
 
             ]
           },

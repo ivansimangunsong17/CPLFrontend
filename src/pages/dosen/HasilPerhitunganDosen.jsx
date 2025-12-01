@@ -1,12 +1,18 @@
-import React from "react";
+import React, { useState, useMemo, useContext } from "react"; // Tambahkan useContext
 import { AiOutlineEye } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
-import { useKelas } from "../../hooks/admin-prodi/useKelas";
+import { useKelas } from "../../hooks/dosen/useKelas";
 import TableSkeleton from "../../components/TableSkeleton";
+import { AuthContext } from "../../context/AuthContext"; // <-- TAMBAHKAN BARIS INI
+
 
 const HasilPerhitunganDosen = () => {
-  const { kelasQuery } = useKelas();
+  const { user } = useContext(AuthContext);
+
+  const dosenId = user?.id;
+  const { kelasQuery } = useKelas({ dosen_id: dosenId });
   const navigate = useNavigate();
+
 
   // ✅ Error state
   if (kelasQuery.isError) {
@@ -23,6 +29,7 @@ const HasilPerhitunganDosen = () => {
     : kelasQuery.data?.data
       ? kelasQuery.data.data
       : [];
+  console.log("Data Kelas:", kelasQuery.data);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -68,12 +75,12 @@ const HasilPerhitunganDosen = () => {
             <tbody>
               {dataKelas.length > 0 ? (
                 dataKelas.map((kelas) => (
-                  <tr key={kelas.kelas_id} className="border-b hover:bg-gray-50">
+                  <tr key={kelas.kelas_id} className="border-b border-1 border-gray-300 hover:bg-gray-50">
                     <td className="px-6 py-4">
-                      {kelas.mata_kuliah?.kode_mata_kuliah || "-"}
+                      {kelas.kode_mata_kuliah || "-"}
                     </td>
                     <td className="px-6 py-4">
-                      {kelas.mata_kuliah?.nama_mata_kuliah || "-"}
+                      {kelas.nama_mata_kuliah || "-"}
                     </td>
                     <td className="px-6 py-4">{kelas.nama_kelas}</td>
                     <td className="px-6 py-4">
@@ -82,7 +89,7 @@ const HasilPerhitunganDosen = () => {
                     <td
                       className="px-6 py-4 text-blue-600 flex items-center gap-1 cursor-pointer hover:text-blue-800"
                       onClick={() =>
-                        navigate(`/dashboard/admin_Dosen/detail_hasil_perhitungan/${kelas.kelas_id}`)
+                        navigate(`/dashboard/dosen/hasil_perhitungan/${kelas.kelas_id}`)
                       }
                     >
                       Lihat <AiOutlineEye size={16} />

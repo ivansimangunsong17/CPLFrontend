@@ -39,11 +39,16 @@ import DetailMonitoringMatakuliahMahasiswa from '../pages/admin-prodi/DetailMoni
 
 //Kaprodi
 import DashboardKaprodi from '../pages/kaprodi/DashboardKaprodi';
-import DataMahasiswaKaprodi from '../pages/kaprodi/DataMahasiswaKaprodi';
-import DataMataKuliahKaprodi from '../pages/kaprodi/DataMatkulKaprodi';
-import DataProdiKaprodi from '../pages/kaprodi/DataProdiKaprodi';
+import DetailDistribusiMatakuliahKaprodi from '../pages/kaprodi/DetailDistribusiMatakuliahKaprodi';
+import DetailMonitoringMahasiswaKaprodi from '../pages/kaprodi/DetailMonitoringMahasiswaKaprodi';
+import DetailDistribusiKelasKaprodi from '../pages/kaprodi/DetailDistribusiKelasKaprodi';
+import DetailDistribusiMahasiswaKaprodi from '../pages/kaprodi/DetailDistribusiMahasiswaKaprodi';
+import DataMasterKaprodi from '../pages/kaprodi/DataMasterKaprodi';
+import DetailDataMasterKaprodi from '../pages/kaprodi/DetailDataMasterKaprodi';
 import HasilPerhitunganKaprodi from '../pages/kaprodi/HasilPerhitunganKaprodi';
-import PemetaanCPLKaprodi from '../pages/kaprodi/PemetaanCPLKaprodi';
+import PemetaanKaprodi from '../pages/kaprodi/PemetaanKaprodi';
+import DetailPemetaanKaprodi from '../pages/kaprodi/DetailPemetaanKaprodi';
+
 
 
 //Dosen
@@ -53,8 +58,8 @@ import DetailAturPenilaianDosen from '../pages/dosen/DetailAturPenilaianDosen';
 import PenilaianDosen from '../pages/dosen/PenilaianDosen';
 import HasilPerhitunganDosen from '../pages/dosen/HasilPerhitunganDosen';
 import DetailDistribusiDosen from '../pages/dosen/DetailDistribusiDosen';
-
-
+import DetailDistribusiMahasiswaDosen from '../pages/dosen/DetailDistribusiMahasiswaDosen';
+import DetailHasilPerhitunganDosen from '../pages/dosen/DetailHasilPerhitunganDosen';
 
 export {
     LoginPage,
@@ -90,19 +95,25 @@ export {
     DetailMonitoringMahasiswa,
     DetailMonitoringMatakuliahMahasiswa,
 
-    DashboardKaprodi,
-    DataMahasiswaKaprodi,
-    DataMataKuliahKaprodi,
-    DataProdiKaprodi,
-    HasilPerhitunganKaprodi,
-    PemetaanCPLKaprodi,
 
+    DashboardKaprodi,
+    PemetaanKaprodi,
+    DataMasterKaprodi,
+    DetailDataMasterKaprodi,
+    DetailPemetaanKaprodi,
+    HasilPerhitunganKaprodi,
+    DetailMonitoringMahasiswaKaprodi,
+    DetailDistribusiMatakuliahKaprodi,
+    DetailDistribusiKelasKaprodi,
+    DetailDistribusiMahasiswaKaprodi,
 
     DashboardDosen,
     DetailDistribusiDosen,
     AturPenilaianDosen,
     DetailAturPenilaianDosen,
     PenilaianDosen,
-    HasilPerhitunganDosen
+    HasilPerhitunganDosen,
+    DetailDistribusiMahasiswaDosen,
+    DetailHasilPerhitunganDosen,
 
 };

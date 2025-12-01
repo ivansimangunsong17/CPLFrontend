@@ -13,7 +13,6 @@ import {
     LabelList,
 } from "recharts";
 import { FiChevronDown, FiBook, FiHash, FiSearch, FiEye } from "react-icons/fi";
-import TabelDetailDistribusiKelasDosen from "../../components/Chart/TabelDetailDistribusiKelasDosen";
 
 // --- KOMPONEN KECIL (UI COMPONENTS) ---
 
@@ -61,14 +60,14 @@ const CustomTooltip = ({ active, payload, label }) => {
     return null;
 };
 
-const DetailDistribusiDosen = () => {
+const DetailDistribusiMatakuliahKaprodi = () => {
     const navigate = useNavigate();
     // Ambil mataKuliahId dari URL jika tersedia, atau gunakan fallback untuk data dummy
     const { mataKuliahId } = useParams();
 
     // --- DATA DUMMY ---
-    const kelasInfo = {
-        nama: "STRUKTUR DATA A",
+    const mataKuliahInfo = {
+        nama: "STRUKTUR DATA",
         kode: "5616563",
     };
 
@@ -102,13 +101,30 @@ const DetailDistribusiDosen = () => {
         { kelas: "Kelas D", CPMK1: 75, CPMK2: 71, CPMK3: 65, CPMK4: 73, CPMK5: 69, CPMK6: 67 },
     ];
 
-
+    // --- DATA DUMMY KELAS ---
+    const dataKelas = [
+        { id: 1, kode: "IF265365", matkul: "Struktur Data", kelas: "Struktur Data A", dosen: "Rizka Andayani, S.T., M.T.", periode: "2024 Genap" },
+        { id: 2, kode: "IF265365", matkul: "Struktur Data", kelas: "Struktur Data B", dosen: "Rizka Andayani, S.T., M.T.", periode: "2024 Genap" },
+        { id: 3, kode: "IF265365", matkul: "Struktur Data", kelas: "Struktur Data C", dosen: "Dr. Budi Santoso, S.Kom., M.Cs.", periode: "2024 Genap" },
+        { id: 4, kode: "IF265365", matkul: "Struktur Data", kelas: "Struktur Data D", dosen: "Dr. Budi Santoso, S.Kom., M.Cs.", periode: "2024 Genap" },
+    ];
 
     const targetLine = 70;
     const [periode, setPeriode] = useState("2024 Genap");
     const [searchKelas, setSearchKelas] = useState(""); // State untuk pencarian kelas
 
+    // Filter data kelas
+    const filteredKelas = dataKelas.filter(kelas =>
+        kelas.kelas.toLowerCase().includes(searchKelas.toLowerCase()) ||
+        kelas.dosen.toLowerCase().includes(searchKelas.toLowerCase())
+    );
 
+    // Handler untuk navigasi ke detail kelas
+    const handleViewDetail = (kelasId) => {
+        // Gunakan mataKuliahId dari URL jika ada, jika tidak gunakan dummy id dari data info
+        const currentMataKuliahId = mataKuliahId || mataKuliahInfo.kode;
+        navigate(`/dashboard/kaprodi/detail_distribusi_matakuliah/${currentMataKuliahId}/${kelasId}`);
+    };
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen font-sans text-gray-800">
@@ -116,8 +132,8 @@ const DetailDistribusiDosen = () => {
 
                 {/* --- 1. Header Info --- */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <InfoCard label="Nama Kelas" value={kelasInfo.nama} icon={FiBook} />
-                    <InfoCard label="Kode Kelas" value={kelasInfo.kode} icon={FiHash} />
+                    <InfoCard label="Nama Mata Kuliah" value={mataKuliahInfo.nama} icon={FiBook} />
+                    <InfoCard label="Kode Mata Kuliah" value={mataKuliahInfo.kode} icon={FiHash} />
                 </div>
 
                 {/* --- 2. Grafik Rata-rata (Baris 1) --- */}
@@ -215,14 +231,80 @@ const DetailDistribusiDosen = () => {
                         </ResponsiveContainer>
                     </ChartCard>
                 </div>
-                <div>
-                    <TabelDetailDistribusiKelasDosen />
-                </div>
 
+                {/* --- 5. Tabel Daftar Kelas (BARU) --- */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <h3 className="text-lg font-bold text-gray-800">
+                            Daftar Kelas Mata Kuliah {mataKuliahInfo.nama} Periode {periode}
+                        </h3>
+
+                        {/* Search Kelas */}
+                        <div className="relative w-full md:w-72">
+                            <input
+                                type="text"
+                                placeholder="Cari Kelas..."
+                                value={searchKelas}
+                                onChange={(e) => setSearchKelas(e.target.value)}
+                                className="w-full pl-10 pr-12 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                            />
+                            <FiSearch className="absolute left-3.5 top-3 text-gray-400" size={16} />
+                            <button className="absolute right-1.5 top-1.5 p-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <FiSearch size={14} />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-blue-600 text-white uppercase text-xs tracking-wider">
+                                <tr>
+                                    <th className="px-6 py-4 font-semibold">Kode MK</th>
+                                    <th className="px-6 py-4 font-semibold">Nama Mata Kuliah</th>
+                                    <th className="px-6 py-4 font-semibold">Nama Kelas</th>
+                                    <th className="px-6 py-4 font-semibold">Dosen</th>
+                                    <th className="px-6 py-4 font-semibold">Periode</th>
+                                    <th className="px-6 py-4 text-center font-semibold">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {filteredKelas.length > 0 ? (
+                                    filteredKelas.map((kelas) => (
+                                        <tr key={kelas.id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-6 py-4 font-medium text-gray-900">{kelas.kode}</td>
+                                            <td className="px-6 py-4 text-gray-700">{kelas.matkul}</td>
+                                            <td className="px-6 py-4 text-gray-900 font-semibold">{kelas.kelas}</td>
+                                            <td className="px-6 py-4 text-gray-600">{kelas.dosen}</td>
+                                            <td className="px-6 py-4 text-gray-600">
+                                                <span className="px-2 py-1 bg-blue-50 text-blue-600 rounded-md text-xs font-medium">
+                                                    {kelas.periode}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
+                                                <button
+                                                    onClick={() => handleViewDetail(kelas.id)}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-full text-xs font-medium transition-colors"
+                                                >
+                                                    Lihat <FiEye size={14} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="6" className="px-6 py-12 text-center text-gray-400">
+                                            Tidak ada data kelas yang ditemukan.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
             </div>
         </div>
     );
 };
 
-export default DetailDistribusiDosen;
+export default DetailDistribusiMatakuliahKaprodi;

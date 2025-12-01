@@ -4,7 +4,7 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import LogoCPLLogin from "../assets/LogoCPLLogin.png";
 import LogoUnila from "../assets/LogoUnila.png";
-import { IoHomeOutline } from "react-icons/io5";
+import { IoAccessibility, IoDocumentAttach, IoHomeOutline } from "react-icons/io5";
 import { FiChevronDown, FiLogOut } from "react-icons/fi";
 import { FaRegFileAlt, FaUsers, FaUserGraduate } from "react-icons/fa";
 import { BsClipboardData } from "react-icons/bs";
@@ -95,23 +95,8 @@ const Sidebar = () => {
         ],
         kaprodi: [
             { label: "Dashboard", path: "/dashboard/kaprodi", icon: <IoHomeOutline /> },
-            {
-                label: "Data Master",
-                icon: <FaRegFileAlt />,
-                children: [
-                    { label: "Data Mahasiswa", path: "/dashboard/kaprodi/data_mahasiswa", icon: <FaUserGraduate /> },
-                    { label: "Data Mata Kuliah", path: "/dashboard/kaprodi/data_matakuliah", icon: <MdOutlineSubject /> },
-                    { label: "Data Program Studi", path: "/dashboard/kaprodi/data_prodi", icon: <MdSchool /> },
-                ],
-            },
-            {
-                label: "Pemetaan",
-                icon: <MdOutlineSubject />,
-                children: [
-                    { label: "Pemetaan CPL", path: "/dashboard/kaprodi/pemetaan_cpl", icon: <MdOutlineSubject /> },
-                    { label: "Pemetaan CPMK", path: "/dashboard/kaprodi/pemetaan_cpmk", icon: <MdOutlineSubject /> },
-                ],
-            },
+            { label: "Data CPL dan CPMK", path: "/dashboard/kaprodi/data_master", icon: <IoDocumentAttach /> },
+            { label: "Pemetaan", path: "/dashboard/kaprodi/pemetaan", icon: <MdOutlineSubject /> },
             { label: "Hasil Perhitungan", path: "/dashboard/kaprodi/hasil_perhitungan", icon: <BsClipboardData /> },
         ],
         dosen: [

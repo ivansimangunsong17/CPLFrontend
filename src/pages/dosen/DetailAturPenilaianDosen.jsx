@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useContext } from "react";
+import { AuthContext } from "../../context/AuthContext"; // sesuaikan path Anda
+
 import { useNavigate, useParams } from "react-router-dom";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { toast } from 'react-toastify';
@@ -11,13 +13,19 @@ import ConfModal from "../../components/Modal/ConfModal";
 import CardSkeleton from "../../components/CardSkeleton";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import LoadingScreen from "../../components/LoadingScreen";
+import TabelPembobotanDosen from "../../components/Chart/TabelPembobotanDosen";
 
 const DetailAturPenilaianDosen = () => {
     // --- 1. Panggil Semua Hook ---
+    const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     const { kelasId } = useParams();
 
-    const { kelasQuery } = useKelas({ kelas_id: kelasId });
+    // ✅ Asumsi ID dosen ada di user.id
+    const dosenId = user?.id;
+
+    // ✅ Panggil hook useKelas
+    const { kelasQuery } = useKelas({ dosen_id: dosenId });
     const { jenisPenilaianQuery } = useJenisPenilaian();
     const {
         subPenilaianQuery,
@@ -175,6 +183,7 @@ const DetailAturPenilaianDosen = () => {
         alert("Fungsi simpan belum terhubung ke API.");
     };
 
+    console.log("Data Kelas:", kelasData);
     // --- 4. Render Komponen ---
     if (isKelasLoading) {
         return (
@@ -209,7 +218,7 @@ const DetailAturPenilaianDosen = () => {
                     <span>Kembali</span>
                 </button>
                 <h2 className="text-xl font-semibold text-gray-800 text-right">
-                    Atur Penilaian - {kelasData.mata_kuliah?.nama_mata_kuliah} ({kelasData.nama_kelas})
+                    Atur Penilaian - {kelasData.nama_mata_kuliah} ({kelasData.nama_kelas})
                 </h2>
             </div>
 
@@ -217,11 +226,11 @@ const DetailAturPenilaianDosen = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="p-3 border rounded-lg bg-gray-50">
                         <p className="text-sm text-gray-500">Mata Kuliah</p>
-                        <p className="font-semibold">{kelasData.mata_kuliah?.nama_mata_kuliah || "-"}</p>
+                        <p className="font-semibold">{kelasData.nama_mata_kuliah || "-"}</p>
                     </div>
                     <div className="p-3 border rounded-lg bg-gray-50">
-                        <p className="text-sm text-gray-500">Kode Kelas</p>
-                        <p className="font-semibold">{kelasData.kode_kelas || "-"}</p>
+                        <p className="text-sm text-gray-500">Kode Matakuliah</p>
+                        <p className="font-semibold">{kelasData.kode_mata_kuliah || "-"}</p>
                     </div>
                     <div className="p-3 border rounded-lg bg-gray-50">
                         <p className="text-sm text-gray-500">Nama Kelas</p>
@@ -347,6 +356,9 @@ const DetailAturPenilaianDosen = () => {
                         )}
                     </tbody>
                 </table>
+            </div>
+            <div className="pt-4">
+                <TabelPembobotanDosen />
             </div>
 
             <FormBox

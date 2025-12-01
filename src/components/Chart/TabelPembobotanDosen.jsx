@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const DetailPenilaianProdi = () => {
+const TabelPembobotanDosen = () => {
     const [penilaian] = useState([
         { jenis: "Tugas", subs: ["Tugas 1", "Tugas 2", "Tugas 3", "Tugas 4", "Tugas 5", "Tugas 6"] },
         { jenis: "Kuis", subs: ["Kuis 1", "Kuis 2", "Kuis 3"] },
@@ -126,5 +126,5 @@ const DetailPenilaianProdi = () => {
     );
 };
 
-export default DetailPenilaianProdi;
+export default TabelPembobotanDosen;
 
