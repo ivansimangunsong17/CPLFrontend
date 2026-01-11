@@ -17,7 +17,6 @@ export const useAkunKaprodi = () => {
   const createMutation = useMutation({
     mutationFn: (data) => createAkunKaprodi(data, userProdiId),
     onSuccess: () => {
-      toast.success('Akun kaprodi berhasil ditambahkan')
       queryClient.invalidateQueries(['akunKaprodi', userProdiId])
     },
     onError: (error) => {

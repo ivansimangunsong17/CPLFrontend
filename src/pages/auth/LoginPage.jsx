@@ -35,11 +35,7 @@ const LoginPage = () => {
           // Cek apakah roles ada di level user
           const userRoles = roles || res.data.user?.roles || [];
 
-          console.log('Token:', token);
-          console.log('User data:', user);
-          console.log('Roles data:', roles);
-          console.log('User roles:', userRoles);
-          console.log('User prodi_id:', user.prodi_id);
+
 
           if (token && user) {
             // Login dengan data user yang sudah include prodi_id dan roles dari response

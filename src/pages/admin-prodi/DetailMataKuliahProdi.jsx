@@ -159,7 +159,7 @@ const DetailMatakuliahProdi = () => {
     const handleDeleteKelas = (kelas_id) => {
         deleteKelasMutation.mutate(kelas_id, {
             onSuccess: () => {
-                toast.success("Kelas berhasil dihapus");
+
                 setIsModalKelasOpen(false);
                 setKelasToDelete(null);
             },

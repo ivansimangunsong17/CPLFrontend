@@ -193,10 +193,11 @@ const AkunProdi = () => {
 
     if (editDataKaprodi) {
       updateKaprodiMutation.mutate({ id: editDataKaprodi.id, ...dataWithProdiId });
-    
+
     } else {
       createKaprodiMutation.mutate(dataWithProdiId);
-     
+      toast.success('Akun kaprodi berhasil ditambahkan');
+
     }
     setIsFormOpenKaprodi(false);
     setEditDataKaprodi(null);

@@ -177,7 +177,7 @@ createRoot(document.getElementById('root')).render(
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <RouterProvider router={router} />
-        <ToastContainer position="top-right" autoClose={3000} />
+        <ToastContainer position="top-right" autoClose={3000} style={{ zIndex: 9999 }} />
       </AuthProvider>
     </QueryClientProvider>
   </StrictMode>

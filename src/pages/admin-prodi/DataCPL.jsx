@@ -418,9 +418,9 @@ const DataCPL = () => {
                         className="w-4 h-4 rounded accent-blue-500 focus:ring-blue-300"
                       />
                     </td>
-                    <td className="p-4 font-medium text-gray-600">{item.kode_cpl}</td>
+                    <td className="p-4 w-32 font-medium text-gray-600">{item.kode_cpl}</td>
                     <td className="p-4 text-gray-600">
-                      <div className="max-w-xs truncate" title={item.deskripsi}>
+                      <div className="max-w " title={item.deskripsi}>
                         {item.deskripsi}
                       </div>
                     </td>
